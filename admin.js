@@ -781,6 +781,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     productBulkClearBtn?.addEventListener('click', () => { selectedProductIds.clear(); renderProductsTable(); });
 
+    document.getElementById('exportProductsExcelBtn')?.addEventListener('click', () => {
+        if (typeof XLSX === 'undefined') { alert('Excel export library did not load. Check your connection and try again.'); return; }
+
+        const rows = getFilteredProducts().map(p => ({
+            'Category': p.category || '',
+            'Product Name': p.title || '',
+            'Specifications': p.spec || '',
+            'MRP (NPR)': p.mrp || '',
+            'Selling Price (NPR)': p.price || '',
+            'Stock Status': p.stock === 'in-stock' ? 'In Stock' : 'Available on Order',
+            'Image URL': p.image || '',
+            'Date Added': p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : ''
+        }));
+
+        if (!rows.length) { alert('No products to export - clear your search/filter or add a product first.'); return; }
+
+        const sheet = XLSX.utils.json_to_sheet(rows);
+        sheet['!cols'] = [
+            { wch: 16 }, { wch: 34 }, { wch: 46 }, { wch: 12 }, { wch: 16 }, { wch: 16 }, { wch: 40 }, { wch: 12 }
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, sheet, 'Products');
+        XLSX.writeFile(workbook, `newage-it-products-${new Date().toISOString().split('T')[0]}.xlsx`);
+    });
+
     productBulkDeleteBtn?.addEventListener('click', async () => {
         const ids = Array.from(selectedProductIds);
         if (!ids.length) return;

@@ -327,6 +327,9 @@
                                 <option value="in-stock">In Stock Only</option>
                                 <option value="pre-order">Available on Order Only</option>
                             </select>
+                            <button type="button" class="btn-secondary" id="exportProductsExcelBtn" title="Export the products shown below to an Excel file">
+                                <i class="fa-solid fa-file-excel"></i> Export to Excel
+                            </button>
                             <button type="button" class="btn-primary" id="openAddProductModalBtn">
                                 <i class="fa-solid fa-plus"></i> Add Product
                             </button>
@@ -656,6 +659,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="config.js"></script>
     <script src="admin.js"></script>
 </body>
