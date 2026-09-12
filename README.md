@@ -3,7 +3,7 @@
 Production website and admin console for NewAge I.T. Solution Center, an IT/electronics
 repair and parts shop in Tinthana, Chandragiri-15, Kathmandu.
 
-Live: https://newage.vercel.app
+Live: https://newage-gold.vercel.app
 
 ## Stack
 

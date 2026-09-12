@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /supabase/
 
-Sitemap: https://newage.vercel.app/sitemap.xml
+Sitemap: https://newage-gold.vercel.app/sitemap.xml
