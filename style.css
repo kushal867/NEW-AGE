@@ -10,6 +10,7 @@
     --surface-2: #1a1816;
     --accent: #2f6fed;
     --accent-dim: #1a3fc4;
+    --accent-rgb: 47, 111, 237;
     --text: #f5f5f5;
     --muted: #9a9a9a;
     --border: rgba(255, 255, 255, 0.08);
@@ -19,6 +20,15 @@
     --font-mono: 'JetBrains Mono', monospace;
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
     --container: 1240px;
+}
+
+/* Accent theme switch - default is blue (above); orange is opt-in via the
+   navbar toggle, persisted in localStorage and applied on <html> to avoid
+   a flash of the wrong color on load. See script.js section 2b. */
+:root[data-accent="orange"] {
+    --accent: #ff5a1f;
+    --accent-dim: #d8460f;
+    --accent-rgb: 255, 90, 31;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -87,7 +97,7 @@ section { position: relative; }
 
 .cursor-ring {
     width: 34px; height: 34px;
-    border: 1px solid rgba(47, 111, 237, 0.5);
+    border: 1px solid rgba(var(--accent-rgb), 0.5);
     display: flex; align-items: center; justify-content: center;
 }
 
@@ -101,7 +111,7 @@ section { position: relative; }
 }
 
 body.cursor-active .cursor-dot, body.cursor-active .cursor-ring { opacity: 1; }
-body.cursor-hover-view .cursor-ring { width: 64px; height: 64px; background: rgba(47, 111, 237, 0.08); }
+body.cursor-hover-view .cursor-ring { width: 64px; height: 64px; background: rgba(var(--accent-rgb), 0.08); }
 body.cursor-hover-view .cursor-ring-label { opacity: 1; }
 body.cursor-hover-crosshair .cursor-ring { width: 44px; height: 44px; border-radius: 4px; transform: translate(-50%, -50%) rotate(45deg); }
 body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
@@ -199,6 +209,35 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 }
 
 .btn-track:hover { background: var(--accent); color: #fff; }
+
+/* Accent color toggle (blue / orange) */
+.accent-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.accent-toggle-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.accent-toggle-dot.is-blue { background: #2f6fed; }
+.accent-toggle-dot.is-orange { background: #ff5a1f; }
+
+.accent-toggle-dot.is-active {
+    border-color: #fff;
+    transform: scale(1.15);
+}
 
 .nav-burger {
     display: none;
@@ -304,7 +343,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     font-family: var(--font-mono);
     font-size: 0.68rem;
     letter-spacing: 1px;
-    color: rgba(47, 111, 237, 0.75);
+    color: rgba(var(--accent-rgb), 0.75);
     text-transform: uppercase;
     opacity: 0;
     transform: translateY(4px);
@@ -458,7 +497,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     transition: border-color 0.25s ease, transform 0.25s ease;
 }
 
-.svc:hover { border-color: rgba(47, 111, 237, 0.35); transform: translateY(-4px); }
+.svc:hover { border-color: rgba(var(--accent-rgb), 0.35); transform: translateY(-4px); }
 
 .svc-a { grid-column: span 7; }
 .svc-b { grid-column: span 5; }
@@ -491,7 +530,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 
 /* PCB trace visual */
 .pcb-svg { width: 100%; height: 100%; }
-.pcb-traces path { fill: none; stroke: rgba(47, 111, 237, 0.35); stroke-width: 1.5; stroke-dasharray: 6 6; animation: pcbFlow 6s linear infinite; }
+.pcb-traces path { fill: none; stroke: rgba(var(--accent-rgb), 0.35); stroke-width: 1.5; stroke-dasharray: 6 6; animation: pcbFlow 6s linear infinite; }
 .pcb-nodes circle { fill: var(--accent); opacity: 0.7; }
 .pcb-chip rect { fill: rgba(255, 255, 255, 0.06); stroke: var(--border-strong); }
 @keyframes pcbFlow { to { stroke-dashoffset: -120; } }
@@ -510,10 +549,10 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     border-radius: 50%;
     border: 1px solid var(--border-strong);
     background:
-        conic-gradient(from 0deg, rgba(47, 111, 237, 0.35) 0deg 30deg, transparent 30deg 90deg,
-        rgba(47, 111, 237, 0.35) 90deg 120deg, transparent 120deg 180deg,
-        rgba(47, 111, 237, 0.35) 180deg 210deg, transparent 210deg 270deg,
-        rgba(47, 111, 237, 0.35) 270deg 300deg, transparent 300deg 360deg);
+        conic-gradient(from 0deg, rgba(var(--accent-rgb), 0.35) 0deg 30deg, transparent 30deg 90deg,
+        rgba(var(--accent-rgb), 0.35) 90deg 120deg, transparent 120deg 180deg,
+        rgba(var(--accent-rgb), 0.35) 180deg 210deg, transparent 210deg 270deg,
+        rgba(var(--accent-rgb), 0.35) 270deg 300deg, transparent 300deg 360deg);
     animation: fanSpin 4s linear infinite;
 }
 .pc-fan-hub { position: absolute; inset: 38%; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); }
@@ -521,7 +560,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 
 /* Network visual */
 .network-svg { width: 100%; height: 100%; }
-.net-lines line { stroke: rgba(47, 111, 237, 0.3); stroke-width: 1; stroke-dasharray: 4 4; animation: pcbFlow 5s linear infinite; }
+.net-lines line { stroke: rgba(var(--accent-rgb), 0.3); stroke-width: 1; stroke-dasharray: 4 4; animation: pcbFlow 5s linear infinite; }
 .net-nodes circle { fill: rgba(245, 245, 245, 0.6); }
 .net-node-main { fill: var(--accent) !important; }
 
@@ -541,7 +580,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .doc-scan-line {
     position: absolute; left: -6px; right: -6px; top: 0;
     height: 2px; background: var(--accent);
-    box-shadow: 0 0 8px rgba(47, 111, 237, 0.6);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
     animation: docScan 2.6s ease-in-out infinite;
 }
 @keyframes docScan { 0%, 100% { top: 0; } 50% { top: 100%; } }
@@ -584,8 +623,8 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.device-chip:hover { border-color: rgba(47, 111, 237, 0.5); }
-.device-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(47, 111, 237, 0.08); }
+.device-chip:hover { border-color: rgba(var(--accent-rgb), 0.5); }
+.device-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
 
 #issueStep { margin-top: 30px; padding-top: 30px; border-top: 1px solid var(--border); }
 
@@ -608,7 +647,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 }
 
 .issue-option:hover { background: var(--surface-2); }
-.issue-option.active { border-color: var(--accent); background: rgba(47, 111, 237, 0.08); color: var(--accent); }
+.issue-option.active { border-color: var(--accent); background: rgba(var(--accent-rgb), 0.08); color: var(--accent); }
 
 .issue-option .radio-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border-strong); flex-shrink: 0; position: relative; }
 .issue-option.active .radio-dot { border-color: var(--accent); }
@@ -625,7 +664,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     color: #fff;
     margin: 6px 0 20px;
     padding: 16px 18px;
-    background: rgba(47, 111, 237, 0.06);
+    background: rgba(var(--accent-rgb), 0.06);
     border-left: 2px solid var(--accent);
 }
 
@@ -721,7 +760,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 
 .status-badge.stage-1, .status-badge.stage-2 { color: #9a9a9a; border-color: #4d453b; background: rgba(154, 154, 154, 0.08); }
 .status-badge.stage-3, .status-badge.stage-4 { color: #facc15; border-color: #a16207; background: rgba(250, 204, 21, 0.08); }
-.status-badge.stage-5, .status-badge.stage-6 { color: var(--accent); border-color: var(--accent); background: rgba(47, 111, 237, 0.1); }
+.status-badge.stage-5, .status-badge.stage-6 { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
 .status-badge.stage-7, .status-badge.stage-8 { color: #4ade80; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
 
 .timeline-track { display: flex; justify-content: space-between; position: relative; margin: 40px 0 44px; }
@@ -760,8 +799,8 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .timeline-node.current .timeline-dot { border-color: var(--accent); color: var(--accent); animation: nodePulse 1.8s infinite; }
 
 @keyframes nodePulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(47, 111, 237, 0.4); }
-    50% { box-shadow: 0 0 0 6px rgba(47, 111, 237, 0); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); }
 }
 
 .timeline-node span.node-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.3px; }
@@ -772,7 +811,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .detail-label { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .detail-val { font-size: 1rem; font-weight: 600; color: #fff; }
 
-.tech-note-box { border-left: 2px solid var(--accent); background: rgba(47, 111, 237, 0.05); padding: 16px 20px; margin-bottom: 24px; }
+.tech-note-box { border-left: 2px solid var(--accent); background: rgba(var(--accent-rgb), 0.05); padding: 16px 20px; margin-bottom: 24px; }
 .tech-note-box h4 { font-size: 0.85rem; color: var(--accent); margin-bottom: 6px; font-weight: 600; }
 .tech-note-box p { font-size: 0.9rem; color: #ddd; }
 
@@ -825,7 +864,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .pc-tower-gpu { position: absolute; left: 12%; right: 12%; top: 55%; height: 14%; background: var(--surface-2); border: 1px solid var(--border-strong); }
 
 .pc-tower-fans { position: absolute; left: 12%; right: 12%; top: 12%; height: 34%; display: flex; gap: 10%; }
-.pc-tower-fan { flex: 1; border-radius: 50%; border: 1px solid var(--border-strong); background: conic-gradient(from 0deg, rgba(47, 111, 237, 0.3) 0deg 25deg, transparent 25deg 90deg, rgba(47, 111, 237, 0.3) 90deg 115deg, transparent 115deg 180deg, rgba(47, 111, 237, 0.3) 180deg 205deg, transparent 205deg 270deg, rgba(47, 111, 237, 0.3) 270deg 295deg, transparent 295deg 360deg); animation: fanSpin 5s linear infinite; }
+.pc-tower-fan { flex: 1; border-radius: 50%; border: 1px solid var(--border-strong); background: conic-gradient(from 0deg, rgba(var(--accent-rgb), 0.3) 0deg 25deg, transparent 25deg 90deg, rgba(var(--accent-rgb), 0.3) 90deg 115deg, transparent 115deg 180deg, rgba(var(--accent-rgb), 0.3) 180deg 205deg, transparent 205deg 270deg, rgba(var(--accent-rgb), 0.3) 270deg 295deg, transparent 295deg 360deg); animation: fanSpin 5s linear infinite; }
 
 .pc-tower-strip { position: absolute; right: 4%; top: 8%; bottom: 8%; width: 3px; background: linear-gradient(to bottom, transparent, var(--accent), transparent); opacity: 0.7; }
 
@@ -835,7 +874,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     font-size: 0.7rem;
     letter-spacing: 1px;
     color: var(--accent);
-    border: 1px solid rgba(47, 111, 237, 0.3);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
     background: rgba(11, 11, 11, 0.7);
     padding: 4px 10px;
     border-radius: 3px;
@@ -873,7 +912,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     transition: border-color 0.25s ease;
 }
 
-.workshop-slide:hover { border-color: rgba(47, 111, 237, 0.4); }
+.workshop-slide:hover { border-color: rgba(var(--accent-rgb), 0.4); }
 .workshop-slide:hover i { transform: scale(1.12); color: var(--accent); }
 .workshop-slide i { transition: transform 0.35s var(--ease), color 0.35s ease; }
 
@@ -943,7 +982,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.product-card:hover { border-color: rgba(47, 111, 237, 0.3); transform: translateY(-4px); }
+.product-card:hover { border-color: rgba(var(--accent-rgb), 0.3); transform: translateY(-4px); }
 
 .product-badge {
     position: absolute; top: 16px; right: 16px;

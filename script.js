@@ -81,6 +81,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================================================
+    // 1b. Accent color theme (blue / orange) - persisted, no page reload
+    // =========================================================================
+    const ACCENT_STORAGE_KEY = 'NEWAGE_ACCENT_THEME';
+    const ACCENT_RGB_BY_THEME = { blue: '47, 111, 237', orange: '255, 90, 31' };
+    const accentToggleBtn = document.getElementById('accentToggleBtn');
+
+    let accentTheme = 'blue';
+    let accentRGB = ACCENT_RGB_BY_THEME.blue;
+    try {
+        if (localStorage.getItem(ACCENT_STORAGE_KEY) === 'orange') accentTheme = 'orange';
+    } catch (e) { /* localStorage unavailable */ }
+
+    function applyAccentTheme(theme) {
+        accentTheme = theme;
+        accentRGB = ACCENT_RGB_BY_THEME[theme];
+        document.documentElement.setAttribute('data-accent', theme);
+        accentToggleBtn?.querySelectorAll('.accent-toggle-dot').forEach(dot => {
+            dot.classList.toggle('is-active', dot.getAttribute('data-accent-option') === theme);
+        });
+        try { localStorage.setItem(ACCENT_STORAGE_KEY, theme); } catch (e) { /* localStorage unavailable */ }
+    }
+    applyAccentTheme(accentTheme);
+
+    accentToggleBtn?.addEventListener('click', () => {
+        applyAccentTheme(accentTheme === 'blue' ? 'orange' : 'blue');
+    });
+
+    // =========================================================================
     // 2. Custom cursor (fine pointer only)
     // =========================================================================
     if (isFinePointer && !prefersReducedMotion) {
@@ -190,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.clearRect(0, 0, w, h);
 
             // connecting lines between nearby nodes
-            ctx.strokeStyle = 'rgba(47, 111, 237, 0.10)';
+            ctx.strokeStyle = `rgba(${accentRGB}, 0.10)`;
             ctx.lineWidth = 1;
             for (let i = 0; i < nodes.length; i++) {
                 for (let k = i + 1; k < nodes.length; k++) {
@@ -211,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lit = Math.max(0, 1 - distToScan / (h * 0.12));
                 ctx.beginPath();
                 ctx.arc(n.x, n.y, n.r * devicePixelRatio * (1 + lit), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(47, 111, 237, ${0.15 + lit * 0.65})`;
+                ctx.fillStyle = `rgba(${accentRGB}, ${0.15 + lit * 0.65})`;
                 ctx.fill();
             });
 
@@ -227,12 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // horizontal scan line
             const grad = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40);
-            grad.addColorStop(0, 'rgba(47, 111, 237, 0)');
-            grad.addColorStop(0.5, 'rgba(47, 111, 237, 0.35)');
-            grad.addColorStop(1, 'rgba(47, 111, 237, 0)');
+            grad.addColorStop(0, `rgba(${accentRGB}, 0)`);
+            grad.addColorStop(0.5, `rgba(${accentRGB}, 0.35)`);
+            grad.addColorStop(1, `rgba(${accentRGB}, 0)`);
             ctx.fillStyle = grad;
             ctx.fillRect(0, scanY - 40, w, 80);
-            ctx.fillStyle = 'rgba(47, 111, 237, 0.55)';
+            ctx.fillStyle = `rgba(${accentRGB}, 0.55)`;
             ctx.fillRect(0, scanY - 0.75, w, 1.5);
 
             scanY += scanSpeed * devicePixelRatio;

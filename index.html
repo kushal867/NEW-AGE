@@ -3,6 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Applied before CSS loads so a saved orange preference doesn't flash blue first.
+        try {
+            if (localStorage.getItem('NEWAGE_ACCENT_THEME') === 'orange') {
+                document.documentElement.setAttribute('data-accent', 'orange');
+            }
+        } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewAge I.T. Solution Center | Computer &amp; Electronics Repair Lab, Kathmandu</title>
     <meta name="description"
@@ -48,6 +56,10 @@
             </ul>
 
             <div class="nav-actions">
+                <button type="button" class="accent-toggle" id="accentToggleBtn" title="Switch accent color" aria-label="Switch accent color between blue and orange">
+                    <span class="accent-toggle-dot is-blue" data-accent-option="blue"></span>
+                    <span class="accent-toggle-dot is-orange" data-accent-option="orange"></span>
+                </button>
                 <a href="#repairs" class="btn-track">
                     <i class="fa-solid fa-magnifying-glass"></i> Track Repair
                 </a>
