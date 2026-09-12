@@ -118,7 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
     orange: "245, 245, 245",
     white: "35, 38, 43",
   };
-  const accentToggleBtn = document.getElementById("accentToggleBtn");
+  // There are two toggle instances in the markup (top navbar for desktop/
+  // tablet, plus one inside the mobile dropdown so the top bar stays narrow
+  // enough to not overflow on small phones) - both share the same class and
+  // stay in sync.
+  const accentToggleBtns = document.querySelectorAll(".accent-toggle");
 
   let accentTheme = "blue";
   let accentRGB = ACCENT_RGB_BY_THEME.blue;
@@ -135,11 +139,13 @@ document.addEventListener("DOMContentLoaded", () => {
     accentRGB = ACCENT_RGB_BY_THEME[theme];
     particleRGB = PARTICLE_RGB_BY_THEME[theme];
     document.documentElement.setAttribute("data-accent", theme);
-    accentToggleBtn?.querySelectorAll(".accent-toggle-dot").forEach((dot) => {
-      dot.classList.toggle(
-        "is-active",
-        dot.getAttribute("data-accent-option") === theme,
-      );
+    accentToggleBtns.forEach((btn) => {
+      btn.querySelectorAll(".accent-toggle-dot").forEach((dot) => {
+        dot.classList.toggle(
+          "is-active",
+          dot.getAttribute("data-accent-option") === theme,
+        );
+      });
     });
     try {
       localStorage.setItem(ACCENT_STORAGE_KEY, theme);
@@ -149,14 +155,16 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   applyAccentTheme(accentTheme);
 
-  accentToggleBtn?.addEventListener("click", (e) => {
-    const dot = e.target.closest("[data-accent-option]");
-    const next = dot
-      ? dot.getAttribute("data-accent-option")
-      : THEME_ORDER[
-          (THEME_ORDER.indexOf(accentTheme) + 1) % THEME_ORDER.length
-        ];
-    applyAccentTheme(next);
+  accentToggleBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const dot = e.target.closest("[data-accent-option]");
+      const next = dot
+        ? dot.getAttribute("data-accent-option")
+        : THEME_ORDER[
+            (THEME_ORDER.indexOf(accentTheme) + 1) % THEME_ORDER.length
+          ];
+      applyAccentTheme(next);
+    });
   });
 
   // =========================================================================

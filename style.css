@@ -835,7 +835,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .timeline-node span.node-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.3px; }
 .timeline-node.done span.node-label, .timeline-node.current span.node-label { color: var(--text); }
 
-.repair-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.repair-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 16px; margin-bottom: 24px; }
 .repair-detail-box { border: 1px solid var(--border); padding: 14px 18px; }
 .detail-label { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
 .detail-val { font-size: 1rem; font-weight: 600; color: var(--heading); }
@@ -987,7 +987,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
    ========================================================================== */
 .products-section { max-width: var(--container); margin: 0 auto; padding: 100px 24px; }
 
-.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px; }
 
 .photo-credits {
     margin-top: 24px;
@@ -1070,7 +1070,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
    Videos (TikTok embeds)
    ========================================================================== */
 .videos-section { max-width: var(--container); margin: 0 auto; padding: 100px 24px; }
-.videos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.videos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 20px; }
 
 .video-card { background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
 
@@ -1521,11 +1521,25 @@ footer { background: var(--surface); padding-top: 2px; position: relative; }
         transition: max-height 0.3s var(--ease);
     }
 
-    .nav-links.is-open { max-height: 520px; }
+    .nav-links.is-open { max-height: 600px; }
     .nav-links li { background: var(--mobile-nav-bg); border-top: 1px solid var(--border); }
     .nav-link { display: block; padding: 16px 24px; }
     .nav-mobile-only { display: block; }
     .nav-mobile-call { display: flex; align-items: center; gap: 8px; padding: 16px 24px; color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+
+    /* The top-bar theme toggle is dropped on narrow screens - it's shown
+       inside the mobile menu instead (below) so the navbar itself never has
+       to fit toggle + track button + burger all in one cramped row. */
+    .nav-actions .accent-toggle { display: none; }
+
+    .nav-mobile-theme-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 24px;
+    }
+
+    .nav-mobile-theme-label { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
 
     .nav-burger { display: flex; }
     .btn-track span { display: none; }
