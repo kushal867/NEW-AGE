@@ -635,27 +635,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const ticketId = `NA-${Math.floor(1000 + Math.random() * 9000)}`;
 
+            let submissionFailed = false;
+
             if (sb) {
                 try {
-                    await sb.from('inquiries').insert({
-                        ticket_id: ticketId, customer_name: name, phone, email, service, message, status: 'New'
+                    const { error: inquiryErr } = await sb.rpc('submit_inquiry', {
+                        p_ticket_id: ticketId, p_customer_name: name, p_phone: phone, p_email: email, p_service: service, p_message: message
                     });
-                } catch (err) { console.warn('Inquiry insert error:', err); }
+                    if (inquiryErr) throw inquiryErr;
+                } catch (err) { console.warn('Inquiry insert error:', err); submissionFailed = true; }
 
                 try {
-                    await sb.from('repairs').insert({
-                        ticket_id: ticketId,
-                        customer_name: name,
-                        phone,
-                        device: service === 'hardware-repair' ? 'Device Repair Request' : (service === 'custom-build' ? 'Custom PC Build Order' : 'IT Service Inquiry'),
-                        issue: message,
-                        stage: 1,
-                        date_received: new Date().toISOString().split('T')[0],
-                        estimated_delivery: 'Quote & Diagnosis within 24h',
-                        cost: 'Pending Diagnosis',
-                        technician_notes: `New inquiry submitted online. Contact customer at ${phone} or ${email}.`
+                    const { error: repairErr } = await sb.rpc('submit_repair', {
+                        p_ticket_id: ticketId,
+                        p_customer_name: name,
+                        p_phone: phone,
+                        p_device: service === 'hardware-repair' ? 'Device Repair Request' : (service === 'custom-build' ? 'Custom PC Build Order' : 'IT Service Inquiry'),
+                        p_issue: message
                     });
-                } catch (err) { console.warn('Repair ticket insert error:', err); }
+                    if (repairErr) throw repairErr;
+                } catch (err) { console.warn('Repair ticket insert error:', err); submissionFailed = true; }
+            }
+
+            if (submissionFailed) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalHtml;
+                if (formFeedback) {
+                    formFeedback.className = 'form-feedback error';
+                    formFeedback.textContent = 'We could not log your inquiry right now. Please try again shortly or reach us directly on WhatsApp.';
+                }
+                return;
             }
 
             const waText = encodeURIComponent(`Hello NewAge I.T. Solution Center, I just submitted an inquiry on your website!\n\nTicket ID: ${ticketId}\nName: ${name}\nPhone: ${phone}\nService: ${service}\nMessage: ${message}`);
