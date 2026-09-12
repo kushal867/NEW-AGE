@@ -948,8 +948,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================================================
-    // 8. Product Catalogue Management Tab
+    // 8. Product Catalogue Management Tab (search, filter, pagination, bulk delete
+    //    - built to stay usable with 100+ products, not just the seed data)
     // =========================================================================
+    const PRODUCTS_PAGE_SIZE = 20;
     const productsTableBody = document.getElementById('productsTableBody');
     const productModal = document.getElementById('productModal');
     const productModalTitleEl = document.querySelector('#productModal .cms-modal-header h3');
@@ -960,47 +962,112 @@ document.addEventListener('DOMContentLoaded', () => {
     const prodImageUrlInput = document.getElementById('prodImageUrl');
     const prodImagePreviewBox = document.getElementById('prodImagePreviewBox');
     const prodImageStatus = document.getElementById('prodImageStatus');
+    const productSearchInput = document.getElementById('productSearchInput');
+    const productCategoryFilter = document.getElementById('productCategoryFilter');
+    const productStockFilter = document.getElementById('productStockFilter');
+    const productSelectAllOnPage = document.getElementById('productSelectAllOnPage');
+    const productBulkBar = document.getElementById('productBulkBar');
+    const productBulkCount = document.getElementById('productBulkCount');
+    const productBulkDeleteBtn = document.getElementById('productBulkDeleteBtn');
+    const productBulkClearBtn = document.getElementById('productBulkClearBtn');
+    const productPaginationSummary = document.getElementById('productPaginationSummary');
+    const productPaginationLabel = document.getElementById('productPaginationLabel');
+    const productPrevPageBtn = document.getElementById('productPrevPageBtn');
+    const productNextPageBtn = document.getElementById('productNextPageBtn');
+
     let editingProductId = null;
+    let currentProductPage = 1;
+    let selectedProductIds = new Set();
+    let currentPageProductIds = [];
 
     wireImagePreview(prodImageUrlInput, prodImagePreviewBox, '<i class="fa-solid fa-image"></i>', prodImageStatus);
 
+    function getFilteredProducts() {
+        const q = (productSearchInput?.value || '').trim().toLowerCase();
+        const cat = productCategoryFilter?.value || '';
+        const stock = productStockFilter?.value || '';
+
+        return getProducts().filter(item => {
+            if (cat && item.category !== cat) return false;
+            if (stock && item.stock !== stock) return false;
+            if (q) {
+                const haystack = `${item.title} ${item.spec} ${item.category}`.toLowerCase();
+                if (!haystack.includes(q)) return false;
+            }
+            return true;
+        });
+    }
+
+    function updateProductBulkBar() {
+        if (!productBulkBar) return;
+        const count = selectedProductIds.size;
+        productBulkBar.hidden = count === 0;
+        if (productBulkCount) productBulkCount.textContent = `${count} selected`;
+
+        if (productSelectAllOnPage) {
+            const onPage = currentPageProductIds;
+            const selectedOnPage = onPage.filter(id => selectedProductIds.has(id));
+            productSelectAllOnPage.checked = onPage.length > 0 && selectedOnPage.length === onPage.length;
+            productSelectAllOnPage.indeterminate = selectedOnPage.length > 0 && selectedOnPage.length < onPage.length;
+        }
+    }
+
     function renderProductsTable() {
         if (!productsTableBody) return;
-        const products = getProducts();
+        const filtered = getFilteredProducts();
+        const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PAGE_SIZE));
+        currentProductPage = Math.min(Math.max(1, currentProductPage), totalPages);
 
-        productsTableBody.innerHTML = products.map(item => {
-            const resolvedImg = resolveImageUrl(item.image);
-            const icon = PRODUCT_ICONS[item.category] || 'fa-box';
-            const thumbHtml = resolvedImg
-                ? `<img class="table-thumb" src="${escapeHtml(resolvedImg)}" alt="" onerror="this.outerHTML='&lt;div class=&quot;table-thumb-fallback&quot;&gt;&lt;i class=&quot;fa-solid ${icon}&quot;&gt;&lt;/i&gt;&lt;/div&gt;'">`
-                : `<div class="table-thumb-fallback"><i class="fa-solid ${icon}"></i></div>`;
+        const start = (currentProductPage - 1) * PRODUCTS_PAGE_SIZE;
+        const pageItems = filtered.slice(start, start + PRODUCTS_PAGE_SIZE);
+        currentPageProductIds = pageItems.map(item => item.id);
 
-            return `
-            <tr>
-                <td>${thumbHtml}</td>
-                <td><span class="badge" style="background: rgba(0, 210, 255, 0.1); color: var(--primary);">${escapeHtml(item.category)}</span></td>
-                <td><strong>${escapeHtml(item.title)}</strong></td>
-                <td><small style="color: var(--text-muted);">${escapeHtml(item.spec)}</small></td>
-                <td><span style="text-decoration: line-through; color: #64748b;">${escapeHtml(item.mrp || '')}</span></td>
-                <td><strong style="color: var(--primary);">${escapeHtml(item.price)}</strong></td>
-                <td>
-                    <span class="status-pill ${item.stock === 'in-stock' ? 'stock' : 'preorder'}">
-                        ${item.stock === 'in-stock' ? 'In Stock' : 'Available on Order'}
-                    </span>
-                </td>
-                <td>
-                    <div class="action-btn-group">
-                        <button type="button" class="btn-icon btn-edit-prod" data-id="${escapeHtml(item.id)}" title="Edit Product">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
-                        <button type="button" class="btn-icon btn-icon-del btn-del-prod" data-id="${escapeHtml(item.id)}" title="Delete Product">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-        }).join('');
+        if (pageItems.length === 0) {
+            productsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                        <i class="fa-solid fa-box-open" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
+                        No products match your search or filters.
+                    </td>
+                </tr>
+            `;
+        } else {
+            productsTableBody.innerHTML = pageItems.map(item => {
+                const resolvedImg = resolveImageUrl(item.image);
+                const icon = PRODUCT_ICONS[item.category] || 'fa-box';
+                const thumbHtml = resolvedImg
+                    ? `<img class="table-thumb" src="${escapeHtml(resolvedImg)}" alt="" onerror="this.outerHTML='&lt;div class=&quot;table-thumb-fallback&quot;&gt;&lt;i class=&quot;fa-solid ${icon}&quot;&gt;&lt;/i&gt;&lt;/div&gt;'">`
+                    : `<div class="table-thumb-fallback"><i class="fa-solid ${icon}"></i></div>`;
+                const checked = selectedProductIds.has(item.id) ? 'checked' : '';
+
+                return `
+                <tr>
+                    <td><input type="checkbox" class="product-row-check" data-id="${escapeHtml(item.id)}" ${checked}></td>
+                    <td>${thumbHtml}</td>
+                    <td><span class="badge" style="background: rgba(0, 210, 255, 0.1); color: var(--primary);">${escapeHtml(item.category)}</span></td>
+                    <td><strong>${escapeHtml(item.title)}</strong></td>
+                    <td><small style="color: var(--text-muted);">${escapeHtml(item.spec)}</small></td>
+                    <td><span style="text-decoration: line-through; color: #64748b;">${escapeHtml(item.mrp || '')}</span></td>
+                    <td><strong style="color: var(--primary);">${escapeHtml(item.price)}</strong></td>
+                    <td>
+                        <span class="status-pill ${item.stock === 'in-stock' ? 'stock' : 'preorder'}">
+                            ${item.stock === 'in-stock' ? 'In Stock' : 'Available on Order'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btn-group">
+                            <button type="button" class="btn-icon btn-edit-prod" data-id="${escapeHtml(item.id)}" title="Edit Product">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" class="btn-icon btn-icon-del btn-del-prod" data-id="${escapeHtml(item.id)}" title="Delete Product">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+        }
 
         productsTableBody.querySelectorAll('.btn-del-prod').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1016,12 +1083,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (item) openProductModal(item);
             });
         });
+
+        productsTableBody.querySelectorAll('.product-row-check').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const id = cb.getAttribute('data-id');
+                if (cb.checked) selectedProductIds.add(id);
+                else selectedProductIds.delete(id);
+                updateProductBulkBar();
+            });
+        });
+
+        // Pagination summary + controls
+        if (productPaginationSummary) {
+            productPaginationSummary.textContent = filtered.length === 0
+                ? 'No products found'
+                : `Showing ${start + 1}-${Math.min(start + PRODUCTS_PAGE_SIZE, filtered.length)} of ${filtered.length} products`;
+        }
+        if (productPaginationLabel) productPaginationLabel.textContent = `Page ${currentProductPage} of ${totalPages}`;
+        if (productPrevPageBtn) productPrevPageBtn.disabled = currentProductPage <= 1;
+        if (productNextPageBtn) productNextPageBtn.disabled = currentProductPage >= totalPages;
+
+        updateProductBulkBar();
     }
+
+    productSearchInput?.addEventListener('input', () => { currentProductPage = 1; renderProductsTable(); });
+    productCategoryFilter?.addEventListener('change', () => { currentProductPage = 1; renderProductsTable(); });
+    productStockFilter?.addEventListener('change', () => { currentProductPage = 1; renderProductsTable(); });
+
+    productPrevPageBtn?.addEventListener('click', () => { currentProductPage -= 1; renderProductsTable(); });
+    productNextPageBtn?.addEventListener('click', () => { currentProductPage += 1; renderProductsTable(); });
+
+    productSelectAllOnPage?.addEventListener('change', () => {
+        if (productSelectAllOnPage.checked) {
+            currentPageProductIds.forEach(id => selectedProductIds.add(id));
+        } else {
+            currentPageProductIds.forEach(id => selectedProductIds.delete(id));
+        }
+        renderProductsTable();
+    });
+
+    productBulkClearBtn?.addEventListener('click', () => {
+        selectedProductIds.clear();
+        renderProductsTable();
+    });
+
+    productBulkDeleteBtn?.addEventListener('click', () => {
+        const count = selectedProductIds.size;
+        if (!count) return;
+        if (!confirm(`Permanently remove ${count} selected product${count > 1 ? 's' : ''} from the website catalogue?`)) return;
+        const list = getProducts().filter(p => !selectedProductIds.has(p.id));
+        saveProducts(list);
+        selectedProductIds.clear();
+        renderOverviewStats();
+        renderProductsTable();
+    });
 
     function deleteProduct(id) {
         if (!confirm('Remove this product from the website catalogue?')) return;
         let list = getProducts().filter(p => p.id !== id);
         saveProducts(list);
+        selectedProductIds.delete(id);
         renderOverviewStats();
         renderProductsTable();
     }

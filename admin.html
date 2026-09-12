@@ -295,16 +295,44 @@
                 <!-- Tab 4: Product Catalogue Manager -->
                 <section id="productsTab" class="tab-pane">
                     <div class="section-toolbar">
-                        <h3>In-Store Catalogue & Accessories</h3>
-                        <button type="button" class="btn-primary" id="openAddProductModalBtn">
-                            <i class="fa-solid fa-plus"></i> Add Product
+                        <div class="toolbar-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="productSearchInput" placeholder="Search by product name, spec, or category...">
+                        </div>
+                        <div class="toolbar-actions">
+                            <select id="productCategoryFilter" class="filter-select">
+                                <option value="">All Categories</option>
+                                <option value="Storage">Storage</option>
+                                <option value="Memory">Memory</option>
+                                <option value="Peripherals">Peripherals</option>
+                                <option value="Laptop Hardware">Laptop Hardware</option>
+                                <option value="Printing">Printing</option>
+                                <option value="Power & Cases">Power & Cases</option>
+                            </select>
+                            <select id="productStockFilter" class="filter-select">
+                                <option value="">In Stock &amp; On Order</option>
+                                <option value="in-stock">In Stock Only</option>
+                                <option value="pre-order">Available on Order Only</option>
+                            </select>
+                            <button type="button" class="btn-primary" id="openAddProductModalBtn">
+                                <i class="fa-solid fa-plus"></i> Add Product
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bulk-action-bar" id="productBulkBar" hidden>
+                        <span id="productBulkCount">0 selected</span>
+                        <button type="button" class="btn-icon-del-text" id="productBulkDeleteBtn">
+                            <i class="fa-solid fa-trash-can"></i> Delete Selected
                         </button>
+                        <button type="button" class="btn-link" id="productBulkClearBtn">Clear selection</button>
                     </div>
 
                     <div class="table-responsive glass-panel">
                         <table class="data-table">
                             <thead>
                                 <tr>
+                                    <th><input type="checkbox" id="productSelectAllOnPage" title="Select all on this page"></th>
                                     <th>Image</th>
                                     <th>Category</th>
                                     <th>Product Name</th>
@@ -319,6 +347,19 @@
                                 <!-- Populated dynamically by admin.js -->
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="pagination-bar" id="productPaginationBar">
+                        <span id="productPaginationSummary"></span>
+                        <div class="pagination-controls">
+                            <button type="button" class="btn-icon" id="productPrevPageBtn" title="Previous page">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </button>
+                            <span id="productPaginationLabel">Page 1 of 1</span>
+                            <button type="button" class="btn-icon" id="productNextPageBtn" title="Next page">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
