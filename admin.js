@@ -24,6 +24,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes lockout
 
     // =========================================================================
+    // Accent color theme (blue / orange) - same control and localStorage key
+    // as the public site, so switching one switches the other too.
+    // =========================================================================
+    (function initAccentTheme() {
+        const ACCENT_STORAGE_KEY = 'NEWAGE_ACCENT_THEME';
+        const accentToggleBtn = document.getElementById('accentToggleBtn');
+        let accentTheme = 'blue';
+        try {
+            if (localStorage.getItem(ACCENT_STORAGE_KEY) === 'orange') accentTheme = 'orange';
+        } catch (e) { /* localStorage unavailable */ }
+
+        function applyAccentTheme(theme) {
+            accentTheme = theme;
+            document.documentElement.setAttribute('data-accent', theme);
+            accentToggleBtn?.querySelectorAll('.accent-toggle-dot').forEach(dot => {
+                dot.classList.toggle('is-active', dot.getAttribute('data-accent-option') === theme);
+            });
+            try { localStorage.setItem(ACCENT_STORAGE_KEY, theme); } catch (e) { /* localStorage unavailable */ }
+        }
+        applyAccentTheme(accentTheme);
+
+        accentToggleBtn?.addEventListener('click', () => {
+            applyAccentTheme(accentTheme === 'blue' ? 'orange' : 'blue');
+        });
+    })();
+
+    // =========================================================================
     // Image URL resolution (supports plain image URLs + Google Drive share links)
     // =========================================================================
     const PRODUCT_ICONS = {

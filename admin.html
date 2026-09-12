@@ -3,11 +3,20 @@
 
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Applied before CSS loads so a saved orange preference doesn't flash blue first.
+        // Shares the same localStorage key as the public site, so both stay in sync.
+        try {
+            if (localStorage.getItem('NEWAGE_ACCENT_THEME') === 'orange') {
+                document.documentElement.setAttribute('data-accent', 'orange');
+            }
+        } catch (e) {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CMS Admin Portal | NewAge I.T. Solution Center</title>
     <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="admin.css">
@@ -19,7 +28,7 @@
         <div class="auth-card glass-panel">
             <div class="auth-header">
                 <div class="auth-logo">
-                    <i class="fa-solid fa-microchip"></i>
+                    <img src="assets/logo.png" alt="NewAge I.T. Solution Center">
                     <span>NewAge I.T.</span>
                 </div>
                 <h2>CMS Administration</h2>
@@ -59,7 +68,7 @@
         <aside class="dashboard-sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <i class="fa-solid fa-microchip"></i>
+                    <img src="assets/logo.png" alt="NewAge I.T. Solution Center">
                     <div>
                         <span class="brand-title">NewAge I.T.</span>
                         <span class="brand-sub">CMS Portal</span>
@@ -116,6 +125,10 @@
                     <h1 id="pageTitle">System Overview</h1>
                 </div>
                 <div class="nav-right">
+                    <button type="button" class="accent-toggle" id="accentToggleBtn" title="Switch accent color" aria-label="Switch accent color between blue and orange">
+                        <span class="accent-toggle-dot is-blue" data-accent-option="blue"></span>
+                        <span class="accent-toggle-dot is-orange" data-accent-option="orange"></span>
+                    </button>
                     <a href="index.html" target="_blank" class="nav-btn-outline" title="Open Live Website in New Tab">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>View Live Site</span>
                     </a>
