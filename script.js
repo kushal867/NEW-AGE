@@ -9,6 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+    // =========================================================================
+    // 0. Supabase client - anon key only (safe to expose; access is enforced
+    //    by Row Level Security policies, see supabase/schema.sql)
+    // =========================================================================
+    const SUPABASE_URL = window.SUPABASE_CONFIG?.url || '';
+    const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.anonKey || '';
+    const sb = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+    if (!sb) console.warn('Supabase not configured - config.js is missing or empty. See .env.example.');
+
     // Helper: Escapes HTML to prevent XSS
     function escapeHtml(str) {
         if (!str) return '';
@@ -436,11 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================================================
-    // 7. Repair database (localStorage-backed demo + optional Google Sheets)
+    // 7. Repair stage definitions
     // =========================================================================
-    const STORAGE_KEY_REPAIRS = 'NEWAGE_REPAIRS_DB';
-    const STORAGE_KEY_SHEET_URL = 'NEWAGE_SHEET_API_URL';
-
     const STAGE_DEFINITIONS = [
         { num: 1, title: 'Device Received' },
         { num: 2, title: 'Diagnosing' },
@@ -460,31 +468,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Quality Check', stages: [6] },
         { label: 'Ready', stages: [7, 8] }
     ];
-
-    const DEFAULT_REPAIRS = {
-        'NA-1001': { ticketId: 'NA-1001', customerName: 'Bikash Sharma', phone: '9841301930', device: 'Dell Inspiron 15 Gaming Laptop', issue: 'Power on failure / Motherboard short circuit', stage: 5, dateReceived: '2026-09-06', estimatedDelivery: '2026-09-10', cost: 'NPR 3,500', technicianNotes: 'Replacing power management IC and charging capacitors. Cleaned cooling fans and applied Arctic MX-4 thermal paste.' },
-        'NA-1002': { ticketId: 'NA-1002', customerName: 'Pooja Shrestha', phone: '9801234567', device: 'Apple MacBook Air M1', issue: 'Cracked display / Vertical colorful lines', stage: 7, dateReceived: '2026-09-05', estimatedDelivery: '2026-09-08', cost: 'NPR 18,000', technicianNotes: 'Original Retina screen assembly replaced and calibrated. 90-day NewAge warranty slip ready for collection.' },
-        'NA-1003': { ticketId: 'NA-1003', customerName: 'Aayush Thapa', phone: '9812345678', device: 'HP LaserJet Pro MFP Printer', issue: 'Paper jam error & faded toner printouts', stage: 2, dateReceived: '2026-09-07', estimatedDelivery: '2026-09-11', cost: 'NPR 1,800', technicianNotes: 'Inspecting pickup roller and optical laser scanner unit. Cleaning toner residue and paper sensors.' },
-        'NA-1004': { ticketId: 'NA-1004', customerName: 'Suman Adhikari', phone: '9841000000', device: 'Sony Bravia 55" 4K Smart TV', issue: 'Sound working but no display / black screen', stage: 3, dateReceived: '2026-09-08', estimatedDelivery: '2026-09-12', cost: 'NPR 4,200', technicianNotes: 'LED backlight strip open-circuit. Quotation sent to customer for backlight array replacement.' }
-    };
-
-    function getLocalRepairs() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY_REPAIRS);
-            if (saved) return { ...DEFAULT_REPAIRS, ...JSON.parse(saved) };
-        } catch (e) { console.warn('Storage read error:', e); }
-        return DEFAULT_REPAIRS;
-    }
-
-    function saveLocalRepair(repair) {
-        try {
-            const existing = getLocalRepairs();
-            existing[repair.ticketId] = repair;
-            localStorage.setItem(STORAGE_KEY_REPAIRS, JSON.stringify(existing));
-        } catch (e) { console.warn('Storage save error:', e); }
-    }
-
-    function getSheetUrl() { return localStorage.getItem(STORAGE_KEY_SHEET_URL) || ''; }
 
     // =========================================================================
     // 8. Track Repair
@@ -518,45 +501,28 @@ document.addEventListener('DOMContentLoaded', () => {
         trackResult.hidden = false;
         trackResult.innerHTML = `<div class="repair-card" style="text-align:center;"><p style="color:var(--muted);">Searching records for <strong style="color:#fff;">"${escapeHtml(query)}"</strong>...</p></div>`;
 
-        let foundRecord = null, isLive = false;
-        const sheetUrl = getSheetUrl();
-        if (sheetUrl) {
+        let foundRecord = null;
+        if (sb) {
             try {
-                const response = await fetch(`${sheetUrl}?action=track&query=${encodeURIComponent(query)}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.found && data.data) { foundRecord = data.data; isLive = true; }
-                }
-            } catch (err) { console.info('Sheets fetch fallback to local db:', err); }
-        }
-
-        if (!foundRecord) {
-            const db = getLocalRepairs();
-            const cleanQuery = query.toUpperCase();
-            const numQuery = query.replace(/\D/g, '');
-            if (db[cleanQuery]) foundRecord = db[cleanQuery];
-            else {
-                for (const key of Object.keys(db)) {
-                    const item = db[key];
-                    const cleanPhone = (item.phone || '').replace(/\D/g, '');
-                    if (numQuery.length >= 7 && cleanPhone.includes(numQuery)) { foundRecord = item; break; }
-                }
-            }
+                const { data, error } = await sb.rpc('track_repair', { p_query: query });
+                if (error) throw error;
+                if (Array.isArray(data) && data.length) foundRecord = data[0];
+            } catch (err) { console.warn('Repair lookup error:', err); }
         }
 
         setTimeout(() => {
             trackBtn.disabled = false;
             trackBtn.innerHTML = originalHtml;
-            if (foundRecord) renderRepairCard(foundRecord, isLive);
+            if (foundRecord) renderRepairCard(foundRecord);
             else renderNotFound(query);
             trackResult.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
         }, 300);
     }
 
-    function renderRepairCard(item, isLive) {
+    function renderRepairCard(item) {
         const stage = Number(item.stage) || 1;
         const statusLabel = STAGE_DEFINITIONS[stage - 1]?.title || 'In Progress';
-        const waMessage = encodeURIComponent(`Hello NewAge I.T. Solution Center, I am inquiring about my repair ticket ${item.ticketId} for my ${item.device}. Could you please update me?`);
+        const waMessage = encodeURIComponent(`Hello NewAge I.T. Solution Center, I am inquiring about my repair ticket ${item.ticket_id} for my ${item.device}. Could you please update me?`);
         const waLink = `https://wa.me/9779841301930?text=${waMessage}`;
 
         const timelineHtml = TIMELINE_NODES.map((node, idx) => {
@@ -579,8 +545,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="repair-card">
                 <div class="repair-header">
                     <div class="repair-title-group">
-                        <h3><i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent);"></i> ${escapeHtml(item.ticketId)}</h3>
-                        <p>${escapeHtml(item.customerName || 'Valued Customer')} &bull; Received ${escapeHtml(item.dateReceived || 'recently')}${isLive ? ' &bull; <span style="color:#4ade80;">Live from Google Sheet</span>' : ''}</p>
+                        <h3><i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent);"></i> ${escapeHtml(item.ticket_id)}</h3>
+                        <p>${escapeHtml(item.customer_name || 'Valued Customer')} &bull; Received ${escapeHtml(item.date_received || 'recently')}</p>
                     </div>
                     <span class="status-badge stage-${stage}">Stage ${stage}/8 &middot; ${escapeHtml(statusLabel)}</span>
                 </div>
@@ -593,13 +559,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="repair-grid">
                     <div class="repair-detail-box"><div class="detail-label">Device</div><div class="detail-val">${escapeHtml(item.device || 'N/A')}</div></div>
                     <div class="repair-detail-box"><div class="detail-label">Reported Issue</div><div class="detail-val">${escapeHtml(item.issue || 'Diagnostic required')}</div></div>
-                    <div class="repair-detail-box"><div class="detail-label">Est. Completion</div><div class="detail-val">${escapeHtml(item.estimatedDelivery || 'In Progress')}</div></div>
+                    <div class="repair-detail-box"><div class="detail-label">Est. Completion</div><div class="detail-val">${escapeHtml(item.estimated_delivery || 'In Progress')}</div></div>
                     <div class="repair-detail-box"><div class="detail-label">Cost Quote</div><div class="detail-val" style="color:var(--accent);">${escapeHtml(item.cost || 'Quote upon diagnosis')}</div></div>
                 </div>
 
                 <div class="tech-note-box">
                     <h4>Technician Notes</h4>
-                    <p>${escapeHtml(item.technicianNotes || 'Device is currently being processed by our technicians.')}</p>
+                    <p>${escapeHtml(item.technician_notes || 'Device is currently being processed by our technicians.')}</p>
                 </div>
 
                 <div class="repair-actions">
@@ -668,29 +634,28 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving &amp; Generating Ticket...';
 
             const ticketId = `NA-${Math.floor(1000 + Math.random() * 9000)}`;
-            const payload = { action: 'inquiry', ticketId, name, phone, email, service, message, timestamp: new Date().toISOString() };
 
-            try {
-                const existingInquiries = JSON.parse(localStorage.getItem('NEWAGE_INQUIRIES_DB') || '[]');
-                existingInquiries.unshift({ id: 'inq_' + Date.now(), ticketId, date: new Date().toISOString().split('T')[0], customerName: name, phone, email, service, message, status: 'New' });
-                localStorage.setItem('NEWAGE_INQUIRIES_DB', JSON.stringify(existingInquiries));
-            } catch (err) { console.warn('Inquiry storage error:', err); }
-
-            saveLocalRepair({
-                ticketId, customerName: name, phone,
-                device: service === 'hardware-repair' ? 'Device Repair Request' : (service === 'custom-build' ? 'Custom PC Build Order' : 'IT Service Inquiry'),
-                issue: message, stage: 1,
-                dateReceived: new Date().toISOString().split('T')[0],
-                estimatedDelivery: 'Quote & Diagnosis within 24h',
-                cost: 'Pending Diagnosis',
-                technicianNotes: `New inquiry submitted online. Contact customer at ${phone} or ${email}.`
-            });
-
-            const sheetUrl = getSheetUrl();
-            if (sheetUrl) {
+            if (sb) {
                 try {
-                    await fetch(sheetUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                } catch (sheetErr) { console.info('Sheets POST attempt:', sheetErr); }
+                    await sb.from('inquiries').insert({
+                        ticket_id: ticketId, customer_name: name, phone, email, service, message, status: 'New'
+                    });
+                } catch (err) { console.warn('Inquiry insert error:', err); }
+
+                try {
+                    await sb.from('repairs').insert({
+                        ticket_id: ticketId,
+                        customer_name: name,
+                        phone,
+                        device: service === 'hardware-repair' ? 'Device Repair Request' : (service === 'custom-build' ? 'Custom PC Build Order' : 'IT Service Inquiry'),
+                        issue: message,
+                        stage: 1,
+                        date_received: new Date().toISOString().split('T')[0],
+                        estimated_delivery: 'Quote & Diagnosis within 24h',
+                        cost: 'Pending Diagnosis',
+                        technician_notes: `New inquiry submitted online. Contact customer at ${phone} or ${email}.`
+                    });
+                } catch (err) { console.warn('Repair ticket insert error:', err); }
             }
 
             const waText = encodeURIComponent(`Hello NewAge I.T. Solution Center, I just submitted an inquiry on your website!\n\nTicket ID: ${ticketId}\nName: ${name}\nPhone: ${phone}\nService: ${service}\nMessage: ${message}`);
@@ -744,7 +709,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================================================================
-    // 11. Dynamic products & video sync from CMS (localStorage)
+    // 11. Products & videos - loaded live from Supabase (same database the
+    //     admin panel writes to, so edits show up for every visitor)
     // =========================================================================
 
     // Converts a Google Drive "share" link into a directly-hotlinkable image URL.
@@ -761,14 +727,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000` : url;
     }
 
-    function loadDynamicProducts() {
+    async function loadDynamicProducts() {
         const grid = document.querySelector('.products-grid');
-        if (!grid) return;
+        if (!grid || !sb) return;
         try {
-            const raw = localStorage.getItem('NEWAGE_PRODUCTS_DB');
-            if (!raw) return;
-            const products = JSON.parse(raw);
+            const { data: products, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
             if (!Array.isArray(products) || !products.length) return;
+
             const ICONS = { Storage: 'fa-hard-drive', Memory: 'fa-memory', Peripherals: 'fa-keyboard', Printing: 'fa-print', 'Laptop Hardware': 'fa-tv', 'Power & Cases': 'fa-microchip' };
             grid.innerHTML = products.map(p => {
                 const icon = ICONS[p.category] || 'fa-box';
@@ -794,17 +760,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             }).join('');
-        } catch (e) { console.warn('Products sync error:', e); }
+        } catch (e) { console.warn('Products load error:', e); }
     }
 
-    function loadDynamicVideos() {
+    async function loadDynamicVideos() {
         const grid = document.getElementById('videosGrid');
-        if (!grid) return;
+        if (!grid || !sb) return;
         try {
-            const raw = localStorage.getItem('NEWAGE_TIKTOK_VIDEOS_DB');
-            if (!raw) return;
-            const videos = JSON.parse(raw);
+            const { data: videos, error } = await sb.from('videos').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
             if (!Array.isArray(videos) || !videos.length) return;
+
             grid.innerHTML = videos.map((v) => {
                 const tiktokMatch = (v.url || '').match(/video\/(\d+)/) || (v.url || '').match(/player\/v1\/(\d+)/);
                 if (!tiktokMatch) return '';
@@ -820,7 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             }).join('');
-        } catch (e) { console.warn('Videos sync error:', e); }
+        } catch (e) { console.warn('Videos load error:', e); }
     }
 
     loadDynamicProducts();

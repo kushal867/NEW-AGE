@@ -1,0 +1,11 @@
+{
+  "name": "newageit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NewAge I.T. Solution Center - static site with a small build step to inject Supabase config from environment variables.",
+  "scripts": {
+    "build": "node build.js",
+    "start": "npm run build && npx serve ."
+  },
+  "license": "ISC"
+}

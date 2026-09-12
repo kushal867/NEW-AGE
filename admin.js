@@ -1,27 +1,21 @@
 // =============================================================================
 // NewAge I.T. - CMS Admin Portal Core Script
-// Salted SHA-256 Cryptographic Authentication, Brute-Force Lockout, Session Guard,
-// Full CRUD for Repairs (Stages 1-8), Customer Inquiries & Catalogue
+// Backed by Supabase (Postgres + Auth + Row Level Security) instead of
+// localStorage - admin edits now reach every visitor, not just this browser.
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
-    // 1. Security & Cryptographic Auth Configuration
+    // 0. Supabase client - anon key only (safe to expose; write access is
+    //    enforced by Row Level Security requiring an authenticated session,
+    //    see supabase/schema.sql). Shared credentials with the public site.
     // =========================================================================
-    const SALT = 'NEWAGE_CMS_SALT_2069';
-    const DEFAULT_HASH = 'cce69fc648225462ea1f5efad3f8642de9309d55dbde59c28d130a0a614b236d'; // NewAge@2069#Secure!
-    const STORAGE_KEY_PASS_HASH = 'NEWAGE_CMS_PASS_HASH';
-    const STORAGE_KEY_AUTH_SESSION = 'NEWAGE_CMS_SESSION_TOKEN';
-    const STORAGE_KEY_FAIL_ATTEMPTS = 'NEWAGE_CMS_FAIL_COUNT';
-    const STORAGE_KEY_LOCKOUT_UNTIL = 'NEWAGE_CMS_LOCKOUT_UNTIL';
-    const STORAGE_KEY_REPAIRS = 'NEWAGE_REPAIRS_DB';
-    const STORAGE_KEY_INQUIRIES = 'NEWAGE_INQUIRIES_DB';
-    const STORAGE_KEY_PRODUCTS = 'NEWAGE_PRODUCTS_DB';
-    const STORAGE_KEY_VIDEOS = 'NEWAGE_TIKTOK_VIDEOS_DB';
-    const STORAGE_KEY_SHEET_URL = 'NEWAGE_SHEET_API_URL';
-
-    const MAX_ATTEMPTS = 5;
-    const LOCKOUT_DURATION_MS = 5 * 60 * 1000; // 5 minutes lockout
+    const SUPABASE_URL = window.SUPABASE_CONFIG?.url || '';
+    const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG?.anonKey || '';
+    const sb = (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY)
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+        : null;
+    if (!sb) console.warn('Supabase not configured - config.js is missing or empty. See .env.example.');
 
     // =========================================================================
     // Accent color theme (blue / orange) - same control and localStorage key
@@ -62,23 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'Power & Cases': 'fa-microchip'
     };
 
-    // Converts a Google Drive "share" link (file/d/ID/view or open?id=ID) into a
-    // directly-hotlinkable image URL. Any other URL (Google Photos direct links,
-    // Imgur, self-hosted, etc.) is returned unchanged.
     function resolveImageUrl(rawUrl) {
         const url = (rawUrl || '').trim();
         if (!url) return '';
-
         let driveId = '';
         const fileMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
         const openMatch = url.match(/drive\.google\.com\/open\?.*[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-
         if (fileMatch) driveId = fileMatch[1];
         else if (url.includes('drive.google.com') && openMatch) driveId = openMatch[1];
-
-        if (driveId) {
-            return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
-        }
+        if (driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
         return url;
     }
 
@@ -87,8 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return match ? match[1] : '';
     }
 
-    // Wires an <input type="url"> to a live thumbnail preview box, converting
-    // Google Drive links automatically and falling back to an icon on error/empty.
     function wireImagePreview(inputEl, boxEl, fallbackIconHtml, statusEl) {
         if (!inputEl || !boxEl) return;
 
@@ -118,29 +102,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         inputEl.addEventListener('input', update);
-        update.run = update;
         inputEl._previewUpdate = update;
     }
 
-    // Compute SHA-256 Hash using browser Web Crypto API
-    async function sha256(str) {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(str);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function getStoredHash() {
-        return localStorage.getItem(STORAGE_KEY_PASS_HASH) || DEFAULT_HASH;
-    }
-
-    function setStoredHash(hash) {
-        localStorage.setItem(STORAGE_KEY_PASS_HASH, hash);
+    // Helper: Escapes HTML to prevent XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     // =========================================================================
-    // 2. Session Guard & Rate-Limiting Protection
+    // 1. Auth (real Supabase Auth session - server-verified, not a client-side
+    //    hash comparison). Rate limiting on failed logins is handled by
+    //    Supabase itself, not this script.
     // =========================================================================
     const loginView = document.getElementById('loginView');
     const dashboardView = document.getElementById('dashboardView');
@@ -150,95 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const togglePwBtn = document.getElementById('togglePwBtn');
     const adminPassword = document.getElementById('adminPassword');
 
-    // Toggle password visibility
     if (togglePwBtn && adminPassword) {
         togglePwBtn.addEventListener('click', () => {
             const isPassword = adminPassword.type === 'password';
             adminPassword.type = isPassword ? 'text' : 'password';
             togglePwBtn.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
         });
-    }
-
-    function isLockedOut() {
-        const lockoutTime = Number(localStorage.getItem(STORAGE_KEY_LOCKOUT_UNTIL)) || 0;
-        return Date.now() < lockoutTime;
-    }
-
-    function getLockoutRemainingSeconds() {
-        const lockoutTime = Number(localStorage.getItem(STORAGE_KEY_LOCKOUT_UNTIL)) || 0;
-        return Math.max(0, Math.ceil((lockoutTime - Date.now()) / 1000));
-    }
-
-    function recordFailedAttempt() {
-        const currentFails = (Number(localStorage.getItem(STORAGE_KEY_FAIL_ATTEMPTS)) || 0) + 1;
-        localStorage.setItem(STORAGE_KEY_FAIL_ATTEMPTS, currentFails);
-
-        if (currentFails >= MAX_ATTEMPTS) {
-            localStorage.setItem(STORAGE_KEY_LOCKOUT_UNTIL, Date.now() + LOCKOUT_DURATION_MS);
-            localStorage.removeItem(STORAGE_KEY_FAIL_ATTEMPTS);
-        }
-    }
-
-    function resetFailedAttempts() {
-        localStorage.removeItem(STORAGE_KEY_FAIL_ATTEMPTS);
-        localStorage.removeItem(STORAGE_KEY_LOCKOUT_UNTIL);
-    }
-
-    function isAuthenticated() {
-        try {
-            const sessionRaw = sessionStorage.getItem(STORAGE_KEY_AUTH_SESSION);
-            if (!sessionRaw) return false;
-            const session = JSON.parse(sessionRaw);
-            if (!session || !session.token || !session.expiresAt) return false;
-            if (Date.now() > session.expiresAt) {
-                sessionStorage.removeItem(STORAGE_KEY_AUTH_SESSION);
-                return false;
-            }
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function createSession(username) {
-        const session = {
-            username: username || 'admin',
-            token: 'tkn_' + Math.random().toString(36).substring(2) + Date.now().toString(36),
-            expiresAt: Date.now() + 2 * 3600 * 1000 // 2 hours session expiry
-        };
-        sessionStorage.setItem(STORAGE_KEY_AUTH_SESSION, JSON.stringify(session));
-    }
-
-    function checkAuthUI() {
-        if (isAuthenticated()) {
-            if (loginView) loginView.style.display = 'none';
-            if (dashboardView) dashboardView.style.display = 'flex';
-            initDashboard();
-        } else {
-            if (loginView) loginView.style.display = 'flex';
-            if (dashboardView) dashboardView.style.display = 'none';
-            checkLockoutState();
-        }
-    }
-
-    function checkLockoutState() {
-        if (isLockedOut()) {
-            const sec = getLockoutRemainingSeconds();
-            showLoginFeedback(`Too many failed login attempts. System locked for security. Try again in ${sec}s.`, 'error');
-            const submitBtn = document.getElementById('loginSubmitBtn');
-            if (submitBtn) submitBtn.disabled = true;
-
-            const timer = setInterval(() => {
-                const remain = getLockoutRemainingSeconds();
-                if (remain <= 0) {
-                    clearInterval(timer);
-                    if (submitBtn) submitBtn.disabled = false;
-                    hideLoginFeedback();
-                } else {
-                    showLoginFeedback(`Too many failed login attempts. System locked for security. Try again in ${remain}s.`, 'error');
-                }
-            }, 1000);
-        }
     }
 
     function showLoginFeedback(msg, type) {
@@ -252,66 +148,58 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loginFeedback) loginFeedback.style.display = 'none';
     }
 
-    // Handle Login Form Submit
+    async function checkAuthUI() {
+        const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } };
+        if (session) {
+            if (loginView) loginView.style.display = 'none';
+            if (dashboardView) dashboardView.style.display = 'flex';
+            const label = document.getElementById('sessionUserLabel');
+            if (label) label.textContent = session.user?.email || 'Admin';
+            initDashboard();
+        } else {
+            if (loginView) loginView.style.display = 'flex';
+            if (dashboardView) dashboardView.style.display = 'none';
+        }
+    }
+
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!sb) { showLoginFeedback('Database connection unavailable. Please reload the page.', 'error'); return; }
 
-            if (isLockedOut()) {
-                checkLockoutState();
-                return;
-            }
-
-            const username = document.getElementById('adminUsername')?.value?.trim();
+            const email = document.getElementById('adminUsername')?.value?.trim();
             const password = document.getElementById('adminPassword')?.value || '';
 
-            if (!username || !password) {
-                showLoginFeedback('Please enter both username and password.', 'error');
+            if (!email || !password) {
+                showLoginFeedback('Please enter both your email and password.', 'error');
                 return;
             }
 
-            // Verify Username (Accepts "admin" or "indra.newage")
-            if (username.toLowerCase() !== 'admin' && username.toLowerCase() !== 'indra.newage') {
-                recordFailedAttempt();
-                showLoginFeedback('Invalid admin credentials. Access denied.', 'error');
-                return;
-            }
+            const submitBtn = document.getElementById('loginSubmitBtn');
+            if (submitBtn) submitBtn.disabled = true;
 
-            // Hash input password with salt and verify
-            const inputHash = await sha256(SALT + password);
-            const targetHash = getStoredHash();
+            const { error } = await sb.auth.signInWithPassword({ email, password });
 
-            if (inputHash === targetHash) {
-                resetFailedAttempts();
-                createSession(username);
+            if (submitBtn) submitBtn.disabled = false;
+
+            if (!error) {
                 showLoginFeedback('Authentication successful! Loading CMS workspace...', 'success');
-                setTimeout(() => {
-                    hideLoginFeedback();
-                    checkAuthUI();
-                }, 400);
+                setTimeout(() => { hideLoginFeedback(); checkAuthUI(); }, 400);
             } else {
-                recordFailedAttempt();
-                const fails = Number(localStorage.getItem(STORAGE_KEY_FAIL_ATTEMPTS)) || 1;
-                const remaining = MAX_ATTEMPTS - fails;
-                if (remaining > 0) {
-                    showLoginFeedback(`Invalid password. Access denied (${remaining} attempts remaining before lockout).`, 'error');
-                } else {
-                    checkLockoutState();
-                }
+                showLoginFeedback('Invalid email or password. Access denied.', 'error');
             }
         });
     }
 
-    // Handle Logout
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            sessionStorage.removeItem(STORAGE_KEY_AUTH_SESSION);
+        logoutBtn.addEventListener('click', async () => {
+            await sb?.auth.signOut();
             checkAuthUI();
         });
     }
 
     // =========================================================================
-    // 3. Navigation & Tab Switching
+    // 2. Navigation & Tab Switching
     // =========================================================================
     const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
     const tabPanes = document.querySelectorAll('.tab-pane');
@@ -330,29 +218,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function switchTab(tabId) {
-        menuItems.forEach(item => {
-            const isActive = item.getAttribute('data-tab') === tabId;
-            item.classList.toggle('active', isActive);
-        });
+        menuItems.forEach(item => item.classList.toggle('active', item.getAttribute('data-tab') === tabId));
+        tabPanes.forEach(pane => pane.classList.toggle('active', pane.id === tabId));
+        if (pageTitle && TAB_TITLES[tabId]) pageTitle.textContent = TAB_TITLES[tabId];
+        if (dashboardSidebar) dashboardSidebar.classList.remove('active');
 
-        tabPanes.forEach(pane => {
-            pane.classList.toggle('active', pane.id === tabId);
-        });
-
-        if (pageTitle && TAB_TITLES[tabId]) {
-            pageTitle.textContent = TAB_TITLES[tabId];
-        }
-
-        if (dashboardSidebar) {
-            dashboardSidebar.classList.remove('active');
-        }
-
-        // Re-render specific tab contents
         if (tabId === 'overviewTab') renderOverviewStats();
-        if (tabId === 'repairsTab') renderRepairsTable();
-        if (tabId === 'inquiriesTab') renderInquiriesTable();
-        if (tabId === 'productsTab') renderProductsTable();
-        if (tabId === 'videosTab') renderVideosTable();
+        if (tabId === 'repairsTab') { fetchRepairs().then(renderRepairsTable); }
+        if (tabId === 'inquiriesTab') { fetchInquiries().then(renderInquiriesTable); }
+        if (tabId === 'productsTab') { fetchProducts().then(renderProductsTable); }
+        if (tabId === 'videosTab') { fetchVideos().then(renderVideosTable); }
     }
 
     menuItems.forEach(item => {
@@ -362,293 +237,79 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    if (mobileSidebarToggle && dashboardSidebar) {
-        mobileSidebarToggle.addEventListener('click', () => {
-            dashboardSidebar.classList.add('active');
-        });
-    }
+    mobileSidebarToggle?.addEventListener('click', () => dashboardSidebar?.classList.add('active'));
+    mobileCloseSidebarBtn?.addEventListener('click', () => dashboardSidebar?.classList.remove('active'));
 
-    if (mobileCloseSidebarBtn && dashboardSidebar) {
-        mobileCloseSidebarBtn.addEventListener('click', () => {
-            dashboardSidebar.classList.remove('active');
-        });
-    }
-
-    // Quick action buttons on overview tab
-    document.getElementById('quickNewJobBtn')?.addEventListener('click', () => {
-        switchTab('repairsTab');
-        openRepairModal();
-    });
-    document.getElementById('quickViewInqBtn')?.addEventListener('click', () => {
-        switchTab('inquiriesTab');
-    });
-    document.getElementById('quickAddProductBtn')?.addEventListener('click', () => {
-        switchTab('productsTab');
-        openProductModal();
-    });
-    document.getElementById('quickSyncSheetBtn')?.addEventListener('click', () => {
-        switchTab('settingsTab');
-    });
+    document.getElementById('quickNewJobBtn')?.addEventListener('click', () => { switchTab('repairsTab'); openRepairModal(); });
+    document.getElementById('quickViewInqBtn')?.addEventListener('click', () => switchTab('inquiriesTab'));
+    document.getElementById('quickAddProductBtn')?.addEventListener('click', () => { switchTab('productsTab'); openProductModal(); });
+    document.getElementById('quickSyncSheetBtn')?.addEventListener('click', () => switchTab('settingsTab'));
 
     // =========================================================================
-    // 4. Data Stores & Seed Data
+    // 3. In-memory caches, refreshed from Supabase after every mutation so the
+    //    UI (search/filter/pagination) stays instant without a round trip
+    //    on every keystroke.
     // =========================================================================
-    const DEFAULT_REPAIRS = {
-        'NA-1001': {
-            ticketId: 'NA-1001',
-            customerName: 'Bikash Sharma',
-            phone: '9841301930',
-            device: 'Dell Inspiron 15 Gaming Laptop',
-            issue: 'Power on failure / Motherboard short circuit',
-            stage: 5,
-            statusLabel: 'Repairing',
-            dateReceived: '2026-09-06',
-            estimatedDelivery: '2026-09-10',
-            cost: 'NPR 3,500',
-            technicianNotes: 'Replacing power management IC and charging capacitors. Cleaned fans and applied Arctic MX-4.'
-        },
-        'NA-1002': {
-            ticketId: 'NA-1002',
-            customerName: 'Pooja Shrestha',
-            phone: '9801234567',
-            device: 'Apple MacBook Air M1',
-            issue: 'Cracked display panel / Screen lines',
-            stage: 7,
-            statusLabel: 'Ready for Pickup',
-            dateReceived: '2026-09-05',
-            estimatedDelivery: '2026-09-08',
-            cost: 'NPR 18,000',
-            technicianNotes: 'Original Retina display replaced and calibrated. 90-day NewAge warranty slip ready for collection.'
-        },
-        'NA-1003': {
-            ticketId: 'NA-1003',
-            customerName: 'Aayush Thapa',
-            phone: '9812345678',
-            device: 'HP LaserJet Pro MFP Printer',
-            issue: 'Paper jam error & faded toner printouts',
-            stage: 2,
-            statusLabel: 'Diagnosis',
-            dateReceived: '2026-09-07',
-            estimatedDelivery: '2026-09-11',
-            cost: 'NPR 1,800',
-            technicianNotes: 'Inspecting pickup roller and optical laser scanner unit. Cleaning toner residue and sensors.'
-        },
-        'NA-1004': {
-            ticketId: 'NA-1004',
-            customerName: 'Suman Adhikari',
-            phone: '9841000000',
-            device: 'Sony Bravia 55" 4K Smart TV',
-            issue: 'Sound working but black screen',
-            stage: 3,
-            statusLabel: 'Quotation',
-            dateReceived: '2026-09-08',
-            estimatedDelivery: '2026-09-12',
-            cost: 'NPR 4,200',
-            technicianNotes: 'LED backlight strip open-circuit. Quotation prepared for customer approval.'
-        }
-    };
+    let repairsCache = [];
+    let inquiriesCache = [];
+    let productsCache = [];
+    let videosCache = [];
 
-    const DEFAULT_INQUIRIES = [
-        {
-            id: 'inq_1',
-            ticketId: 'NA-8421',
-            date: '2026-09-08',
-            customerName: 'Rabin Maharjan',
-            phone: '9841234890',
-            email: 'rabin.m@gmail.com',
-            service: 'custom-build',
-            message: 'Need a quotation for Intel Core i7 14th Gen RTX 4070 gaming rig with liquid cooling.',
-            status: 'New'
-        },
-        {
-            id: 'inq_2',
-            ticketId: 'NA-9312',
-            date: '2026-09-07',
-            customerName: 'Sunita Basnet',
-            phone: '9803112233',
-            email: 'sunita.b@yahoo.com',
-            service: 'hardware-repair',
-            message: 'Lenovo ThinkPad spilled tea on keyboard. Keys are sticky and some not working.',
-            status: 'Contacted'
-        }
-    ];
-
-    const DEFAULT_PRODUCTS = [
-        {
-            id: 'prod_1',
-            category: 'Storage',
-            title: 'NVMe M.2 1TB PCIe 4.0 SSD',
-            spec: 'Speeds up to 7,000 MB/s. Perfect for high-speed boot, gaming, and 4K editing.',
-            mrp: 'NPR 15,500',
-            price: 'NPR 13,200',
-            stock: 'in-stock'
-        },
-        {
-            id: 'prod_2',
-            category: 'Memory',
-            title: '16GB DDR4 / DDR5 High-Speed RAM',
-            spec: 'Heat-spreader module, low latency, tested for flawless stability and multitasking.',
-            mrp: 'NPR 6,800',
-            price: 'NPR 5,600',
-            stock: 'in-stock'
-        },
-        {
-            id: 'prod_3',
-            category: 'Peripherals',
-            title: 'RGB Mechanical Gaming Keyboard',
-            spec: 'Blue/Red mechanical switches, tactile feedback, customizable backlit modes.',
-            mrp: 'NPR 5,200',
-            price: 'NPR 4,200',
-            stock: 'in-stock'
-        },
-        {
-            id: 'prod_4',
-            category: 'Printing',
-            title: 'HP & Canon Laser Toner Cartridges',
-            spec: 'High-yield crisp black toner cartridges with original chip for laser printers.',
-            mrp: 'NPR 2,800',
-            price: 'NPR 2,200',
-            stock: 'in-stock'
-        },
-        {
-            id: 'prod_5',
-            category: 'Laptop Hardware',
-            title: 'Genuine Replacement Laptop Screens',
-            spec: 'IPS FHD & 4K display panels for Dell, HP, Lenovo, Acer, and MacBook.',
-            mrp: 'NPR 9,500',
-            price: 'NPR 7,800+',
-            stock: 'pre-order'
-        },
-        {
-            id: 'prod_6',
-            category: 'Power & Cases',
-            title: '650W 80+ Bronze Gaming PSU',
-            spec: 'Reliable active PFC power supply with Japanese capacitors and silent cooling fan.',
-            mrp: 'NPR 7,200',
-            price: 'NPR 5,900',
-            stock: 'in-stock'
-        }
-    ];
-
-    const DEFAULT_VIDEOS = [
-        {
-            id: 'vid_1',
-            title: 'Laptop Water Damage? What to do immediately to save your motherboard',
-            topic: 'Laptop Emergency Tip',
-            views: '24.5K views',
-            url: 'https://www.tiktok.com/@newageit2069'
-        },
-        {
-            id: 'vid_2',
-            title: 'Motherboard Short Circuit Diagnostic with Thermal Camera & Multimeter',
-            topic: 'Chip-Level Engineering',
-            views: '41.2K views',
-            url: 'https://www.tiktok.com/@newageit2069'
-        },
-        {
-            id: 'vid_3',
-            title: 'Why NVMe M.2 SSD Upgrade makes your old computer 10x faster',
-            topic: 'Speed & Hardware Upgrade',
-            views: '18.9K views',
-            url: 'https://www.tiktok.com/@newageit2069'
-        },
-        {
-            id: 'vid_4',
-            title: 'Building a High-Performance RTX 4070 Gaming Workstation in Kathmandu',
-            topic: 'Custom PC Rig Build',
-            views: '35.4K views',
-            url: 'https://www.tiktok.com/@newageit2069'
-        }
-    ];
-
-    function getRepairs() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY_REPAIRS);
-            return data ? { ...DEFAULT_REPAIRS, ...JSON.parse(data) } : DEFAULT_REPAIRS;
-        } catch (e) {
-            return DEFAULT_REPAIRS;
-        }
+    async function fetchRepairs() {
+        if (!sb) return;
+        const { data, error } = await sb.from('repairs').select('*').order('created_at', { ascending: false });
+        if (error) { console.warn('Fetch repairs error:', error); return; }
+        repairsCache = data || [];
     }
 
-    function saveRepairs(repairs) {
-        localStorage.setItem(STORAGE_KEY_REPAIRS, JSON.stringify(repairs));
+    async function fetchInquiries() {
+        if (!sb) return;
+        const { data, error } = await sb.from('inquiries').select('*').order('created_at', { ascending: false });
+        if (error) { console.warn('Fetch inquiries error:', error); return; }
+        inquiriesCache = data || [];
     }
 
-    function getInquiries() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY_INQUIRIES);
-            return data ? JSON.parse(data) : DEFAULT_INQUIRIES;
-        } catch (e) {
-            return DEFAULT_INQUIRIES;
-        }
+    async function fetchProducts() {
+        if (!sb) return;
+        const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
+        if (error) { console.warn('Fetch products error:', error); return; }
+        productsCache = data || [];
     }
 
-    function saveInquiries(inquiries) {
-        localStorage.setItem(STORAGE_KEY_INQUIRIES, JSON.stringify(inquiries));
-    }
-
-    function getProducts() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY_PRODUCTS);
-            return data ? JSON.parse(data) : DEFAULT_PRODUCTS;
-        } catch (e) {
-            return DEFAULT_PRODUCTS;
-        }
-    }
-
-    function saveProducts(products) {
-        localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(products));
-    }
-
-    function getVideos() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY_VIDEOS);
-            return data ? JSON.parse(data) : DEFAULT_VIDEOS;
-        } catch (e) {
-            return DEFAULT_VIDEOS;
-        }
-    }
-
-    function saveVideos(videos) {
-        localStorage.setItem(STORAGE_KEY_VIDEOS, JSON.stringify(videos));
+    async function fetchVideos() {
+        if (!sb) return;
+        const { data, error } = await sb.from('videos').select('*').order('created_at', { ascending: false });
+        if (error) { console.warn('Fetch videos error:', error); return; }
+        videosCache = data || [];
     }
 
     // =========================================================================
-    // 5. Dashboard Overview Tab
+    // 4. Dashboard Overview Tab
     // =========================================================================
-    function renderOverviewStats() {
-        const repairs = getRepairs();
-        const inquiries = getInquiries();
-        const products = getProducts();
+    async function renderOverviewStats() {
+        await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts()]);
 
-        const repairsList = Object.values(repairs);
-        const totalRepairs = repairsList.length;
-        const pendingRepairs = repairsList.filter(r => Number(r.stage) < 8).length;
-        const totalInquiries = inquiries.length;
-        const newInquiries = inquiries.filter(i => i.status === 'New').length;
+        const totalRepairs = repairsCache.length;
+        const pendingRepairs = repairsCache.filter(r => Number(r.stage) < 8).length;
+        const totalInquiries = inquiriesCache.length;
+        const newInquiries = inquiriesCache.filter(i => i.status === 'New').length;
 
         document.getElementById('statTotalRepairs').textContent = totalRepairs;
         document.getElementById('statPendingRepairs').textContent = `${pendingRepairs} actively in progress`;
         document.getElementById('statTotalInquiries').textContent = totalInquiries;
         document.getElementById('statNewInquiries').textContent = `${newInquiries} pending review`;
-        document.getElementById('statTotalProducts').textContent = products.length;
+        document.getElementById('statTotalProducts').textContent = productsCache.length;
 
         document.getElementById('repairsCountBadge').textContent = pendingRepairs;
         document.getElementById('inquiriesCountBadge').textContent = newInquiries;
     }
 
     // =========================================================================
-    // 6. Repair Jobs Management Tab (8 Stages)
+    // 5. Repair Jobs Management Tab (8 Stages)
     // =========================================================================
     const STAGE_NAMES = {
-        1: '1. Received',
-        2: '2. Diagnosis',
-        3: '3. Quotation',
-        4: '4. Approval',
-        5: '5. Repairing',
-        6: '6. Testing',
-        7: '7. Ready for Pickup',
-        8: '8. Delivered'
+        1: '1. Received', 2: '2. Diagnosis', 3: '3. Quotation', 4: '4. Approval',
+        5: '5. Repairing', 6: '6. Testing', 7: '7. Ready for Pickup', 8: '8. Delivered'
     };
 
     const repairSearchInput = document.getElementById('repairSearchInput');
@@ -657,118 +318,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderRepairsTable() {
         if (!repairsTableBody) return;
-        const repairs = getRepairs();
-        let list = Object.values(repairs);
+        let list = repairsCache;
 
-        // Filter search query
         const q = (repairSearchInput?.value || '').trim().toLowerCase();
         if (q) {
-            list = list.filter(r => 
-                (r.ticketId || '').toLowerCase().includes(q) ||
-                (r.customerName || '').toLowerCase().includes(q) ||
+            list = list.filter(r =>
+                (r.ticket_id || '').toLowerCase().includes(q) ||
+                (r.customer_name || '').toLowerCase().includes(q) ||
                 (r.phone || '').includes(q) ||
                 (r.device || '').toLowerCase().includes(q)
             );
         }
 
-        // Filter stage
         const stageF = repairStageFilter?.value;
-        if (stageF) {
-            list = list.filter(r => String(r.stage) === stageF);
-        }
+        if (stageF) list = list.filter(r => String(r.stage) === stageF);
 
         if (list.length === 0) {
             repairsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
-                        <i class="fa-solid fa-magnifying-glass" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
-                        No repair jobs match your current search or filter.
-                    </td>
-                </tr>
-            `;
+                <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
+                    No repair jobs match your current search or filter.
+                </td></tr>`;
             return;
         }
 
         repairsTableBody.innerHTML = list.map(item => {
             const stage = Number(item.stage) || 1;
-            const waMsg = encodeURIComponent(`Hello ${item.customerName}, update on your repair ticket ${item.ticketId} (${item.device}) at NewAge I.T. Solution Center: Current Status is Stage ${stage}/8 - ${STAGE_NAMES[stage]}. Estimated cost: ${item.cost}. Remarks: ${item.technicianNotes}`);
+            const waMsg = encodeURIComponent(`Hello ${item.customer_name}, update on your repair ticket ${item.ticket_id} (${item.device}) at NewAge I.T. Solution Center: Current Status is Stage ${stage}/8 - ${STAGE_NAMES[stage]}. Estimated cost: ${item.cost}. Remarks: ${item.technician_notes}`);
             const waUrl = `https://wa.me/977${(item.phone || '').replace(/\D/g, '')}?text=${waMsg}`;
 
             return `
                 <tr>
-                    <td><strong style="color: var(--primary);">${escapeHtml(item.ticketId)}</strong></td>
-                    <td>
-                        <div><strong>${escapeHtml(item.customerName)}</strong></div>
-                        <small style="color: var(--text-muted);">${escapeHtml(item.phone)}</small>
-                    </td>
+                    <td><strong style="color: var(--primary);">${escapeHtml(item.ticket_id)}</strong></td>
+                    <td><div><strong>${escapeHtml(item.customer_name)}</strong></div><small style="color: var(--text-muted);">${escapeHtml(item.phone)}</small></td>
                     <td>${escapeHtml(item.device)}</td>
                     <td><span style="font-size: 0.85rem; color: #cbd5e1;">${escapeHtml(item.issue)}</span></td>
                     <td>
-                        <select class="table-stage-select" data-ticket="${escapeHtml(item.ticketId)}">
-                            ${Object.keys(STAGE_NAMES).map(num => `
-                                <option value="${num}" ${Number(num) === stage ? 'selected' : ''}>${STAGE_NAMES[num]}</option>
-                            `).join('')}
+                        <select class="table-stage-select" data-ticket="${escapeHtml(item.ticket_id)}">
+                            ${Object.keys(STAGE_NAMES).map(num => `<option value="${num}" ${Number(num) === stage ? 'selected' : ''}>${STAGE_NAMES[num]}</option>`).join('')}
                         </select>
                     </td>
                     <td><strong style="color: #4ade80;">${escapeHtml(item.cost || 'Pending')}</strong></td>
                     <td>
                         <div class="action-btn-group">
-                            <a href="${waUrl}" target="_blank" class="btn-icon btn-icon-wa" title="Notify Customer on WhatsApp">
-                                <i class="fa-brands fa-whatsapp"></i>
-                            </a>
-                            <button type="button" class="btn-icon btn-edit-repair" data-ticket="${escapeHtml(item.ticketId)}" title="Edit Repair Details">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button type="button" class="btn-icon btn-icon-del btn-del-repair" data-ticket="${escapeHtml(item.ticketId)}" title="Delete Ticket">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <a href="${waUrl}" target="_blank" class="btn-icon btn-icon-wa" title="Notify Customer on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                            <button type="button" class="btn-icon btn-edit-repair" data-ticket="${escapeHtml(item.ticket_id)}" title="Edit Repair Details"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button type="button" class="btn-icon btn-icon-del btn-del-repair" data-ticket="${escapeHtml(item.ticket_id)}" title="Delete Ticket"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </td>
-                </tr>
-            `;
+                </tr>`;
         }).join('');
 
-        // Attach stage change event listeners
         repairsTableBody.querySelectorAll('.table-stage-select').forEach(sel => {
-            sel.addEventListener('change', (e) => {
-                const ticketId = sel.getAttribute('data-ticket');
-                const newStage = Number(e.target.value);
-                updateRepairStage(ticketId, newStage);
-            });
+            sel.addEventListener('change', (e) => updateRepairStage(sel.getAttribute('data-ticket'), Number(e.target.value)));
         });
-
-        // Attach edit & delete listeners
         repairsTableBody.querySelectorAll('.btn-edit-repair').forEach(btn => {
             btn.addEventListener('click', () => {
-                const ticketId = btn.getAttribute('data-ticket');
-                editRepairJob(ticketId);
+                const item = repairsCache.find(r => r.ticket_id === btn.getAttribute('data-ticket'));
+                if (item) openRepairModal(item);
             });
         });
-
         repairsTableBody.querySelectorAll('.btn-del-repair').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const ticketId = btn.getAttribute('data-ticket');
-                deleteRepairJob(ticketId);
-            });
+            btn.addEventListener('click', () => deleteRepairJob(btn.getAttribute('data-ticket')));
         });
     }
 
-    function updateRepairStage(ticketId, newStage) {
-        const repairs = getRepairs();
-        if (repairs[ticketId]) {
-            repairs[ticketId].stage = newStage;
-            repairs[ticketId].statusLabel = STAGE_NAMES[newStage]?.replace(/^\d+\.\s*/, '') || 'In Progress';
-            saveRepairs(repairs);
-            renderOverviewStats();
-            renderRepairsTable();
-        }
+    async function updateRepairStage(ticketId, newStage) {
+        if (!sb) return;
+        const { error } = await sb.from('repairs').update({ stage: newStage }).eq('ticket_id', ticketId);
+        if (error) { alert('Could not update stage: ' + error.message); return; }
+        await fetchRepairs();
+        renderOverviewStats();
+        renderRepairsTable();
     }
 
-    function deleteRepairJob(ticketId) {
+    async function deleteRepairJob(ticketId) {
         if (!confirm(`Are you sure you want to permanently delete repair ticket ${ticketId}?`)) return;
-        const repairs = getRepairs();
-        delete repairs[ticketId];
-        saveRepairs(repairs);
+        const { error } = await sb.from('repairs').delete().eq('ticket_id', ticketId);
+        if (error) { alert('Could not delete ticket: ' + error.message); return; }
+        await fetchRepairs();
         renderOverviewStats();
         renderRepairsTable();
     }
@@ -782,47 +410,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeRepairModalBtn = document.getElementById('closeRepairModalBtn');
     const cancelRepairModalBtn = document.getElementById('cancelRepairModalBtn');
     const repairJobForm = document.getElementById('repairJobForm');
+    let editingRepairTicketId = null;
 
     function openRepairModal(ticketData = null) {
         if (!repairModal) return;
         repairJobForm?.reset();
+        editingRepairTicketId = ticketData ? ticketData.ticket_id : null;
 
         const titleEl = document.getElementById('repairModalTitle');
         const idInput = document.getElementById('jobTicketId');
 
         if (ticketData) {
-            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Ticket ${escapeHtml(ticketData.ticketId)}`;
-            if (idInput) {
-                idInput.value = ticketData.ticketId;
-                idInput.readOnly = true;
-            }
-            document.getElementById('jobCustomerName').value = ticketData.customerName || '';
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Ticket ${escapeHtml(ticketData.ticket_id)}`;
+            if (idInput) { idInput.value = ticketData.ticket_id; idInput.readOnly = true; }
+            document.getElementById('jobCustomerName').value = ticketData.customer_name || '';
             document.getElementById('jobPhone').value = ticketData.phone || '';
             document.getElementById('jobDevice').value = ticketData.device || '';
             document.getElementById('jobIssue').value = ticketData.issue || '';
             document.getElementById('jobStage').value = ticketData.stage || 1;
             document.getElementById('jobCost').value = ticketData.cost || '';
-            document.getElementById('jobReceivedDate').value = ticketData.dateReceived || '';
-            document.getElementById('jobDeliveryDate').value = ticketData.estimatedDelivery || '';
-            document.getElementById('jobNotes').value = ticketData.technicianNotes || '';
+            document.getElementById('jobReceivedDate').value = ticketData.date_received || '';
+            document.getElementById('jobDeliveryDate').value = ticketData.estimated_delivery || '';
+            document.getElementById('jobNotes').value = ticketData.technician_notes || '';
         } else {
             if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-screwdriver-wrench text-primary"></i> Add Repair Job`;
-            if (idInput) {
-                idInput.value = 'NA-' + Math.floor(1000 + Math.random() * 9000);
-                idInput.readOnly = false;
-            }
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('jobReceivedDate').value = today;
+            if (idInput) { idInput.value = 'NA-' + Math.floor(1000 + Math.random() * 9000); idInput.readOnly = false; }
+            document.getElementById('jobReceivedDate').value = new Date().toISOString().split('T')[0];
         }
 
         repairModal.style.display = 'flex';
-    }
-
-    function editRepairJob(ticketId) {
-        const repairs = getRepairs();
-        if (repairs[ticketId]) {
-            openRepairModal(repairs[ticketId]);
-        }
     }
 
     openNewJobModalBtn?.addEventListener('click', () => openRepairModal());
@@ -830,80 +446,77 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelRepairModalBtn?.addEventListener('click', () => { if (repairModal) repairModal.style.display = 'none'; });
 
     if (repairJobForm) {
-        repairJobForm.addEventListener('submit', (e) => {
+        repairJobForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const ticketId = document.getElementById('jobTicketId')?.value?.trim().toUpperCase();
-            if (!ticketId) return;
+            if (!ticketId || !sb) return;
 
             const stage = Number(document.getElementById('jobStage')?.value) || 1;
             const repairData = {
-                ticketId: ticketId,
-                customerName: document.getElementById('jobCustomerName')?.value?.trim() || '',
+                customer_name: document.getElementById('jobCustomerName')?.value?.trim() || '',
                 phone: document.getElementById('jobPhone')?.value?.trim() || '',
                 device: document.getElementById('jobDevice')?.value?.trim() || '',
                 issue: document.getElementById('jobIssue')?.value?.trim() || '',
                 stage: stage,
-                statusLabel: STAGE_NAMES[stage]?.replace(/^\d+\.\s*/, '') || 'In Progress',
-                dateReceived: document.getElementById('jobReceivedDate')?.value || '',
-                estimatedDelivery: document.getElementById('jobDeliveryDate')?.value || '',
+                date_received: document.getElementById('jobReceivedDate')?.value || null,
+                estimated_delivery: document.getElementById('jobDeliveryDate')?.value || '',
                 cost: document.getElementById('jobCost')?.value?.trim() || 'Pending Quote',
-                technicianNotes: document.getElementById('jobNotes')?.value?.trim() || ''
+                technician_notes: document.getElementById('jobNotes')?.value?.trim() || ''
             };
 
-            const repairs = getRepairs();
-            repairs[ticketId] = repairData;
-            saveRepairs(repairs);
+            const submitBtn = repairJobForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
 
+            const { error } = editingRepairTicketId
+                ? await sb.from('repairs').update(repairData).eq('ticket_id', ticketId)
+                : await sb.from('repairs').insert({ ticket_id: ticketId, ...repairData });
+
+            if (submitBtn) submitBtn.disabled = false;
+            if (error) { alert('Could not save repair job: ' + error.message); return; }
+
+            editingRepairTicketId = null;
             repairModal.style.display = 'none';
+            await fetchRepairs();
             renderOverviewStats();
             renderRepairsTable();
         });
     }
 
     // =========================================================================
-    // 7. Customer Inquiries Management Tab
+    // 6. Customer Inquiries Management Tab
     // =========================================================================
     const inquirySearchInput = document.getElementById('inquirySearchInput');
     const inquiriesTableBody = document.getElementById('inquiriesTableBody');
 
     function renderInquiriesTable() {
         if (!inquiriesTableBody) return;
-        let list = getInquiries();
+        let list = inquiriesCache;
 
         const q = (inquirySearchInput?.value || '').trim().toLowerCase();
         if (q) {
-            list = list.filter(i => 
-                (i.customerName || '').toLowerCase().includes(q) ||
+            list = list.filter(i =>
+                (i.customer_name || '').toLowerCase().includes(q) ||
                 (i.phone || '').includes(q) ||
                 (i.message || '').toLowerCase().includes(q) ||
-                (i.ticketId || '').toLowerCase().includes(q)
+                (i.ticket_id || '').toLowerCase().includes(q)
             );
         }
 
         if (list.length === 0) {
-            inquiriesTableBody.innerHTML = `
-                <tr>
-                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">
-                        No customer inquiries found.
-                    </td>
-                </tr>
-            `;
+            inquiriesTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No customer inquiries found.</td></tr>`;
             return;
         }
 
         inquiriesTableBody.innerHTML = list.map(item => {
-            const waMsg = encodeURIComponent(`Hello ${item.customerName}, this is Indra Kumar Shrestha from NewAge I.T. Solution Center responding to your website inquiry regarding "${item.service}". How can we help you today?`);
+            const waMsg = encodeURIComponent(`Hello ${item.customer_name}, this is Indra Kumar Shrestha from NewAge I.T. Solution Center responding to your website inquiry regarding "${item.service}". How can we help you today?`);
             const waUrl = `https://wa.me/977${(item.phone || '').replace(/\D/g, '')}?text=${waMsg}`;
-            const statusClass = item.status === 'New' ? 'new' : (item.status === 'Contacted' ? 'contacted' : 'closed');
+            const dateStr = item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : 'Recent';
 
             return `
                 <tr>
-                    <td><small style="color: var(--text-muted);">${escapeHtml(item.date || 'Recent')}</small></td>
-                    <td><strong style="color: var(--primary);">${escapeHtml(item.ticketId || 'N/A')}</strong></td>
-                    <td>
-                        <div><strong>${escapeHtml(item.customerName)}</strong></div>
-                        <small style="color: var(--text-muted);">${escapeHtml(item.phone)} &bull; ${escapeHtml(item.email || '')}</small>
-                    </td>
+                    <td><small style="color: var(--text-muted);">${escapeHtml(dateStr)}</small></td>
+                    <td><strong style="color: var(--primary);">${escapeHtml(item.ticket_id || 'N/A')}</strong></td>
+                    <td><div><strong>${escapeHtml(item.customer_name)}</strong></div><small style="color: var(--text-muted);">${escapeHtml(item.phone)} &bull; ${escapeHtml(item.email || '')}</small></td>
                     <td><span class="badge" style="background: rgba(255,255,255,0.06); color:#fff;">${escapeHtml(item.service)}</span></td>
                     <td style="max-width: 250px;"><p style="font-size: 0.85rem; color: #cbd5e1; margin: 0; line-height: 1.4;">${escapeHtml(item.message)}</p></td>
                     <td>
@@ -916,67 +529,54 @@ document.addEventListener('DOMContentLoaded', () => {
                     </td>
                     <td>
                         <div class="action-btn-group">
-                            <a href="${waUrl}" target="_blank" class="btn-icon btn-icon-wa" title="Reply on WhatsApp">
-                                <i class="fa-brands fa-whatsapp"></i>
-                            </a>
-                            <a href="tel:${escapeHtml(item.phone)}" class="btn-icon" title="Call Customer">
-                                <i class="fa-solid fa-phone"></i>
-                            </a>
-                            <button type="button" class="btn-icon btn-icon-del btn-del-inq" data-id="${escapeHtml(item.id)}" title="Delete Inquiry">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <a href="${waUrl}" target="_blank" class="btn-icon btn-icon-wa" title="Reply on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="tel:${escapeHtml(item.phone)}" class="btn-icon" title="Call Customer"><i class="fa-solid fa-phone"></i></a>
+                            <button type="button" class="btn-icon btn-icon-del btn-del-inq" data-id="${escapeHtml(item.id)}" title="Delete Inquiry"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </td>
-                </tr>
-            `;
+                </tr>`;
         }).join('');
 
         inquiriesTableBody.querySelectorAll('.inq-status-select').forEach(sel => {
-            sel.addEventListener('change', (e) => {
-                const id = sel.getAttribute('data-id');
-                updateInquiryStatus(id, e.target.value);
-            });
+            sel.addEventListener('change', (e) => updateInquiryStatus(sel.getAttribute('data-id'), e.target.value));
         });
-
         inquiriesTableBody.querySelectorAll('.btn-del-inq').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                deleteInquiry(id);
-            });
+            btn.addEventListener('click', () => deleteInquiry(btn.getAttribute('data-id')));
         });
     }
 
-    function updateInquiryStatus(id, status) {
-        let list = getInquiries();
-        const item = list.find(i => i.id === id);
-        if (item) {
-            item.status = status;
-            saveInquiries(list);
-            renderOverviewStats();
-        }
+    async function updateInquiryStatus(id, status) {
+        const { error } = await sb.from('inquiries').update({ status }).eq('id', id);
+        if (error) { alert('Could not update status: ' + error.message); return; }
+        await fetchInquiries();
+        renderOverviewStats();
     }
 
-    function deleteInquiry(id) {
+    async function deleteInquiry(id) {
         if (!confirm('Are you sure you want to delete this customer inquiry?')) return;
-        let list = getInquiries().filter(i => i.id !== id);
-        saveInquiries(list);
+        const { error } = await sb.from('inquiries').delete().eq('id', id);
+        if (error) { alert('Could not delete inquiry: ' + error.message); return; }
+        await fetchInquiries();
         renderOverviewStats();
         renderInquiriesTable();
     }
 
     inquirySearchInput?.addEventListener('input', renderInquiriesTable);
 
-    document.getElementById('clearArchivedInquiriesBtn')?.addEventListener('click', () => {
+    document.getElementById('clearArchivedInquiriesBtn')?.addEventListener('click', async () => {
         if (!confirm('Clear all closed inquiries from the list?')) return;
-        let list = getInquiries().filter(i => i.status !== 'Closed');
-        saveInquiries(list);
+        const closedIds = inquiriesCache.filter(i => i.status === 'Closed').map(i => i.id);
+        if (!closedIds.length) return;
+        const { error } = await sb.from('inquiries').delete().in('id', closedIds);
+        if (error) { alert('Could not clear archived inquiries: ' + error.message); return; }
+        await fetchInquiries();
         renderOverviewStats();
         renderInquiriesTable();
     });
 
     // =========================================================================
-    // 8. Product Catalogue Management Tab (search, filter, pagination, bulk delete
-    //    - built to stay usable with 100+ products, not just the seed data)
+    // 7. Product Catalogue Management Tab (search, filter, pagination, bulk
+    //    delete - built to stay usable with 100+ products)
     // =========================================================================
     const PRODUCTS_PAGE_SIZE = 20;
     const productsTableBody = document.getElementById('productsTableBody');
@@ -1014,7 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cat = productCategoryFilter?.value || '';
         const stock = productStockFilter?.value || '';
 
-        return getProducts().filter(item => {
+        return productsCache.filter(item => {
             if (cat && item.category !== cat) return false;
             if (stock && item.stock !== stock) return false;
             if (q) {
@@ -1051,13 +651,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (pageItems.length === 0) {
             productsTableBody.innerHTML = `
-                <tr>
-                    <td colspan="9" style="text-align:center; color: var(--text-muted); padding: 30px;">
-                        <i class="fa-solid fa-box-open" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
-                        No products match your search or filters.
-                    </td>
-                </tr>
-            `;
+                <tr><td colspan="9" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                    <i class="fa-solid fa-box-open" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
+                    No products match your search or filters.
+                </td></tr>`;
         } else {
             productsTableBody.innerHTML = pageItems.map(item => {
                 const resolvedImg = resolveImageUrl(item.image);
@@ -1076,51 +673,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><small style="color: var(--text-muted);">${escapeHtml(item.spec)}</small></td>
                     <td><span style="text-decoration: line-through; color: #64748b;">${escapeHtml(item.mrp || '')}</span></td>
                     <td><strong style="color: var(--primary);">${escapeHtml(item.price)}</strong></td>
-                    <td>
-                        <span class="status-pill ${item.stock === 'in-stock' ? 'stock' : 'preorder'}">
-                            ${item.stock === 'in-stock' ? 'In Stock' : 'Available on Order'}
-                        </span>
-                    </td>
+                    <td><span class="status-pill ${item.stock === 'in-stock' ? 'stock' : 'preorder'}">${item.stock === 'in-stock' ? 'In Stock' : 'Available on Order'}</span></td>
                     <td>
                         <div class="action-btn-group">
-                            <button type="button" class="btn-icon btn-edit-prod" data-id="${escapeHtml(item.id)}" title="Edit Product">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button type="button" class="btn-icon btn-icon-del btn-del-prod" data-id="${escapeHtml(item.id)}" title="Delete Product">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
+                            <button type="button" class="btn-icon btn-edit-prod" data-id="${escapeHtml(item.id)}" title="Edit Product"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button type="button" class="btn-icon btn-icon-del btn-del-prod" data-id="${escapeHtml(item.id)}" title="Delete Product"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </td>
-                </tr>
-            `;
+                </tr>`;
             }).join('');
         }
 
         productsTableBody.querySelectorAll('.btn-del-prod').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                deleteProduct(id);
-            });
+            btn.addEventListener('click', () => deleteProduct(btn.getAttribute('data-id')));
         });
-
         productsTableBody.querySelectorAll('.btn-edit-prod').forEach(btn => {
             btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                const item = getProducts().find(p => p.id === id);
+                const item = productsCache.find(p => p.id === btn.getAttribute('data-id'));
                 if (item) openProductModal(item);
             });
         });
-
         productsTableBody.querySelectorAll('.product-row-check').forEach(cb => {
             cb.addEventListener('change', () => {
                 const id = cb.getAttribute('data-id');
-                if (cb.checked) selectedProductIds.add(id);
-                else selectedProductIds.delete(id);
+                if (cb.checked) selectedProductIds.add(id); else selectedProductIds.delete(id);
                 updateProductBulkBar();
             });
         });
 
-        // Pagination summary + controls
         if (productPaginationSummary) {
             productPaginationSummary.textContent = filtered.length === 0
                 ? 'No products found'
@@ -1136,40 +716,35 @@ document.addEventListener('DOMContentLoaded', () => {
     productSearchInput?.addEventListener('input', () => { currentProductPage = 1; renderProductsTable(); });
     productCategoryFilter?.addEventListener('change', () => { currentProductPage = 1; renderProductsTable(); });
     productStockFilter?.addEventListener('change', () => { currentProductPage = 1; renderProductsTable(); });
-
     productPrevPageBtn?.addEventListener('click', () => { currentProductPage -= 1; renderProductsTable(); });
     productNextPageBtn?.addEventListener('click', () => { currentProductPage += 1; renderProductsTable(); });
 
     productSelectAllOnPage?.addEventListener('change', () => {
-        if (productSelectAllOnPage.checked) {
-            currentPageProductIds.forEach(id => selectedProductIds.add(id));
-        } else {
-            currentPageProductIds.forEach(id => selectedProductIds.delete(id));
-        }
+        if (productSelectAllOnPage.checked) currentPageProductIds.forEach(id => selectedProductIds.add(id));
+        else currentPageProductIds.forEach(id => selectedProductIds.delete(id));
         renderProductsTable();
     });
 
-    productBulkClearBtn?.addEventListener('click', () => {
-        selectedProductIds.clear();
-        renderProductsTable();
-    });
+    productBulkClearBtn?.addEventListener('click', () => { selectedProductIds.clear(); renderProductsTable(); });
 
-    productBulkDeleteBtn?.addEventListener('click', () => {
-        const count = selectedProductIds.size;
-        if (!count) return;
-        if (!confirm(`Permanently remove ${count} selected product${count > 1 ? 's' : ''} from the website catalogue?`)) return;
-        const list = getProducts().filter(p => !selectedProductIds.has(p.id));
-        saveProducts(list);
+    productBulkDeleteBtn?.addEventListener('click', async () => {
+        const ids = Array.from(selectedProductIds);
+        if (!ids.length) return;
+        if (!confirm(`Permanently remove ${ids.length} selected product${ids.length > 1 ? 's' : ''} from the website catalogue?`)) return;
+        const { error } = await sb.from('products').delete().in('id', ids);
+        if (error) { alert('Could not delete products: ' + error.message); return; }
         selectedProductIds.clear();
+        await fetchProducts();
         renderOverviewStats();
         renderProductsTable();
     });
 
-    function deleteProduct(id) {
+    async function deleteProduct(id) {
         if (!confirm('Remove this product from the website catalogue?')) return;
-        let list = getProducts().filter(p => p.id !== id);
-        saveProducts(list);
+        const { error } = await sb.from('products').delete().eq('id', id);
+        if (error) { alert('Could not delete product: ' + error.message); return; }
         selectedProductIds.delete(id);
+        await fetchProducts();
         renderOverviewStats();
         renderProductsTable();
     }
@@ -1195,7 +770,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (prodImageUrlInput) prodImageUrlInput.value = productData.image || '';
         }
         prodImageUrlInput?._previewUpdate?.();
-
         productModal.style.display = 'flex';
     }
 
@@ -1204,8 +778,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelProductModalBtn?.addEventListener('click', () => { if (productModal) productModal.style.display = 'none'; });
 
     if (productForm) {
-        productForm.addEventListener('submit', (e) => {
+        productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!sb) return;
             const prodData = {
                 title: document.getElementById('prodTitle')?.value?.trim() || '',
                 category: document.getElementById('prodCategory')?.value || 'Storage',
@@ -1216,24 +791,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 image: prodImageUrlInput?.value?.trim() || ''
             };
 
-            const list = getProducts();
-            if (editingProductId) {
-                const idx = list.findIndex(p => p.id === editingProductId);
-                if (idx !== -1) list[idx] = { ...list[idx], ...prodData };
-            } else {
-                list.unshift({ id: 'prod_' + Date.now(), ...prodData });
-            }
-            saveProducts(list);
+            const submitBtn = productForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const { error } = editingProductId
+                ? await sb.from('products').update(prodData).eq('id', editingProductId)
+                : await sb.from('products').insert(prodData);
+
+            if (submitBtn) submitBtn.disabled = false;
+            if (error) { alert('Could not save product: ' + error.message); return; }
 
             editingProductId = null;
             productModal.style.display = 'none';
+            await fetchProducts();
             renderOverviewStats();
             renderProductsTable();
         });
     }
 
     // =========================================================================
-    // 9. TikTok Videos Management Tab
+    // 8. TikTok Videos Management Tab
     // =========================================================================
     const videosTableBody = document.getElementById('videosTableBody');
     const videoModal = document.getElementById('videoModal');
@@ -1274,55 +851,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderVideosTable() {
         if (!videosTableBody) return;
-        const videos = getVideos();
-
-        videosTableBody.innerHTML = videos.map(item => {
+        videosTableBody.innerHTML = videosCache.map(item => {
             const resolvedImg = resolveImageUrl(item.thumbnail);
             const thumbHtml = resolvedImg
                 ? `<img class="table-thumb" src="${escapeHtml(resolvedImg)}" alt="" onerror="this.outerHTML='&lt;div class=&quot;table-thumb-fallback&quot;&gt;&lt;i class=&quot;fa-brands fa-tiktok&quot;&gt;&lt;/i&gt;&lt;/div&gt;'">`
                 : `<div class="table-thumb-fallback"><i class="fa-brands fa-tiktok"></i></div>`;
 
             return `
-            <tr>
-                <td>${thumbHtml}</td>
-                <td><strong>${escapeHtml(item.title)}</strong></td>
-                <td><span class="badge" style="background: rgba(255,0,80,0.15); color: #ff0050;">${escapeHtml(item.topic)}</span></td>
-                <td><a href="${escapeHtml(item.url)}" target="_blank" style="color: var(--primary); text-decoration: underline;">${escapeHtml(item.url)}</a></td>
-                <td><span style="color: #4ade80; font-weight: 600;"><i class="fa-solid fa-eye"></i> ${escapeHtml(item.views)}</span></td>
-                <td>
-                    <div class="action-btn-group">
-                        <button type="button" class="btn-icon btn-edit-vid" data-id="${escapeHtml(item.id)}" title="Edit Video">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
-                        <button type="button" class="btn-icon btn-icon-del btn-del-vid" data-id="${escapeHtml(item.id)}" title="Delete Video">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
+                <tr>
+                    <td>${thumbHtml}</td>
+                    <td><strong>${escapeHtml(item.title)}</strong></td>
+                    <td><span class="badge" style="background: rgba(255,0,80,0.15); color: #ff0050;">${escapeHtml(item.topic)}</span></td>
+                    <td><a href="${escapeHtml(item.url)}" target="_blank" style="color: var(--primary); text-decoration: underline;">${escapeHtml(item.url)}</a></td>
+                    <td><span style="color: #4ade80; font-weight: 600;"><i class="fa-solid fa-eye"></i> ${escapeHtml(item.views)}</span></td>
+                    <td>
+                        <div class="action-btn-group">
+                            <button type="button" class="btn-icon btn-edit-vid" data-id="${escapeHtml(item.id)}" title="Edit Video"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button type="button" class="btn-icon btn-icon-del btn-del-vid" data-id="${escapeHtml(item.id)}" title="Delete Video"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
         }).join('');
 
         videosTableBody.querySelectorAll('.btn-del-vid').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                deleteVideo(id);
-            });
+            btn.addEventListener('click', () => deleteVideo(btn.getAttribute('data-id')));
         });
-
         videosTableBody.querySelectorAll('.btn-edit-vid').forEach(btn => {
             btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                const item = getVideos().find(v => v.id === id);
+                const item = videosCache.find(v => v.id === btn.getAttribute('data-id'));
                 if (item) openVideoModal(item);
             });
         });
     }
 
-    function deleteVideo(id) {
+    async function deleteVideo(id) {
         if (!confirm('Remove this video reel from the showcase?')) return;
-        let list = getVideos().filter(v => v.id !== id);
-        saveVideos(list);
+        const { error } = await sb.from('videos').delete().eq('id', id);
+        if (error) { alert('Could not delete video: ' + error.message); return; }
+        await fetchVideos();
         renderVideosTable();
     }
 
@@ -1346,7 +912,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateVideoUrlPreview();
         vidThumbUrlInput?._previewUpdate?.();
-
         videoModal.style.display = 'flex';
     }
 
@@ -1355,8 +920,9 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelVideoModalBtn?.addEventListener('click', () => { if (videoModal) videoModal.style.display = 'none'; });
 
     if (videoForm) {
-        videoForm.addEventListener('submit', (e) => {
+        videoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!sb) return;
             const tiktokId = extractTikTokId(vidUrlInput?.value || '');
             if (!tiktokId) {
                 vidUrlInput?.focus();
@@ -1372,57 +938,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 thumbnail: vidThumbUrlInput?.value?.trim() || ''
             };
 
-            const list = getVideos();
-            if (editingVideoId) {
-                const idx = list.findIndex(v => v.id === editingVideoId);
-                if (idx !== -1) list[idx] = { ...list[idx], ...vidData };
-            } else {
-                list.unshift({ id: 'vid_' + Date.now(), ...vidData });
-            }
-            saveVideos(list);
+            const submitBtn = videoForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const { error } = editingVideoId
+                ? await sb.from('videos').update(vidData).eq('id', editingVideoId)
+                : await sb.from('videos').insert(vidData);
+
+            if (submitBtn) submitBtn.disabled = false;
+            if (error) { alert('Could not save video: ' + error.message); return; }
 
             editingVideoId = null;
             videoModal.style.display = 'none';
+            await fetchVideos();
             renderVideosTable();
         });
     }
 
     // =========================================================================
-    // 10. Security & Settings Tab
+    // 9. Security & Settings Tab
     // =========================================================================
     const changePasswordForm = document.getElementById('changePasswordForm');
     const pwChangeFeedback = document.getElementById('pwChangeFeedback');
-    const adminSheetUrlInput = document.getElementById('adminSheetUrlInput');
-    const adminSaveSheetUrlBtn = document.getElementById('adminSaveSheetUrlBtn');
-    const adminTestSheetUrlBtn = document.getElementById('adminTestSheetUrlBtn');
-    const adminSheetStatus = document.getElementById('adminSheetStatus');
     const exportBackupBtn = document.getElementById('exportBackupBtn');
-    const resetDemoDataBtn = document.getElementById('resetDemoDataBtn');
-
-    if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const curr = document.getElementById('currentPassword')?.value || '';
-            const newP = document.getElementById('newPassword')?.value || '';
-            const conf = document.getElementById('confirmNewPassword')?.value || '';
-
-            if (newP !== conf) {
-                showPwFeedback('New passwords do not match.', 'error');
-                return;
-            }
-
-            const currHash = await sha256(SALT + curr);
-            if (currHash !== getStoredHash()) {
-                showPwFeedback('Current master password verification failed.', 'error');
-                return;
-            }
-
-            const newHash = await sha256(SALT + newP);
-            setStoredHash(newHash);
-            showPwFeedback('Master password updated and hashed with salted SHA-256 successfully!', 'success');
-            changePasswordForm.reset();
-        });
-    }
 
     function showPwFeedback(msg, type) {
         if (!pwChangeFeedback) return;
@@ -1431,67 +969,43 @@ document.addEventListener('DOMContentLoaded', () => {
         pwChangeFeedback.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${escapeHtml(msg)}`;
     }
 
-    // Google Sheets API Settings in Admin
-    if (adminSheetUrlInput) {
-        adminSheetUrlInput.value = localStorage.getItem(STORAGE_KEY_SHEET_URL) || '';
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!sb) return;
+            const curr = document.getElementById('currentPassword')?.value || '';
+            const newP = document.getElementById('newPassword')?.value || '';
+            const conf = document.getElementById('confirmNewPassword')?.value || '';
+
+            if (newP !== conf) { showPwFeedback('New passwords do not match.', 'error'); return; }
+            if (newP.length < 8) { showPwFeedback('New password must be at least 8 characters.', 'error'); return; }
+
+            const { data: { session } } = await sb.auth.getSession();
+            const email = session?.user?.email;
+            if (!email) { showPwFeedback('Session expired. Please log in again.', 'error'); return; }
+
+            // Re-verify the current password before allowing a change
+            const { error: verifyError } = await sb.auth.signInWithPassword({ email, password: curr });
+            if (verifyError) { showPwFeedback('Current master password verification failed.', 'error'); return; }
+
+            const { error: updateError } = await sb.auth.updateUser({ password: newP });
+            if (updateError) { showPwFeedback('Could not update password: ' + updateError.message, 'error'); return; }
+
+            showPwFeedback('Master password updated successfully!', 'success');
+            changePasswordForm.reset();
+        });
     }
 
-    adminSaveSheetUrlBtn?.addEventListener('click', () => {
-        const url = adminSheetUrlInput?.value?.trim() || '';
-        localStorage.setItem(STORAGE_KEY_SHEET_URL, url);
-        if (adminSheetStatus) {
-            adminSheetStatus.style.display = 'block';
-            adminSheetStatus.className = 'login-feedback success';
-            adminSheetStatus.innerHTML = '<i class="fa-solid fa-check"></i> Google Apps Script API URL saved!';
-        }
-    });
-
-    adminTestSheetUrlBtn?.addEventListener('click', async () => {
-        const url = adminSheetUrlInput?.value?.trim() || '';
-        if (!url) {
-            if (adminSheetStatus) {
-                adminSheetStatus.style.display = 'block';
-                adminSheetStatus.className = 'login-feedback error';
-                adminSheetStatus.textContent = 'Please enter a Google Apps Script Web App URL first.';
-            }
-            return;
-        }
-
-        adminTestSheetUrlBtn.disabled = true;
-        adminTestSheetUrlBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Testing...';
-
-        try {
-            const res = await fetch(`${url}?action=track&query=NA-1001`);
-            if (res.ok) {
-                if (adminSheetStatus) {
-                    adminSheetStatus.style.display = 'block';
-                    adminSheetStatus.className = 'login-feedback success';
-                    adminSheetStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> Connected! Google Sheet database is active.';
-                }
-            } else {
-                throw new Error(`HTTP ${res.status}`);
-            }
-        } catch (err) {
-            if (adminSheetStatus) {
-                adminSheetStatus.style.display = 'block';
-                adminSheetStatus.className = 'login-feedback error';
-                adminSheetStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Connection test failed. Verify Web App is deployed with access "Anyone".';
-            }
-        } finally {
-            adminTestSheetUrlBtn.disabled = false;
-            adminTestSheetUrlBtn.innerHTML = 'Test Connection';
-        }
-    });
-
-    // Export Backup JSON
-    exportBackupBtn?.addEventListener('click', () => {
+    // Export Backup JSON (now sourced from Supabase instead of localStorage)
+    exportBackupBtn?.addEventListener('click', async () => {
+        await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts(), fetchVideos()]);
         const backup = {
             exportDate: new Date().toISOString(),
             business: 'NewAge I.T. Solution Center',
-            repairs: getRepairs(),
-            inquiries: getInquiries(),
-            products: getProducts(),
-            videos: getVideos()
+            repairs: repairsCache,
+            inquiries: inquiriesCache,
+            products: productsCache,
+            videos: videosCache
         };
 
         const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
@@ -1503,39 +1017,14 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     });
 
-    // Reset to Default Demo
-    resetDemoDataBtn?.addEventListener('click', () => {
-        if (!confirm('Reset all repairs, inquiries, and catalogue to initial factory demo?')) return;
-        localStorage.removeItem(STORAGE_KEY_REPAIRS);
-        localStorage.removeItem(STORAGE_KEY_INQUIRIES);
-        localStorage.removeItem(STORAGE_KEY_PRODUCTS);
-        localStorage.removeItem(STORAGE_KEY_VIDEOS);
-        renderOverviewStats();
-        renderRepairsTable();
-        renderInquiriesTable();
-        renderProductsTable();
-        renderVideosTable();
-        alert('Database restored to default demonstration state.');
-    });
-
     // Initialize Dashboard
-    function initDashboard() {
+    async function initDashboard() {
+        await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts(), fetchVideos()]);
         renderOverviewStats();
         renderRepairsTable();
         renderInquiriesTable();
         renderProductsTable();
         renderVideosTable();
-    }
-
-    // Helper: Escapes HTML to prevent XSS
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
     }
 
     // Initial check
