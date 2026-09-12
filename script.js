@@ -807,4 +807,223 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadDynamicProducts();
     loadDynamicVideos();
+
+    // =========================================================================
+    // 12. Price Assistant - client-side lookup against the official service
+    //     charge list (no external API, no cost, works instantly offline).
+    //     Prices marked `from: true` are starting estimates ("... dekhi" on
+    //     the printed chart) - final cost is confirmed after diagnosis.
+    // =========================================================================
+    const PRICE_LIST = [
+        { cat: 'Installation & Upgrades', item: 'OS Installation (Only)', price: 500, from: false, kw: 'windows format install os reinstall' },
+        { cat: 'Installation & Upgrades', item: 'OS Tune Up, Startup Repair, Restore', price: 500, from: false, kw: 'slow hang freeze startup boot tune up restore' },
+        { cat: 'Installation & Upgrades', item: 'OS Installation - With All Programs', price: 1000, from: false, kw: 'windows format install os reinstall with software' },
+        { cat: 'Installation & Upgrades', item: 'Software Installation and Upgrade', price: 500, from: false, kw: 'app program install update' },
+        { cat: 'Installation & Upgrades', item: 'All Drivers Setup', price: 300, from: true, kw: 'driver graphics audio setup' },
+        { cat: 'Installation & Upgrades', item: 'Antivirus Setup (1 Year)', price: 850, from: false, kw: 'antivirus protection security' },
+        { cat: 'Installation & Upgrades', item: 'Virus Scanning, Healing & Updates', price: 800, from: false, kw: 'virus malware scan clean' },
+        { cat: 'Installation & Upgrades', item: 'Complete Setup Servicing', price: 1000, from: false, kw: 'desktop pc full service' },
+        { cat: 'Installation & Upgrades', item: 'Complete Laptop Servicing', price: 1000, from: true, kw: 'laptop full service cleaning' },
+        { cat: 'Installation & Upgrades', item: "Laptop's Keyboard Change", price: 2000, from: true, kw: 'laptop keyboard replace change key' },
+        { cat: 'Installation & Upgrades', item: 'Laptop Battery Change (Internal)', price: 3000, from: true, kw: 'laptop battery replace change not charging' },
+        { cat: 'Installation & Upgrades', item: 'Laptop Cooling Fan Change, Charging Port Repair', price: 2000, from: true, kw: 'laptop fan noise heating charging port repair' },
+        { cat: 'Installation & Upgrades', item: "Laptop's HDD Change", price: 4500, from: true, kw: 'laptop hard disk hdd ssd change replace' },
+        { cat: 'Installation & Upgrades', item: "Laptop's Screen Change", price: 5500, from: true, kw: 'laptop screen display change broken cracked replace' },
+        { cat: 'Installation & Upgrades', item: "Laptop's Speaker Change", price: 2000, from: true, kw: 'laptop speaker sound change no audio' },
+        { cat: 'Installation & Upgrades', item: 'Desktop RAM Upgrade', price: 1500, from: true, kw: 'desktop ram memory upgrade' },
+        { cat: 'Installation & Upgrades', item: 'Laptop/Desktop Faults Finding Diagnose Only', price: 300, from: true, kw: 'diagnose diagnosis check up fault finding' },
+        { cat: 'Installation & Upgrades', item: 'Monitor/Printer/UPS/Projector Faults Finding', price: 500, from: true, kw: 'monitor printer ups projector diagnose check' },
+        { cat: 'Installation & Upgrades', item: "Desktop's HDD Change", price: 4500, from: true, kw: 'desktop hard disk hdd ssd change replace' },
+
+        { cat: 'Password Decrypt', item: 'BIOS Password Remove (Laptop)', price: 1500, from: true, kw: 'bios password remove laptop locked' },
+        { cat: 'Password Decrypt', item: 'BIOS Password Remove (Desktop)', price: 500, from: true, kw: 'bios password remove desktop locked' },
+        { cat: 'Password Decrypt', item: 'OS Password Remove', price: 500, from: false, kw: 'windows login password remove forgot locked' },
+
+        { cat: 'Device Setup', item: 'Router Setup', price: 100, from: false, kw: 'router wifi internet setup' },
+        { cat: 'Device Setup', item: 'Thin Client Setup (Per Client)', price: 1500, from: false, kw: 'thin client setup office' },
+
+        { cat: 'Data Backup & Recovery', item: 'Data Copy/Backup', price: 800, from: false, kw: 'data copy backup transfer' },
+        { cat: 'Data Backup & Recovery', item: 'Data Recovery (Per GB)', price: 800, from: false, kw: 'data recovery lost deleted recover files' },
+        { cat: 'Data Backup & Recovery', item: "Desktop's HDD Repair (Physical)", price: 600, from: true, kw: 'desktop hard disk hdd physical repair bad sector' },
+        { cat: 'Data Backup & Recovery', item: "Laptop's HDD Repair (Physical)", price: 800, from: true, kw: 'laptop hard disk hdd physical repair bad sector' },
+
+        { cat: 'Mobile & Smartphone Repair', item: 'Tempered Glass', price: 100, from: true, kw: 'mobile phone tempered glass screen guard' },
+        { cat: 'Mobile & Smartphone Repair', item: 'Normal Repair', price: 500, from: true, kw: 'mobile phone general repair' },
+        { cat: 'Mobile & Smartphone Repair', item: 'Charging Port Repair', price: 200, from: true, kw: 'mobile phone charging port not charging' },
+        { cat: 'Mobile & Smartphone Repair', item: 'Display Change', price: 2000, from: true, kw: 'mobile phone screen display change broken cracked' },
+
+        { cat: 'Printer & Photocopy', item: 'Printer Driver Setup', price: 500, from: false, kw: 'printer driver setup install' },
+        { cat: 'Printer & Photocopy', item: 'Printer Servicing (Laser)', price: 1500, from: false, kw: 'laser printer service' },
+        { cat: 'Printer & Photocopy', item: 'Inkjet Servicing', price: 2000, from: false, kw: 'inkjet printer service' },
+        { cat: 'Printer & Photocopy', item: 'Printer Heavy Servicing', price: 2500, from: false, kw: 'printer heavy service repair' },
+        { cat: 'Printer & Photocopy', item: 'Photocopy Heavy Servicing', price: 3000, from: false, kw: 'photocopy copier heavy service repair' },
+        { cat: 'Printer & Photocopy', item: 'Cartridge Refilling', price: 500, from: false, kw: 'toner cartridge refill ink' },
+
+        { cat: 'Power System', item: 'Desktop SMPS Repair', price: 500, from: true, kw: 'desktop smps power supply repair' },
+        { cat: 'Power System', item: 'Laptop Adaptor Repair', price: 500, from: true, kw: 'laptop adapter charger repair' },
+        { cat: 'Power System', item: "Laptop's Power D/C Cord Change", price: 500, from: true, kw: 'laptop dc jack power cord change' },
+        { cat: 'Power System', item: 'UPS Repair', price: 600, from: true, kw: 'ups repair not working' },
+        { cat: 'Power System', item: 'UPS Battery Change', price: 2000, from: true, kw: 'ups battery replace change' },
+        { cat: 'Power System', item: 'BIOS Battery Change', price: 100, from: false, kw: 'bios battery cmos change' },
+        { cat: 'Power System', item: 'Inverter Repairing Charge', price: 1500, from: true, kw: 'inverter repair' },
+
+        { cat: 'Online/Offline Support', item: 'Home Service (Per Visit)', price: 600, from: true, kw: 'home visit service call' },
+        { cat: 'Online/Offline Support', item: 'Office Service (Per Visit)', price: 1000, from: true, kw: 'office visit service call' },
+        { cat: 'Online/Offline Support', item: 'Any Device Repair Minimum Charge', price: 300, from: true, kw: 'minimum charge repair' },
+        { cat: 'Online/Offline Support', item: 'Distance Support (TeamViewer, AnyDesk, etc.)', price: 600, from: false, kw: 'remote support teamviewer anydesk online' },
+
+        { cat: 'Chip Level Repair', item: "Laptop's Motherboard Power Problem", price: 2000, from: true, kw: 'laptop motherboard mb power not turning on' },
+        { cat: 'Chip Level Repair', item: 'ENE Chip, Power IC, LAN, Sound & Other IC', price: 2500, from: true, kw: 'chip ic repair lan sound power' },
+        { cat: 'Chip Level Repair', item: 'South/North Bridge Heating', price: 1500, from: true, kw: 'motherboard bridge heating overheat' },
+        { cat: 'Chip Level Repair', item: 'Green Chip Old Reballing', price: 3500, from: true, kw: 'gpu chip reballing old' },
+        { cat: 'Chip Level Repair', item: 'Green Chip New Installation & Reballing', price: 5000, from: true, kw: 'gpu chip reballing new installation' },
+        { cat: 'Chip Level Repair', item: "Laptop's Motherboard Minimum Repair", price: 1500, from: false, kw: 'laptop motherboard mb minimum repair' },
+        { cat: 'Chip Level Repair', item: "Desktop's Motherboard Repair", price: 1000, from: false, kw: 'desktop motherboard mb repair' },
+        { cat: 'Chip Level Repair', item: "Laptop's BIOS Copy", price: 2000, from: false, kw: 'laptop bios chip copy' },
+        { cat: 'Chip Level Repair', item: "Desktop's Motherboard BIOS Copy", price: 1000, from: false, kw: 'desktop motherboard mb bios chip copy' },
+
+        { cat: 'TV Repair', item: 'TV Board Problem', price: 3000, from: true, kw: 'tv board repair not turning on' },
+        { cat: 'TV Repair', item: 'TV Backlight Problem', price: 4500, from: true, kw: 'tv backlight dark screen no display' },
+        { cat: 'TV Repair', item: 'TV Panel Repair', price: 7000, from: true, kw: 'tv panel repair screen' },
+        { cat: 'TV Repair', item: 'TV Panel Change', price: 10000, from: true, kw: 'tv panel change screen replace' },
+    ];
+
+    const PB_STOPWORDS = new Set(['the', 'a', 'an', 'is', 'my', 'i', 'to', 'for', 'of', 'do', 'you', 'much', 'how', 'what', 'price', 'cost', 'charge', 'rate', 'in', 'on', 'at', 'it', 'want', 'need', 'please', 'and']);
+
+    function pbNormalize(str) {
+        return (str || '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function pbFormatPrice(entry) {
+        return `Rs. ${entry.price.toLocaleString('en-IN')}${entry.from ? ' onwards' : ''}`;
+    }
+
+    function searchPriceList(query) {
+        const normQuery = pbNormalize(query);
+        const words = normQuery.split(' ').filter(w => w.length > 1 && !PB_STOPWORDS.has(w));
+        if (!words.length) return [];
+
+        const candidates = PRICE_LIST.map(entry => ({
+            entry,
+            haystack: pbNormalize(`${entry.item} ${entry.cat} ${entry.kw}`)
+        }));
+
+        // Tier 1: every query word must appear somewhere in the entry - keeps a
+        // generic word like "repair" from pulling in unrelated services just
+        // because one word happens to overlap.
+        let matches = candidates.filter(c => words.every(w => c.haystack.includes(w)));
+
+        // Tier 2: nothing matched everything - fall back to whichever entries
+        // matched the most words, so a slightly-off phrasing still finds something.
+        if (!matches.length) {
+            matches = candidates
+                .map(c => ({ ...c, score: words.filter(w => c.haystack.includes(w)).length }))
+                .filter(c => c.score > 0)
+                .sort((a, b) => b.score - a.score);
+        }
+
+        return matches.slice(0, 6).map(m => m.entry);
+    }
+
+    const priceBotToggle = document.getElementById('priceBotToggle');
+    const priceBotPanel = document.getElementById('priceBotPanel');
+    const priceBotMessages = document.getElementById('priceBotMessages');
+    const priceBotChips = document.getElementById('priceBotChips');
+    const priceBotForm = document.getElementById('priceBotForm');
+    const priceBotInput = document.getElementById('priceBotInput');
+
+    if (priceBotToggle && priceBotPanel) {
+        let pbInitialized = false;
+
+        function pbAppendUser(text) {
+            const div = document.createElement('div');
+            div.className = 'pb-msg-user';
+            div.innerHTML = `<span></span>`;
+            div.querySelector('span').textContent = text;
+            priceBotMessages.appendChild(div);
+        }
+
+        function pbAppendBotHtml(html) {
+            const div = document.createElement('div');
+            div.className = 'pb-msg-bot';
+            div.innerHTML = html;
+            priceBotMessages.appendChild(div);
+            priceBotMessages.scrollTop = priceBotMessages.scrollHeight;
+        }
+
+        function pbRenderResults(entries) {
+            const rows = entries.map(e => `
+                <div class="pb-result-item">
+                    <span class="pb-result-name">${escapeHtml(e.item)}</span>
+                    <span class="pb-result-price">${escapeHtml(pbFormatPrice(e))}</span>
+                </div>
+            `).join('');
+            return `<p>Here's what I found:</p><div class="pb-result-list">${rows}</div>`;
+        }
+
+        function pbHandleQuery(rawText) {
+            const text = (rawText || '').trim();
+            if (!text) return;
+            pbAppendUser(text);
+
+            const results = searchPriceList(text);
+            if (results.length) {
+                pbAppendBotHtml(pbRenderResults(results));
+            } else {
+                pbAppendBotHtml(`
+                    <p>I couldn't match that to a listed service. Try a shorter phrase (e.g. "laptop screen" or "printer service"), or ask our team directly:</p>
+                    <p><a href="https://wa.me/9779841301930" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Ask on WhatsApp <i class="fa-brands fa-whatsapp"></i></a></p>
+                `);
+            }
+            priceBotMessages.scrollTop = priceBotMessages.scrollHeight;
+        }
+
+        function pbRenderCategoryChips() {
+            const cats = [...new Set(PRICE_LIST.map(e => e.cat))];
+            priceBotChips.innerHTML = cats.map(c => `<button type="button" class="pb-chip" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('');
+            priceBotChips.querySelectorAll('.pb-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const cat = chip.getAttribute('data-cat');
+                    pbAppendUser(cat);
+                    const entries = PRICE_LIST.filter(e => e.cat === cat);
+                    pbAppendBotHtml(pbRenderResults(entries));
+                });
+            });
+        }
+
+        function pbInit() {
+            if (pbInitialized) return;
+            pbInitialized = true;
+            pbAppendBotHtml(`
+                <p><strong>Hi! I'm the NewAge Price Assistant.</strong> Ask about any repair or service charge, e.g. "laptop screen change price" or "BIOS password remove".</p>
+                <p style="color:var(--muted); font-size:0.78rem;">Prices marked "onwards" are starting estimates - final cost is confirmed after diagnosis. Or browse a category below:</p>
+            `);
+            pbRenderCategoryChips();
+        }
+
+        function pbOpen() {
+            priceBotPanel.hidden = false;
+            priceBotToggle.classList.add('is-active');
+            priceBotToggle.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+            pbInit();
+            priceBotInput?.focus();
+        }
+
+        function pbClose() {
+            priceBotPanel.hidden = true;
+            priceBotToggle.classList.remove('is-active');
+            priceBotToggle.innerHTML = '<i class="fa-solid fa-comment-dots"></i>';
+        }
+
+        priceBotToggle.addEventListener('click', () => {
+            if (priceBotPanel.hidden) pbOpen(); else pbClose();
+        });
+        document.getElementById('priceBotClose')?.addEventListener('click', pbClose);
+
+        priceBotForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            pbHandleQuery(priceBotInput.value);
+            priceBotInput.value = '';
+        });
+    }
 });

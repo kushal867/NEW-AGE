@@ -754,6 +754,29 @@
         <span class="fw-tooltip">Chat with NewAge I.T.</span>
     </a>
 
+    <!-- Price Assistant (client-side lookup against the official service charge list) -->
+    <button type="button" class="price-bot-toggle" id="priceBotToggle" aria-label="Ask about repair prices" title="Ask about repair prices">
+        <i class="fa-solid fa-comment-dots"></i>
+    </button>
+
+    <div class="price-bot-panel" id="priceBotPanel" hidden>
+        <div class="price-bot-header">
+            <div>
+                <strong>Price Assistant</strong>
+                <span>Ask about any service charge</span>
+            </div>
+            <button type="button" class="price-bot-close" id="priceBotClose" aria-label="Close price assistant">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="price-bot-messages" id="priceBotMessages"></div>
+        <div class="price-bot-chips" id="priceBotChips"></div>
+        <form class="price-bot-input-row" id="priceBotForm">
+            <input type="text" id="priceBotInput" placeholder="e.g. laptop screen change price" autocomplete="off">
+            <button type="submit" aria-label="Send"><i class="fa-solid fa-paper-plane"></i></button>
+        </form>
+    </div>
+
     <!-- ============================================================ -->
     <!-- Footer                                                        -->
     <!-- ============================================================ -->
