@@ -757,13 +757,15 @@
     <!-- Price Assistant (client-side lookup against the official service charge list) -->
     <button type="button" class="price-bot-toggle" id="priceBotToggle" aria-label="Ask about repair prices" title="Ask about repair prices">
         <i class="fa-solid fa-comment-dots"></i>
+        <span class="pb-toggle-badge">1</span>
     </button>
 
-    <div class="price-bot-panel" id="priceBotPanel" hidden>
+    <div class="price-bot-panel" id="priceBotPanel" aria-hidden="true">
         <div class="price-bot-header">
-            <div>
+            <div class="pb-avatar pb-avatar-lg">NA<span class="pb-presence"></span></div>
+            <div class="pb-header-text">
                 <strong>Price Assistant</strong>
-                <span>Ask about any service charge</span>
+                <span><span class="pb-presence-dot"></span> Online &bull; replies instantly</span>
             </div>
             <button type="button" class="price-bot-close" id="priceBotClose" aria-label="Close price assistant">
                 <i class="fa-solid fa-xmark"></i>

@@ -936,19 +936,36 @@ document.addEventListener('DOMContentLoaded', () => {
         let pbInitialized = false;
 
         function pbAppendUser(text) {
-            const div = document.createElement('div');
-            div.className = 'pb-msg-user';
-            div.innerHTML = `<span></span>`;
-            div.querySelector('span').textContent = text;
-            priceBotMessages.appendChild(div);
+            const row = document.createElement('div');
+            row.className = 'pb-row pb-row-user';
+            row.innerHTML = `<div class="pb-msg-user"></div>`;
+            row.querySelector('.pb-msg-user').textContent = text;
+            priceBotMessages.appendChild(row);
+            priceBotMessages.scrollTop = priceBotMessages.scrollHeight;
         }
 
-        function pbAppendBotHtml(html) {
-            const div = document.createElement('div');
-            div.className = 'pb-msg-bot';
-            div.innerHTML = html;
-            priceBotMessages.appendChild(div);
+        function pbShowTyping() {
+            const row = document.createElement('div');
+            row.className = 'pb-row pb-row-bot pb-row-typing';
+            row.innerHTML = `<div class="pb-avatar">NA</div><div class="pb-msg-bot pb-typing"><span></span><span></span><span></span></div>`;
+            priceBotMessages.appendChild(row);
             priceBotMessages.scrollTop = priceBotMessages.scrollHeight;
+            return row;
+        }
+
+        function pbAppendBotHtml(html, replaceRow) {
+            const row = replaceRow || document.createElement('div');
+            row.className = 'pb-row pb-row-bot';
+            row.innerHTML = `<div class="pb-avatar">NA</div><div class="pb-msg-bot">${html}</div>`;
+            if (!replaceRow) priceBotMessages.appendChild(row);
+            priceBotMessages.scrollTop = priceBotMessages.scrollHeight;
+        }
+
+        // Small delay + typing indicator makes the bot feel alive without
+        // being slow enough to annoy anyone who already knows what they want.
+        function pbReplyWithDelay(html) {
+            const typingRow = pbShowTyping();
+            setTimeout(() => { pbAppendBotHtml(html, typingRow); }, 450 + Math.random() * 300);
         }
 
         function pbRenderResults(entries) {
@@ -968,14 +985,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const results = searchPriceList(text);
             if (results.length) {
-                pbAppendBotHtml(pbRenderResults(results));
+                pbReplyWithDelay(pbRenderResults(results));
             } else {
-                pbAppendBotHtml(`
+                pbReplyWithDelay(`
                     <p>I couldn't match that to a listed service. Try a shorter phrase (e.g. "laptop screen" or "printer service"), or ask our team directly:</p>
                     <p><a href="https://wa.me/9779841301930" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Ask on WhatsApp <i class="fa-brands fa-whatsapp"></i></a></p>
                 `);
             }
-            priceBotMessages.scrollTop = priceBotMessages.scrollHeight;
         }
 
         function pbRenderCategoryChips() {
@@ -986,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const cat = chip.getAttribute('data-cat');
                     pbAppendUser(cat);
                     const entries = PRICE_LIST.filter(e => e.cat === cat);
-                    pbAppendBotHtml(pbRenderResults(entries));
+                    pbReplyWithDelay(pbRenderResults(entries));
                 });
             });
         }
@@ -1002,7 +1018,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function pbOpen() {
-            priceBotPanel.hidden = false;
+            priceBotPanel.classList.add('is-open');
+            priceBotPanel.setAttribute('aria-hidden', 'false');
             priceBotToggle.classList.add('is-active');
             priceBotToggle.innerHTML = '<i class="fa-solid fa-xmark"></i>';
             pbInit();
@@ -1010,13 +1027,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function pbClose() {
-            priceBotPanel.hidden = true;
+            priceBotPanel.classList.remove('is-open');
+            priceBotPanel.setAttribute('aria-hidden', 'true');
             priceBotToggle.classList.remove('is-active');
             priceBotToggle.innerHTML = '<i class="fa-solid fa-comment-dots"></i>';
         }
 
         priceBotToggle.addEventListener('click', () => {
-            if (priceBotPanel.hidden) pbOpen(); else pbClose();
+            if (!priceBotPanel.classList.contains('is-open')) pbOpen(); else pbClose();
         });
         document.getElementById('priceBotClose')?.addEventListener('click', pbClose);
 
