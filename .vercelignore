@@ -1,0 +1,4 @@
+legacy-server
+node_modules
+*.db
+.git

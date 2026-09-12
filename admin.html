@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS Admin Portal | NewAge I.T. Solution Center</title>
+    <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+    <!-- 1. Secure Login View -->
+    <div id="loginView" class="auth-wrapper">
+        <div class="auth-card glass-panel">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>NewAge I.T.</span>
+                </div>
+                <h2>CMS Administration</h2>
+                <p>Enter your authorized credentials to manage repairs, inquiries, and store catalogue.</p>
+            </div>
+
+            <form id="loginForm" class="auth-form" autocomplete="off">
+                <div class="form-group">
+                    <label for="adminUsername"><i class="fa-solid fa-user-shield"></i> Username</label>
+                    <input type="text" id="adminUsername" placeholder="Enter admin username" required autofocus>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword"><i class="fa-solid fa-lock"></i> Master Password</label>
+                    <div class="password-input-wrap">
+                        <input type="password" id="adminPassword" placeholder="Enter secure password" required>
+                        <button type="button" class="btn-toggle-pw" id="togglePwBtn" aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary btn-block" id="loginSubmitBtn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Authenticate & Enter CMS
+                </button>
+                <div id="loginFeedback" class="login-feedback" role="alert" style="display: none;"></div>
+            </form>
+
+            <div class="auth-footer">
+                <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Return to Live Website</a>
+                <span class="security-tag"><i class="fa-solid fa-shield-halved"></i> Salted SHA-256 Secured</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Main CMS Dashboard View (Protected) -->
+    <div id="dashboardView" class="dashboard-wrapper" style="display: none;">
+        <!-- Sidebar Navigation -->
+        <aside class="dashboard-sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <i class="fa-solid fa-microchip"></i>
+                    <div>
+                        <span class="brand-title">NewAge I.T.</span>
+                        <span class="brand-sub">CMS Portal</span>
+                    </div>
+                </div>
+                <button type="button" class="mobile-close-sidebar" id="mobileCloseSidebarBtn">&times;</button>
+            </div>
+
+            <nav class="sidebar-menu">
+                <button type="button" class="menu-item active" data-tab="overviewTab">
+                    <i class="fa-solid fa-chart-pie"></i> <span>Overview</span>
+                </button>
+                <button type="button" class="menu-item" data-tab="repairsTab">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> <span>Repair Jobs</span>
+                    <span class="badge" id="repairsCountBadge">0</span>
+                </button>
+                <button type="button" class="menu-item" data-tab="inquiriesTab">
+                    <i class="fa-solid fa-envelope-open-text"></i> <span>Inquiries</span>
+                    <span class="badge badge-accent" id="inquiriesCountBadge">0</span>
+                </button>
+                <button type="button" class="menu-item" data-tab="productsTab">
+                    <i class="fa-solid fa-boxes-stacked"></i> <span>Products</span>
+                </button>
+                <button type="button" class="menu-item" data-tab="videosTab">
+                    <i class="fa-brands fa-tiktok"></i> <span>TikTok Videos</span>
+                </button>
+                <button type="button" class="menu-item" data-tab="settingsTab">
+                    <i class="fa-solid fa-gear"></i> <span>Security & Settings</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <div>
+                        <strong id="sessionUserLabel">Admin</strong>
+                        <span>Super Administrator</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-logout" id="logoutBtn" title="Secure Logout">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="dashboard-main">
+            <!-- Top Navbar -->
+            <header class="top-nav">
+                <div class="nav-left">
+                    <button type="button" class="mobile-sidebar-toggle" id="mobileSidebarToggle">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <h1 id="pageTitle">System Overview</h1>
+                </div>
+                <div class="nav-right">
+                    <a href="index.html" target="_blank" class="nav-btn-outline" title="Open Live Website in New Tab">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> <span>View Live Site</span>
+                    </a>
+                    <span class="db-sync-indicator" id="topDbIndicator">
+                        <i class="fa-solid fa-circle-check"></i> System Operational
+                    </span>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Tab 1: Overview -->
+                <section id="overviewTab" class="tab-pane active">
+                    <div class="stats-grid">
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon icon-cyan"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Active Repair Jobs</span>
+                                <h3 id="statTotalRepairs">0</h3>
+                                <span class="stat-sub" id="statPendingRepairs">0 in progress</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon icon-purple"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Inquiries</span>
+                                <h3 id="statTotalInquiries">0</h3>
+                                <span class="stat-sub" id="statNewInquiries">0 new messages</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon icon-green"><i class="fa-solid fa-boxes-stacked"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Product Catalogue</span>
+                                <h3 id="statTotalProducts">0</h3>
+                                <span class="stat-sub">Active in store</span>
+                            </div>
+                        </div>
+                        <div class="stat-card glass-panel">
+                            <div class="stat-icon icon-blue"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-label">Security Posture</span>
+                                <h3 style="color: #4ade80;">Active</h3>
+                                <span class="stat-sub">Session timeout: 2 hrs</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions & Recent Activity -->
+                    <div class="overview-split">
+                        <div class="split-card glass-panel">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-bolt text-primary"></i> Quick Actions</h3>
+                            </div>
+                            <div class="quick-actions-grid">
+                                <button type="button" class="quick-act-btn" id="quickNewJobBtn">
+                                    <i class="fa-solid fa-plus-circle"></i>
+                                    <span>New Repair Job</span>
+                                </button>
+                                <button type="button" class="quick-act-btn" id="quickViewInqBtn">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <span>Review Inquiries</span>
+                                </button>
+                                <button type="button" class="quick-act-btn" id="quickAddProductBtn">
+                                    <i class="fa-solid fa-box"></i>
+                                    <span>Add Product</span>
+                                </button>
+                                <button type="button" class="quick-act-btn" id="quickSyncSheetBtn">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Sync Google Sheets</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="split-card glass-panel">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-clock-rotate-left text-primary"></i> System Summary</h3>
+                            </div>
+                            <div class="system-summary-list">
+                                <div class="summary-item">
+                                    <span>Business Name:</span>
+                                    <strong>NewAge I.T. Solution Center</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Established:</span>
+                                    <strong>2069 B.S. (Tinthana, Kathmandu)</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Proprietor:</span>
+                                    <strong>Indra Kumar Shrestha</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Repair Lifecycle:</span>
+                                    <strong>8 Stages (PDF Specification)</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 2: Repair Jobs Manager -->
+                <section id="repairsTab" class="tab-pane">
+                    <div class="section-toolbar">
+                        <div class="toolbar-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="repairSearchInput" placeholder="Filter by Ticket ID, Customer, or Phone...">
+                        </div>
+                        <div class="toolbar-actions">
+                            <select id="repairStageFilter" class="filter-select">
+                                <option value="">All 8 Stages</option>
+                                <option value="1">1. Received</option>
+                                <option value="2">2. Diagnosis</option>
+                                <option value="3">3. Quotation</option>
+                                <option value="4">4. Approval</option>
+                                <option value="5">5. Repairing</option>
+                                <option value="6">6. Testing</option>
+                                <option value="7">7. Ready for Pickup</option>
+                                <option value="8">8. Delivered</option>
+                            </select>
+                            <button type="button" class="btn-primary" id="openNewJobModalBtn">
+                                <i class="fa-solid fa-plus"></i> New Repair Job
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive glass-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Customer</th>
+                                    <th>Device</th>
+                                    <th>Reported Issue</th>
+                                    <th>Current Stage (1-8)</th>
+                                    <th>Est. Cost</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repairsTableBody">
+                                <!-- Populated dynamically by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab 3: Inquiries Manager -->
+                <section id="inquiriesTab" class="tab-pane">
+                    <div class="section-toolbar">
+                        <div class="toolbar-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="inquirySearchInput" placeholder="Search inquiries by name, phone, message...">
+                        </div>
+                        <button type="button" class="btn-secondary" id="clearArchivedInquiriesBtn">
+                            <i class="fa-solid fa-trash-can"></i> Clear Closed
+                        </button>
+                    </div>
+
+                    <div class="table-responsive glass-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Ticket Ref</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inquiriesTableBody">
+                                <!-- Populated dynamically by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab 4: Product Catalogue Manager -->
+                <section id="productsTab" class="tab-pane">
+                    <div class="section-toolbar">
+                        <h3>In-Store Catalogue & Accessories</h3>
+                        <button type="button" class="btn-primary" id="openAddProductModalBtn">
+                            <i class="fa-solid fa-plus"></i> Add Product
+                        </button>
+                    </div>
+
+                    <div class="table-responsive glass-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>Category</th>
+                                    <th>Product Name</th>
+                                    <th>Specifications</th>
+                                    <th>MRP</th>
+                                    <th>Selling Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody">
+                                <!-- Populated dynamically by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab 5: TikTok Videos Manager -->
+                <section id="videosTab" class="tab-pane">
+                    <div class="section-toolbar">
+                        <h3>Featured TikTok Tech Repair Reels (@newageit2069)</h3>
+                        <button type="button" class="btn-primary" id="openAddVideoModalBtn">
+                            <i class="fa-solid fa-plus"></i> Add TikTok Reel
+                        </button>
+                    </div>
+
+                    <div class="table-responsive glass-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Thumbnail</th>
+                                    <th>Title</th>
+                                    <th>Topic / Category</th>
+                                    <th>TikTok Video URL</th>
+                                    <th>Views Badge</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="videosTableBody">
+                                <!-- Populated dynamically by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab 6: Security & Settings -->
+                <section id="settingsTab" class="tab-pane">
+                    <div class="settings-grid">
+                        <!-- Password Management -->
+                        <div class="settings-card glass-panel">
+                            <h3><i class="fa-solid fa-key text-primary"></i> Change Master Password</h3>
+                            <p>Update the CMS admin master password. New password will be salted and hashed using SHA-256 before storage.</p>
+                            <form id="changePasswordForm" class="settings-form">
+                                <div class="form-group">
+                                    <label for="currentPassword">Current Password</label>
+                                    <input type="password" id="currentPassword" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">New Secure Password</label>
+                                    <input type="password" id="newPassword" placeholder="Minimum 8 characters with numbers & symbols" required minlength="8">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmNewPassword">Confirm New Password</label>
+                                    <input type="password" id="confirmNewPassword" required minlength="8">
+                                </div>
+                                <button type="submit" class="btn-primary">Update Master Password</button>
+                                <div id="pwChangeFeedback" class="login-feedback" style="display: none; margin-top: 10px;"></div>
+                            </form>
+                        </div>
+
+                        <!-- Database & Google Sheets -->
+                        <div class="settings-card glass-panel">
+                            <h3><i class="fa-solid fa-database text-primary"></i> Google Sheets API Sync</h3>
+                            <p>Synchronize your website's database with your deployed Google Apps Script Web App.</p>
+                            <div class="form-group">
+                                <label for="adminSheetUrlInput">Google Apps Script Web App URL</label>
+                                <input type="url" id="adminSheetUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+                            </div>
+                            <div class="db-modal-actions" style="margin-top: 12px;">
+                                <button type="button" class="btn-primary" id="adminSaveSheetUrlBtn">Save API URL</button>
+                                <button type="button" class="btn-secondary" id="adminTestSheetUrlBtn">Test Connection</button>
+                            </div>
+                            <div id="adminSheetStatus" class="login-feedback" style="display: none; margin-top: 10px;"></div>
+
+                            <hr style="margin: 25px 0; border: 0; border-top: 1px solid var(--glass-border);">
+
+                            <h3><i class="fa-solid fa-download text-primary"></i> Data Backup & Recovery</h3>
+                            <p>Export all repairs, inquiries, and catalogue data into an offline JSON backup.</p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                <button type="button" class="btn-secondary" id="exportBackupBtn">
+                                    <i class="fa-solid fa-file-export"></i> Export JSON Backup
+                                </button>
+                                <button type="button" class="btn-secondary" id="resetDemoDataBtn" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+                                    <i class="fa-solid fa-rotate-left"></i> Reset to Default Demo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: New/Edit Repair Job -->
+    <div id="repairModal" class="cms-modal" style="display: none;">
+        <div class="cms-modal-content glass-panel">
+            <div class="cms-modal-header">
+                <h3 id="repairModalTitle"><i class="fa-solid fa-screwdriver-wrench text-primary"></i> Add Repair Job</h3>
+                <button type="button" class="modal-close-btn" id="closeRepairModalBtn">&times;</button>
+            </div>
+            <form id="repairJobForm" class="cms-modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jobTicketId">Ticket ID *</label>
+                        <input type="text" id="jobTicketId" placeholder="e.g. NA-1005" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobCustomerName">Customer Name *</label>
+                        <input type="text" id="jobCustomerName" placeholder="Full name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jobPhone">Phone / WhatsApp Number *</label>
+                        <input type="tel" id="jobPhone" placeholder="98XXXXXXXX" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobDevice">Device & Model *</label>
+                        <input type="text" id="jobDevice" placeholder="e.g. Dell G15 5515 / iPhone 13" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="jobIssue">Reported Issue *</label>
+                    <textarea id="jobIssue" rows="2" placeholder="Describe hardware or software fault..." required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jobStage">Lifecycle Stage (1 to 8) *</label>
+                        <select id="jobStage" required>
+                            <option value="1">1. Received (Device logged into center)</option>
+                            <option value="2">2. Diagnosis (Inspecting circuits & diagnostic test)</option>
+                            <option value="3">3. Quotation (Cost estimate drafted)</option>
+                            <option value="4">4. Approval (Customer confirmed & approved)</option>
+                            <option value="5" selected>5. Repairing (Active hardware / IC repair)</option>
+                            <option value="6">6. Testing (Stress test & QA verification)</option>
+                            <option value="7">7. Ready (Ready for customer pickup)</option>
+                            <option value="8">8. Delivered (Collected / Delivered with warranty)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobCost">Estimated Cost Quote</label>
+                        <input type="text" id="jobCost" placeholder="e.g. NPR 3,500">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="jobReceivedDate">Date Received</label>
+                        <input type="date" id="jobReceivedDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobDeliveryDate">Estimated Completion Date</label>
+                        <input type="date" id="jobDeliveryDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="jobNotes">Technician Diagnostic Remarks</label>
+                    <textarea id="jobNotes" rows="2" placeholder="Technical diagnostic notes, parts replaced, thermal paste..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelRepairModalBtn">Cancel</button>
+                    <button type="submit" class="btn-primary" id="saveRepairBtn">Save Repair Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Product -->
+    <div id="productModal" class="cms-modal" style="display: none;">
+        <div class="cms-modal-content glass-panel">
+            <div class="cms-modal-header">
+                <h3><i class="fa-solid fa-box-open text-primary"></i> Add Catalogue Product</h3>
+                <button type="button" class="modal-close-btn" id="closeProductModalBtn">&times;</button>
+            </div>
+            <form id="productForm" class="cms-modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodTitle">Product Name *</label>
+                        <input type="text" id="prodTitle" placeholder="e.g. Kingston NV2 1TB NVMe PCIe 4.0 SSD" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prodCategory">Category *</label>
+                        <select id="prodCategory" required>
+                            <option value="Storage">Storage (SSD / HDD)</option>
+                            <option value="Memory">Memory (RAM)</option>
+                            <option value="Peripherals">Peripherals (Keyboards/Mice)</option>
+                            <option value="Laptop Hardware">Laptop Hardware (Screens/Batteries)</option>
+                            <option value="Printing">Printing & Toners</option>
+                            <option value="Power & Cases">Power & Cases</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="prodSpec">Specifications / Description *</label>
+                    <input type="text" id="prodSpec" placeholder="Key technical specifications, speed, warranty..." required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodMrp">MRP (NPR)</label>
+                        <input type="text" id="prodMrp" placeholder="e.g. NPR 12,000">
+                    </div>
+                    <div class="form-group">
+                        <label for="prodPrice">Selling Price (NPR) *</label>
+                        <input type="text" id="prodPrice" placeholder="e.g. NPR 9,800" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="prodStock">Stock Availability</label>
+                    <select id="prodStock" required>
+                        <option value="in-stock" selected>In Stock</option>
+                        <option value="pre-order">Available on Order</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="prodImageUrl">Product Photo URL (optional)</label>
+                    <div class="image-field-row">
+                        <div class="image-preview-box" id="prodImagePreviewBox">
+                            <i class="fa-solid fa-image"></i>
+                        </div>
+                        <div class="image-field-input">
+                            <input type="url" id="prodImageUrl" placeholder="Paste an image URL, or a Google Drive share link">
+                            <p class="field-hint">
+                                Google Drive links are converted automatically &mdash; just set the file to
+                                "Anyone with the link can view" and paste the normal share link here.
+                                Leave blank to show the category icon instead.
+                            </p>
+                            <p class="field-status" id="prodImageStatus"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelProductModalBtn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add TikTok Video -->
+    <div id="videoModal" class="cms-modal" style="display: none;">
+        <div class="cms-modal-content glass-panel">
+            <div class="cms-modal-header">
+                <h3><i class="fa-brands fa-tiktok text-primary"></i> Add TikTok Tech Video</h3>
+                <button type="button" class="modal-close-btn" id="closeVideoModalBtn">&times;</button>
+            </div>
+            <form id="videoForm" class="cms-modal-form">
+                <div class="form-group">
+                    <label for="vidTitle">Video Title / Caption *</label>
+                    <input type="text" id="vidTitle" placeholder="e.g. Laptop Water Damage First Aid Tips" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vidTopic">Topic Tag *</label>
+                        <input type="text" id="vidTopic" placeholder="e.g. Hardware Repair / Laptop Tip" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="vidViews">Views Count</label>
+                        <input type="text" id="vidViews" placeholder="e.g. 18.5K views">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="vidUrl">TikTok Video URL *</label>
+                    <input type="url" id="vidUrl" placeholder="https://www.tiktok.com/@newageit2069/video/..." required>
+                    <p class="field-status" id="vidUrlStatus"></p>
+                </div>
+                <div class="video-live-preview" id="videoLivePreview" hidden>
+                    <span class="field-hint">Live preview:</span>
+                    <div class="video-live-preview-frame" id="videoLivePreviewFrame"></div>
+                </div>
+                <div class="form-group">
+                    <label for="vidThumbUrl">Cover Photo URL (optional, for this admin table only)</label>
+                    <div class="image-field-row">
+                        <div class="image-preview-box" id="vidImagePreviewBox">
+                            <i class="fa-brands fa-tiktok"></i>
+                        </div>
+                        <div class="image-field-input">
+                            <input type="url" id="vidThumbUrl" placeholder="Paste an image URL, or a Google Drive share link">
+                            <p class="field-hint">Google Drive links are converted automatically. This is only a quick-reference thumbnail here in the CMS &mdash; visitors always see the live TikTok embed.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelVideoModalBtn">Cancel</button>
+                    <button type="submit" class="btn-primary">Add Video</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+
+</html>

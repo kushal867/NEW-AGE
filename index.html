@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewAge I.T. Solution Center | Computer &amp; Electronics Repair Lab, Kathmandu</title>
+    <meta name="description"
+        content="NewAge I.T. Solution Center (ESTD. 2069 B.S. / 2012, Tinthana, Kathmandu). Chip-level hardware repair, IT services, custom PC builds, networking and electronics repair, with live repair tracking.">
+    <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Custom cursor (desktop / fine-pointer only, see script.js) -->
+    <div class="cursor-dot" id="cursorDot" aria-hidden="true"></div>
+    <div class="cursor-ring" id="cursorRing" aria-hidden="true"><span class="cursor-ring-label" id="cursorRingLabel"></span></div>
+
+    <!-- ============================================================ -->
+    <!-- Navigation                                                    -->
+    <!-- ============================================================ -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#home" class="brand">
+                <img src="assets/logo.png" alt="NewAge I.T. Solution Center" class="brand-mark">
+                <span class="brand-text">
+                    <span class="brand-name">NEWAGE I.T.</span>
+                    <span class="brand-sub">Solution Center</span>
+                </span>
+            </a>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#services" class="nav-link">Services</a></li>
+                <li><a href="#repairs" class="nav-link">Repairs</a></li>
+                <li><a href="#custompc" class="nav-link">Custom PC</a></li>
+                <li><a href="#products" class="nav-link">Products</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li class="nav-mobile-only">
+                    <a href="tel:+9779841301930" class="nav-mobile-call"><i class="fa-solid fa-phone"></i> +977 9841301930</a>
+                </li>
+            </ul>
+
+            <div class="nav-actions">
+                <a href="#repairs" class="btn-track">
+                    <i class="fa-solid fa-magnifying-glass"></i> Track Repair
+                </a>
+                <button type="button" class="nav-burger" id="mobileMenuBtn" aria-label="Toggle navigation menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- Hero                                                          -->
+    <!-- ============================================================ -->
+    <section id="home" class="hero">
+        <canvas id="heroCanvas" class="hero-canvas" aria-hidden="true"></canvas>
+        <div class="hero-grid-overlay" aria-hidden="true"></div>
+        <div class="hero-vignette" aria-hidden="true"></div>
+
+        <!-- Floating technical data labels (JS toggles .is-visible) -->
+        <div class="hero-data-labels" aria-hidden="true">
+            <span class="data-label" data-label="1" style="top:22%; left:8%;">CPU</span>
+            <span class="data-label" data-label="2" style="top:64%; left:14%;">POWER</span>
+            <span class="data-label" data-label="3" style="top:18%; left:82%;">DISPLAY</span>
+            <span class="data-label" data-label="4" style="top:74%; left:78%;">THERMAL</span>
+            <span class="data-label" data-label="5" style="top:44%; left:90%;">BOARD</span>
+            <span class="data-label mono" data-label="6" style="top:12%; left:46%;">TEMP 42&deg;C</span>
+            <span class="data-label mono" data-label="7" style="top:82%; left:44%;">VOLT 12.4V</span>
+            <span class="data-label mono" data-label="8" style="top:52%; left:6%;">DIAG/ACTIVE</span>
+        </div>
+
+        <div class="hero-inner">
+            <div class="hero-status">
+                <span class="status-dot"></span> REPAIR LAB ONLINE
+            </div>
+
+            <h1 class="hero-title">
+                <span class="hero-title-line">NEWAGE I.T.</span>
+                <span class="hero-title-line hero-title-accent">SOLUTION CENTER</span>
+            </h1>
+
+            <p class="hero-tagline">Technology repaired properly.</p>
+
+            <ul class="hero-stack" aria-label="What we do">
+                <li>Computer Repair.</li>
+                <li>Electronics.</li>
+                <li>IT Solutions.</li>
+                <li>Custom Systems.</li>
+            </ul>
+
+            <p class="hero-desc">
+                From chip-level repairs to complete IT solutions, we diagnose, repair and build technology
+                for individuals and businesses across Kathmandu.
+            </p>
+
+            <div class="hero-actions">
+                <a href="#repairs" class="btn-solid" data-cursor="repair">
+                    <i class="fa-solid fa-screwdriver-wrench"></i> Book a Repair
+                </a>
+                <a href="#services" class="btn-ghost">
+                    Explore Services <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <p class="hero-meta">Kathmandu &bull; Since 2069 B.S.</p>
+        </div>
+
+        <div class="hero-scroll-cue" aria-hidden="true">
+            <span></span> Scroll
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Trust / Technical specification strip                        -->
+    <!-- ============================================================ -->
+    <section class="stats-strip" id="stats">
+        <div class="stats-inner">
+            <div class="stat-item">
+                <div class="stat-number" data-count="15" data-suffix="+">0</div>
+                <div class="stat-label">Years of Experience</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-count="5000" data-suffix="+">0</div>
+                <div class="stat-label">Devices Serviced</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-count="24" data-suffix="&ndash;48h" data-static-suffix="true">0</div>
+                <div class="stat-label">Typical Diagnostics</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-count="100" data-suffix="%">0</div>
+                <div class="stat-label">Customer Focus</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Services (editorial / asymmetric)                             -->
+    <!-- ============================================================ -->
+    <section id="services" class="services">
+        <div class="section-head">
+            <span class="eyebrow">01 &mdash; Services</span>
+            <h2>What We Actually Do</h2>
+            <p>Professional technology services from component-level repair to complete IT infrastructure.</p>
+        </div>
+
+        <div class="services-editorial">
+
+            <article class="svc svc-a" data-reveal>
+                <div class="svc-visual svc-visual-pcb" aria-hidden="true">
+                    <svg viewBox="0 0 400 260" class="pcb-svg">
+                        <g class="pcb-traces">
+                            <path d="M10 40 H120 V90 H260 V40 H390" />
+                            <path d="M10 130 H80 V200 H220 V150 H390" />
+                            <path d="M10 220 H160 V190 H300 V220 H390" />
+                            <path d="M200 10 V70" />
+                            <path d="M330 70 V180" />
+                        </g>
+                        <g class="pcb-nodes">
+                            <circle cx="120" cy="40" r="4" />
+                            <circle cx="260" cy="90" r="4" />
+                            <circle cx="80" cy="130" r="4" />
+                            <circle cx="220" cy="200" r="4" />
+                            <circle cx="160" cy="220" r="4" />
+                            <circle cx="300" cy="190" r="4" />
+                            <circle cx="200" cy="70" r="4" />
+                            <circle cx="330" cy="180" r="4" />
+                        </g>
+                        <g class="pcb-chip">
+                            <rect x="170" y="105" width="60" height="50" rx="3"></rect>
+                        </g>
+                    </svg>
+                </div>
+                <div class="svc-body">
+                    <span class="svc-index">01</span>
+                    <h3>Hardware &amp; Chip-Level Repair</h3>
+                    <ul class="svc-tags">
+                        <li>Laptops</li><li>Desktops</li><li>Motherboards</li><li>Mobile Devices</li>
+                        <li>TVs</li><li>Printers</li><li>UPS</li><li>Inverters</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="svc svc-b" data-reveal>
+                <div class="svc-visual svc-visual-terminal" aria-hidden="true">
+                    <div class="terminal-window">
+                        <div class="terminal-line"><span class="t-prompt">&gt;</span> scanning volume /dev/sda1 ...</div>
+                        <div class="terminal-line"><span class="t-prompt">&gt;</span> removing threat: <span class="t-ok">0 found</span></div>
+                        <div class="terminal-line"><span class="t-prompt">&gt;</span> optimizing startup services ...</div>
+                        <div class="terminal-line terminal-cursor-line"><span class="t-prompt">&gt;</span> <span class="t-cursor">_</span></div>
+                    </div>
+                </div>
+                <div class="svc-body">
+                    <span class="svc-index">02</span>
+                    <h3>Software &amp; Systems</h3>
+                    <ul class="svc-tags">
+                        <li>OS Installation</li><li>Virus Removal</li><li>Data Recovery</li>
+                        <li>System Optimization</li><li>App Troubleshooting</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="svc svc-c" data-reveal>
+                <div class="svc-visual svc-visual-fan" aria-hidden="true">
+                    <div class="pc-fan">
+                        <div class="pc-fan-blades"></div>
+                        <div class="pc-fan-hub"></div>
+                    </div>
+                </div>
+                <div class="svc-body">
+                    <span class="svc-index">03</span>
+                    <h3>Custom PC &amp; Workstations</h3>
+                    <ul class="svc-tags">
+                        <li>Gaming PCs</li><li>Workstations</li><li>Office Systems</li><li>Content Creation PCs</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="svc svc-d" data-reveal>
+                <div class="svc-visual svc-visual-network" aria-hidden="true">
+                    <svg viewBox="0 0 300 200" class="network-svg">
+                        <g class="net-lines">
+                            <line x1="150" y1="100" x2="60" y2="40"></line>
+                            <line x1="150" y1="100" x2="240" y2="40"></line>
+                            <line x1="150" y1="100" x2="60" y2="160"></line>
+                            <line x1="150" y1="100" x2="240" y2="160"></line>
+                            <line x1="150" y1="100" x2="150" y2="30"></line>
+                        </g>
+                        <g class="net-nodes">
+                            <circle cx="150" cy="100" r="7" class="net-node-main"></circle>
+                            <circle cx="60" cy="40" r="4"></circle>
+                            <circle cx="240" cy="40" r="4"></circle>
+                            <circle cx="60" cy="160" r="4"></circle>
+                            <circle cx="240" cy="160" r="4"></circle>
+                            <circle cx="150" cy="30" r="4"></circle>
+                        </g>
+                    </svg>
+                </div>
+                <div class="svc-body">
+                    <span class="svc-index">04</span>
+                    <h3>Networking &amp; IT</h3>
+                    <ul class="svc-tags">
+                        <li>Wi-Fi</li><li>LAN</li><li>CCTV</li><li>Data Backup</li><li>Office Infrastructure</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="svc svc-e" data-reveal>
+                <div class="svc-visual svc-visual-scope" aria-hidden="true">
+                    <svg viewBox="0 0 300 120" class="scope-svg" preserveAspectRatio="none">
+                        <line x1="0" y1="60" x2="300" y2="60" class="scope-baseline"></line>
+                        <polyline class="scope-wave" points="0,60 20,60 35,20 50,100 65,60 100,60 115,25 130,95 145,60 200,60 215,15 230,105 245,60 300,60"></polyline>
+                    </svg>
+                </div>
+                <div class="svc-body">
+                    <span class="svc-index">05</span>
+                    <h3>Electronics &amp; Power</h3>
+                    <ul class="svc-tags">
+                        <li>Solar Inverters</li><li>Power Supplies</li><li>Smart TVs</li>
+                        <li>Audio Systems</li><li>Electronic Projects</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article class="svc svc-f" data-reveal>
+                <div class="svc-visual svc-visual-doc" aria-hidden="true">
+                    <div class="doc-icon">
+                        <i class="fa-solid fa-file-lines"></i>
+                        <span class="doc-scan-line"></span>
+                    </div>
+                </div>
+                <div class="svc-body">
+                    <span class="svc-index">06</span>
+                    <h3>Documentation &amp; Printing</h3>
+                    <ul class="svc-tags">
+                        <li>Printing</li><li>Scanning</li><li>Photocopy</li><li>Typing</li>
+                        <li>Photo Printing</li><li>Mobile Top-up</li>
+                    </ul>
+                </div>
+            </article>
+
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Interactive diagnostic tool                                   -->
+    <!-- ============================================================ -->
+    <section id="diagnose" class="diagnose">
+        <div class="section-head">
+            <span class="eyebrow">02 &mdash; Diagnose</span>
+            <h2>Something wrong with your device?</h2>
+            <p>Tell us what happened. We'll help you find the problem.</p>
+        </div>
+
+        <div class="diagnose-panel">
+            <div class="diagnose-step" id="deviceStep">
+                <span class="diagnose-step-label">STEP 1 / SELECT DEVICE</span>
+                <div class="device-chips" id="deviceChips">
+                    <button type="button" class="device-chip" data-device="Laptop"><i class="fa-solid fa-laptop"></i> Laptop</button>
+                    <button type="button" class="device-chip" data-device="Desktop"><i class="fa-solid fa-desktop"></i> Desktop</button>
+                    <button type="button" class="device-chip" data-device="Mobile"><i class="fa-solid fa-mobile-screen"></i> Mobile</button>
+                    <button type="button" class="device-chip" data-device="Printer"><i class="fa-solid fa-print"></i> Printer</button>
+                    <button type="button" class="device-chip" data-device="TV"><i class="fa-solid fa-tv"></i> TV</button>
+                    <button type="button" class="device-chip" data-device="Other"><i class="fa-solid fa-ellipsis"></i> Other</button>
+                </div>
+            </div>
+
+            <div class="diagnose-step" id="issueStep" hidden>
+                <span class="diagnose-step-label">STEP 2 / SELECT PROBLEM</span>
+                <div class="issue-list" id="issueList"></div>
+            </div>
+
+            <div class="diagnose-result" id="diagnoseResult" hidden>
+                <span class="diagnose-step-label">LIKELY DIAGNOSIS</span>
+                <p class="diagnose-result-text" id="diagnoseResultText"></p>
+                <button type="button" class="btn-solid" id="requestDiagnosisBtn">
+                    <i class="fa-solid fa-paper-plane"></i> Request Diagnosis
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Repair tracking                                               -->
+    <!-- ============================================================ -->
+    <section id="repairs" class="repairs">
+        <div class="section-head">
+            <span class="eyebrow">03 &mdash; Repairs</span>
+            <h2>Track Your Repair</h2>
+            <p>Enter your Repair ID or the phone number used at drop-off to see live status.</p>
+        </div>
+
+        <div class="track-panel">
+            <form class="track-form" id="trackForm">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="trackInput" placeholder="Repair ID (e.g. NA-1001) or phone number" autocomplete="off" required>
+                <button type="submit" class="btn-solid" id="trackBtn">Track</button>
+            </form>
+
+            <div class="track-samples">
+                <span>Try a sample:</span>
+                <button type="button" class="sample-chip" data-ticket="NA-1001">NA-1001</button>
+                <button type="button" class="sample-chip" data-ticket="NA-1002">NA-1002</button>
+                <button type="button" class="sample-chip" data-ticket="NA-1003">NA-1003</button>
+            </div>
+
+            <div class="track-result" id="trackResult" hidden></div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Custom PC                                                     -->
+    <!-- ============================================================ -->
+    <section id="custompc" class="custompc">
+        <div class="custompc-copy">
+            <span class="eyebrow">04 &mdash; Custom PC</span>
+            <h2>Built For Your Work.</h2>
+            <p>From competitive gaming to professional workloads, we build systems around how you actually work &mdash; not a catalogue template.</p>
+            <a href="#contact" class="btn-solid" id="buildPcBtn">
+                <i class="fa-solid fa-microchip"></i> Build Your PC
+            </a>
+        </div>
+
+        <div class="custompc-visual" id="customPcVisual">
+            <div class="pc-diagram" id="pcDiagram">
+                <div class="pc-tower">
+                    <div class="pc-tower-panel"></div>
+                    <div class="pc-tower-gpu"></div>
+                    <div class="pc-tower-fans">
+                        <div class="pc-tower-fan"></div>
+                        <div class="pc-tower-fan"></div>
+                    </div>
+                    <div class="pc-tower-strip"></div>
+                </div>
+                <span class="pc-spec-label" data-depth="30" style="top:10%; left:6%;">CPU</span>
+                <span class="pc-spec-label" data-depth="55" style="top:32%; left:82%;">GPU</span>
+                <span class="pc-spec-label" data-depth="20" style="top:58%; left:4%;">RAM</span>
+                <span class="pc-spec-label" data-depth="45" style="top:78%; left:80%;">STORAGE</span>
+                <span class="pc-spec-label" data-depth="35" style="top:88%; left:40%;">COOLING</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Workshop gallery                                              -->
+    <!-- ============================================================ -->
+    <section class="workshop">
+        <div class="section-head">
+            <span class="eyebrow">05 &mdash; The Lab</span>
+            <h2>Inside The Repair Lab</h2>
+            <p>Real bench work, not a stock photo &mdash; drop your own shop photography into these slots any time.</p>
+        </div>
+
+        <div class="workshop-gallery" id="workshopGallery">
+            <div class="workshop-slide" data-label="REPAIR LAB"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+            <div class="workshop-slide" data-label="BOARD DIAGNOSTICS"><i class="fa-solid fa-microchip"></i></div>
+            <div class="workshop-slide" data-label="PC ASSEMBLY"><i class="fa-solid fa-computer"></i></div>
+            <div class="workshop-slide" data-label="ELECTRONICS"><i class="fa-solid fa-bolt"></i></div>
+            <div class="workshop-slide" data-label="QUALITY CHECK"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="workshop-slide" data-label="FINISHED SYSTEMS"><i class="fa-solid fa-box-open"></i></div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Why NewAge (editorial)                                        -->
+    <!-- ============================================================ -->
+    <section id="about" class="why">
+        <div class="section-head">
+            <span class="eyebrow">06 &mdash; Why NewAge</span>
+            <h2>Why People Bring Their Devices To Us</h2>
+        </div>
+
+        <div class="why-list">
+            <div class="why-item" data-reveal>
+                <span class="why-num">01</span>
+                <h3>Experienced technicians</h3>
+                <p>Certified, hands-on engineers who have handled thousands of repair tickets since 2069 B.S.</p>
+            </div>
+            <div class="why-item" data-reveal>
+                <span class="why-num">02</span>
+                <h3>Component-level diagnosis</h3>
+                <p>We trace faults to the exact IC or trace instead of swapping whole boards by default.</p>
+            </div>
+            <div class="why-item" data-reveal>
+                <span class="why-num">03</span>
+                <h3>Genuine replacement parts</h3>
+                <p>Original and OEM-grade components only, with the part sourced before we touch your device.</p>
+            </div>
+            <div class="why-item" data-reveal>
+                <span class="why-num">04</span>
+                <h3>Transparent repair process</h3>
+                <p>A quote before any repair begins, and a live ticket you can track from drop-off to pickup.</p>
+            </div>
+            <div class="why-item" data-reveal>
+                <span class="why-num">05</span>
+                <h3>Business IT support</h3>
+                <p>Networking, backups and infrastructure for small offices, not just single-device repairs.</p>
+            </div>
+            <div class="why-item" data-reveal>
+                <span class="why-num">06</span>
+                <h3>Post-repair testing</h3>
+                <p>Every job is stress-tested before collection, with a warranty slip on completed repairs.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Products                                                      -->
+    <!-- ============================================================ -->
+    <section id="products" class="products-section">
+        <div class="section-head">
+            <span class="eyebrow">07 &mdash; Store</span>
+            <h2>Products &amp; Peripherals</h2>
+            <p>Genuine parts, high-speed storage, and accessories available in-store.</p>
+        </div>
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-badge in-stock"><i class="fa-solid fa-check"></i> In Stock</div>
+                <div class="product-icon-wrap has-photo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/75/Samsung_980_PRO_PCIe_4.0_NVMe_SSD_1TB-top_PNr%C2%B00915.jpg" alt="NVMe M.2 PCIe SSD" loading="lazy" onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.innerHTML='&lt;i class=&quot;fa-solid fa-hard-drive&quot;&gt;&lt;/i&gt;';">
+                </div>
+                <div class="product-info">
+                    <span class="product-cat">Storage</span>
+                    <h3>NVMe M.2 1TB PCIe 4.0 SSD</h3>
+                    <p class="product-spec">Speeds up to 7,000 MB/s. Perfect for high-speed boot, gaming, and 4K editing.</p>
+                    <div class="product-price-row">
+                        <div class="price-box">
+                            <span class="mrp">NPR 15,500</span>
+                            <span class="price">NPR 13,200</span>
+                        </div>
+                        <a href="https://wa.me/9779841301930?text=Hello%20NewAge%20IT,%20I%20am%20interested%20in%20buying%20the%20NVMe%20M.2%201TB%20PCIe%20SSD." target="_blank" rel="noopener noreferrer" class="btn-buy-wa">
+                            <i class="fa-brands fa-whatsapp"></i> Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-badge in-stock"><i class="fa-solid fa-check"></i> In Stock</div>
+                <div class="product-icon-wrap has-photo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/94/2%2A8Go_DDR4_Corsair_-_2018-05-08.jpg" alt="DDR4 RAM memory modules" loading="lazy" onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.innerHTML='&lt;i class=&quot;fa-solid fa-memory&quot;&gt;&lt;/i&gt;';">
+                </div>
+                <div class="product-info">
+                    <span class="product-cat">Memory</span>
+                    <h3>16GB DDR4 / DDR5 High-Speed RAM</h3>
+                    <p class="product-spec">Heat-spreader module, low latency, tested for flawless stability and multitasking.</p>
+                    <div class="product-price-row">
+                        <div class="price-box">
+                            <span class="mrp">NPR 6,800</span>
+                            <span class="price">NPR 5,600</span>
+                        </div>
+                        <a href="https://wa.me/9779841301930?text=Hello%20NewAge%20IT,%20I%20am%20interested%20in%20buying%2016GB%20DDR4/DDR5%20RAM." target="_blank" rel="noopener noreferrer" class="btn-buy-wa">
+                            <i class="fa-brands fa-whatsapp"></i> Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-badge in-stock"><i class="fa-solid fa-check"></i> In Stock</div>
+                <div class="product-icon-wrap has-photo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/f/fe/Logitech-g910_%2816475940137%29.jpg" alt="RGB mechanical gaming keyboard" loading="lazy" onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.innerHTML='&lt;i class=&quot;fa-solid fa-keyboard&quot;&gt;&lt;/i&gt;';">
+                </div>
+                <div class="product-info">
+                    <span class="product-cat">Peripherals</span>
+                    <h3>RGB Mechanical Gaming Keyboard</h3>
+                    <p class="product-spec">Blue/Red mechanical switches, tactile feedback, customizable backlit modes.</p>
+                    <div class="product-price-row">
+                        <div class="price-box">
+                            <span class="mrp">NPR 5,200</span>
+                            <span class="price">NPR 4,200</span>
+                        </div>
+                        <a href="https://wa.me/9779841301930?text=Hello%20NewAge%20IT,%20I%20am%20interested%20in%20the%20RGB%20Mechanical%20Keyboard." target="_blank" rel="noopener noreferrer" class="btn-buy-wa">
+                            <i class="fa-brands fa-whatsapp"></i> Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-badge in-stock"><i class="fa-solid fa-check"></i> In Stock</div>
+                <div class="product-icon-wrap has-photo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4d/HP_117A_-_black_laser_toner_cartridge-2408.jpg" alt="HP laser toner cartridge" loading="lazy" onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.innerHTML='&lt;i class=&quot;fa-solid fa-print&quot;&gt;&lt;/i&gt;';">
+                </div>
+                <div class="product-info">
+                    <span class="product-cat">Printing</span>
+                    <h3>HP &amp; Canon Laser Toner Cartridges</h3>
+                    <p class="product-spec">High-yield crisp black toner cartridges with original chip for HP/Canon laser printers.</p>
+                    <div class="product-price-row">
+                        <div class="price-box">
+                            <span class="mrp">NPR 2,800</span>
+                            <span class="price">NPR 2,200</span>
+                        </div>
+                        <a href="https://wa.me/9779841301930?text=Hello%20NewAge%20IT,%20I%20need%20a%20Printer%20Toner%20Cartridge." target="_blank" rel="noopener noreferrer" class="btn-buy-wa">
+                            <i class="fa-brands fa-whatsapp"></i> Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-badge pre-order"><i class="fa-solid fa-clock"></i> Fast Sourcing</div>
+                <div class="product-icon-wrap has-photo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c9/Disassembled_LCD_screen_assembly_of_a_Lenovo_ThinkPad_X220.jpg" alt="Replacement laptop LCD screen assembly" loading="lazy" onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.innerHTML='&lt;i class=&quot;fa-solid fa-tv&quot;&gt;&lt;/i&gt;';">
+                </div>
+                <div class="product-info">
+                    <span class="product-cat">Laptop Hardware</span>
+                    <h3>Genuine Replacement Laptop Screens</h3>
+                    <p class="product-spec">IPS FHD &amp; 4K display panels for Dell, HP, Lenovo, Acer, and MacBook.</p>
+                    <div class="product-price-row">
+                        <div class="price-box">
+                            <span class="mrp">NPR 9,500</span>
+                            <span class="price">NPR 7,800+</span>
+                        </div>
+                        <a href="https://wa.me/9779841301930?text=Hello%20NewAge%20IT,%20I%20am%20looking%20for%20a%20Replacement%20Laptop%20Screen." target="_blank" rel="noopener noreferrer" class="btn-buy-wa">
+                            <i class="fa-brands fa-whatsapp"></i> Inquire
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-badge in-stock"><i class="fa-solid fa-check"></i> In Stock</div>
+                <div class="product-icon-wrap has-photo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Full_modular_ATX_power_supply_unit.jpg" alt="80+ Bronze ATX power supply unit" loading="lazy" onerror="this.parentElement.classList.remove('has-photo'); this.parentElement.innerHTML='&lt;i class=&quot;fa-solid fa-microchip&quot;&gt;&lt;/i&gt;';">
+                </div>
+                <div class="product-info">
+                    <span class="product-cat">Power &amp; Cases</span>
+                    <h3>650W 80+ Bronze Gaming PSU</h3>
+                    <p class="product-spec">Reliable active PFC power supply with Japanese capacitors and silent cooling fan.</p>
+                    <div class="product-price-row">
+                        <div class="price-box">
+                            <span class="mrp">NPR 7,200</span>
+                            <span class="price">NPR 5,900</span>
+                        </div>
+                        <a href="https://wa.me/9779841301930?text=Hello%20NewAge%20IT,%20I%20am%20interested%20in%20the%20650W%20Power%20Supply." target="_blank" rel="noopener noreferrer" class="btn-buy-wa">
+                            <i class="fa-brands fa-whatsapp"></i> Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="photo-credits">
+            Product photos: illustrative stock, not the exact in-store item &mdash;
+            <a href="https://commons.wikimedia.org/wiki/File:Samsung_980_PRO_PCIe_4.0_NVMe_SSD_1TB-top_PNr%C2%B00915.jpg" target="_blank" rel="noopener noreferrer">D-Kuru</a>,
+            <a href="https://commons.wikimedia.org/wiki/File:2*8Go_DDR4_Corsair_-_2018-05-08.jpg" target="_blank" rel="noopener noreferrer">Bretwa</a>,
+            <a href="https://commons.wikimedia.org/wiki/File:Logitech-g910_(16475940137).jpg" target="_blank" rel="noopener noreferrer">Sinchen.Lin</a>,
+            <a href="https://commons.wikimedia.org/wiki/File:HP_117A_-_black_laser_toner_cartridge-2408.jpg" target="_blank" rel="noopener noreferrer">Raimond Spekking</a> and
+            <a href="https://commons.wikimedia.org/wiki/File:Disassembled_LCD_screen_assembly_of_a_Lenovo_ThinkPad_X220.jpg" target="_blank" rel="noopener noreferrer">Siarhei Besarab</a>,
+            <a href="https://commons.wikimedia.org/wiki/File:Full_modular_ATX_power_supply_unit.jpg" target="_blank" rel="noopener noreferrer">Project Kei</a>
+            &bull; Wikimedia Commons, CC BY-SA 4.0 / CC BY 2.0.
+        </p>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Featured TikTok reels                                         -->
+    <!-- ============================================================ -->
+    <section id="videos" class="videos-section">
+        <div class="section-head">
+            <span class="eyebrow tiktok">@newageit2069</span>
+            <h2>Watch Us in Action</h2>
+            <p>Diagnostic breakdowns and real repair footage from our TikTok channel.</p>
+        </div>
+        <div class="videos-grid" id="videosGrid">
+            <div class="video-card" data-card-id="vid-1">
+                <div class="video-player-wrap">
+                    <iframe src="https://www.tiktok.com/player/v1/7595988578186824967?autoplay=0" class="tiktok-iframe-player" allow="autoplay; encrypted-media" allowfullscreen title="Water vs Technology - laptop water damage repair"></iframe>
+                </div>
+                <div class="video-card-body">
+                    <span class="video-topic-badge"><i class="fa-brands fa-tiktok"></i> Laptop Emergency Tip</span>
+                    <h3>Laptop Water Damage? What to do immediately</h3>
+                    <p>Crucial first-aid steps to save your motherboard, battery, and data before corrosion spreads.</p>
+                </div>
+            </div>
+            <div class="video-card" data-card-id="vid-2">
+                <div class="video-player-wrap">
+                    <iframe src="https://www.tiktok.com/player/v1/7598566558608264466?autoplay=0" class="tiktok-iframe-player" allow="autoplay; encrypted-media" allowfullscreen title="Gaming laptop BOOT issue fixed at the BIOS level"></iframe>
+                </div>
+                <div class="video-card-body">
+                    <span class="video-topic-badge"><i class="fa-brands fa-tiktok"></i> BIOS &amp; Boot Repair</span>
+                    <h3>Gaming Laptop Won't Boot? Fixed at the BIOS Level</h3>
+                    <p>Diagnosing a stubborn boot failure and resolving it directly at the BIOS/firmware level.</p>
+                </div>
+            </div>
+            <div class="video-card" data-card-id="vid-3">
+                <div class="video-player-wrap">
+                    <iframe src="https://www.tiktok.com/player/v1/7595196841881472274?autoplay=0" class="tiktok-iframe-player" allow="autoplay; encrypted-media" allowfullscreen title="Induction cooker repair"></iframe>
+                </div>
+                <div class="video-card-body">
+                    <span class="video-topic-badge"><i class="fa-brands fa-tiktok"></i> Appliance Repair</span>
+                    <h3>Induction Cooker Not Working? We Can Help</h3>
+                    <p>From power issues to heating coil faults, we repair induction cooktops of all major brands.</p>
+                </div>
+            </div>
+            <div class="video-card" data-card-id="vid-4">
+                <div class="video-player-wrap">
+                    <iframe src="https://www.tiktok.com/player/v1/7658712315147160853?autoplay=0" class="tiktok-iframe-player" allow="autoplay; encrypted-media" allowfullscreen title="Power on, no display - full motherboard service and BIOS upgrade"></iframe>
+                </div>
+                <div class="video-card-body">
+                    <span class="video-topic-badge"><i class="fa-brands fa-tiktok"></i> Chip-Level Engineering</span>
+                    <h3>Power ON but No Display? Full Motherboard Service</h3>
+                    <p>Complete motherboard servicing and a BIOS upgrade to resolve a "power on, no display" fault.</p>
+                </div>
+            </div>
+        </div>
+        <div class="videos-follow">
+            <a href="https://www.tiktok.com/@newageit2069" target="_blank" rel="noopener noreferrer" class="btn-ghost">
+                <i class="fa-brands fa-tiktok"></i> Follow @newageit2069 for daily tech tips
+            </a>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- Contact                                                       -->
+    <!-- ============================================================ -->
+    <section id="contact" class="contact">
+        <div class="contact-info">
+            <span class="eyebrow">08 &mdash; Contact</span>
+            <h2>Get In Touch</h2>
+            <p>Have a damaged device, need a custom PC quote, or want to check part availability? Visit our center or reach out below.</p>
+            <div class="contact-details">
+                <div class="contact-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div><h4>Location</h4><p>Tinthana, Chandragiri-15, Kathmandu, Nepal</p></div>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <div><h4>Direct Hotline</h4><p><a href="tel:+9779841301930" class="contact-link">+977 9841301930</a></p></div>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <div><h4>Email</h4><p><a href="mailto:cyberbhagwati@gmail.com" class="contact-link">cyberbhagwati@gmail.com</a></p></div>
+                </div>
+                <div class="contact-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <div><h4>Operating Hours</h4><p>Sunday &ndash; Friday: 7:30 AM &ndash; 7:30 PM (Saturday on call)</p></div>
+                </div>
+            </div>
+        </div>
+
+        <form class="contact-form" id="contactForm">
+            <h3><i class="fa-solid fa-paper-plane"></i> Send Us a Message</h3>
+            <p class="contact-form-note">Submitted inquiries are logged and generate an immediate tracking ID.</p>
+            <div class="form-row">
+                <input type="text" id="senderName" placeholder="Your Full Name *" required>
+            </div>
+            <div class="form-row">
+                <input type="tel" id="senderPhone" placeholder="Mobile / WhatsApp Number *" required>
+            </div>
+            <div class="form-row">
+                <input type="email" id="senderEmail" placeholder="Your Email Address *" required>
+            </div>
+            <div class="form-row">
+                <select id="serviceType" required aria-label="Select Service or Inquiry Needed">
+                    <option value="" disabled selected>Select Service or Inquiry Needed *</option>
+                    <option value="hardware-repair">Laptop / Desktop / Mobile Hardware Repair</option>
+                    <option value="tv-printer-inverter">TV / Printer / Inverter / UPS Repair</option>
+                    <option value="software-issue">Software Installation, Virus Removal &amp; OS</option>
+                    <option value="custom-build">Custom Gaming PC / Workstation Build</option>
+                    <option value="parts-peripherals">Computer Parts, SSD, RAM &amp; Peripherals</option>
+                    <option value="documentation-print">Document Printing, Scanning &amp; Mobile Top-up</option>
+                    <option value="other">General IT Consulting / Other Inquiries</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <textarea id="messageText" placeholder="Describe your device brand, model, and the issue you are facing..." rows="4" required></textarea>
+            </div>
+            <input type="text" name="website_hp" id="websiteHp" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <button type="submit" class="btn-solid btn-block" id="submitBtn">
+                <i class="fa-solid fa-paper-plane"></i> Submit &amp; Get Tracking Ticket
+            </button>
+            <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
+        </form>
+
+        <div class="map-container">
+            <div class="map-header">
+                <div>
+                    <h3><i class="fa-solid fa-location-dot"></i> NewAge I.T Solution Center</h3>
+                    <p>Tinthana, Chandragiri-15, Kathmandu, Nepal &bull; Near Kalanki &amp; Ring Road Access</p>
+                </div>
+                <a href="https://www.google.com/maps/search/?api=1&query=New+Age+I.T+Solution+Center,+Tinthana,+Chandragiri-15,+Kathmandu,+Nepal" target="_blank" rel="noopener noreferrer" class="btn-ghost">
+                    <i class="fa-solid fa-diamond-turn-right"></i> Open in Google Maps
+                </a>
+            </div>
+            <div class="map-embed-wrapper">
+                <iframe title="NewAge I.T Solution Center Google Maps Location"
+                    src="https://maps.google.com/maps?q=New%20Age%20I.T%20Solution%20Center,%20Tinthana,%20Kathmandu,%20Nepal&t=&z=16&ie=UTF8&iwloc=B&output=embed"
+                    width="100%" height="380" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/9779841301930" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with NewAge I.T. on WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span class="fw-tooltip">Chat with NewAge I.T.</span>
+    </a>
+
+    <!-- ============================================================ -->
+    <!-- Footer                                                        -->
+    <!-- ============================================================ -->
+    <footer>
+        <div class="footer-line" aria-hidden="true"></div>
+        <div class="footer-content">
+            <div class="footer-col footer-brand">
+                <div class="footer-logo">
+                    <img src="assets/logo.png" alt="NewAge I.T. Solution Center">
+                    <span>NewAge I.T.<br><small>Solution Center</small></span>
+                </div>
+                <p>Kathmandu, Nepal &bull; ESTD. 2069 B.S.</p>
+                <div class="footer-status">
+                    <span class="status-dot"></span> REPAIR LAB STATUS &bull; ONLINE
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Services</h4>
+                <a href="#services">Repair</a>
+                <a href="#custompc">Custom PC</a>
+                <a href="#services">Networking</a>
+                <a href="#products">Products</a>
+                <a href="#contact">Contact</a>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <a href="tel:+9779841301930"><i class="fa-solid fa-phone"></i> +977 9841301930</a>
+                <a href="https://wa.me/9779841301930" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                <a href="mailto:cyberbhagwati@gmail.com"><i class="fa-solid fa-envelope"></i> cyberbhagwati@gmail.com</a>
+                <span class="footer-static"><i class="fa-solid fa-clock"></i> Sun&ndash;Fri: 7:30 AM&ndash;7:30 PM</span>
+            </div>
+
+            <div class="footer-col">
+                <h4>Follow</h4>
+                <a href="https://www.tiktok.com/@newageit2069" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-tiktok"></i> TikTok</a>
+                <a href="https://www.facebook.com/newageit2069" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i> Facebook</a>
+                <a href="https://www.youtube.com/@newage2069" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i> YouTube</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 NewAge I.T. Solution Center. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
