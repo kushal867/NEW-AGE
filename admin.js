@@ -105,6 +105,58 @@ document.addEventListener('DOMContentLoaded', () => {
         inputEl._previewUpdate = update;
     }
 
+    // Wires a hidden <input type="file"> to upload straight to Supabase
+    // Storage (the "media" bucket) and drop the resulting public URL into the
+    // paired URL input, reusing that field's existing preview wiring.
+    const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+    function wireFileUpload(fileInputEl, urlInputEl, statusEl, folder) {
+        if (!fileInputEl || !urlInputEl) return;
+
+        fileInputEl.addEventListener('change', async () => {
+            const file = fileInputEl.files?.[0];
+            if (!file) return;
+
+            const label = fileInputEl.previousElementSibling;
+            const setStatus = (msg, type) => {
+                if (!statusEl) return;
+                statusEl.textContent = msg;
+                statusEl.className = `field-status ${type || ''}`;
+            };
+
+            if (!sb) { setStatus('Database connection unavailable.', 'invalid'); fileInputEl.value = ''; return; }
+            if (file.size > MAX_UPLOAD_BYTES) {
+                setStatus('That file is over 5MB - choose a smaller image.', 'invalid');
+                fileInputEl.value = '';
+                return;
+            }
+
+            label?.classList.add('is-uploading');
+            setStatus('Uploading...', '');
+
+            const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+            const path = `${folder}/${Date.now()}-${safeName}`;
+
+            const { error: uploadError } = await sb.storage.from('media').upload(path, file, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: file.type
+            });
+
+            label?.classList.remove('is-uploading');
+            fileInputEl.value = '';
+
+            if (uploadError) {
+                setStatus('Upload failed: ' + uploadError.message, 'invalid');
+                return;
+            }
+
+            const { data } = sb.storage.from('media').getPublicUrl(path);
+            urlInputEl.value = data.publicUrl;
+            urlInputEl.dispatchEvent(new Event('input'));
+            setStatus('Uploaded!', 'valid');
+        });
+    }
+
     // Helper: Escapes HTML to prevent XSS
     function escapeHtml(str) {
         if (!str) return '';
@@ -589,6 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const prodImageUrlInput = document.getElementById('prodImageUrl');
     const prodImagePreviewBox = document.getElementById('prodImagePreviewBox');
     const prodImageStatus = document.getElementById('prodImageStatus');
+    const prodImageFile = document.getElementById('prodImageFile');
     const productSearchInput = document.getElementById('productSearchInput');
     const productCategoryFilter = document.getElementById('productCategoryFilter');
     const productStockFilter = document.getElementById('productStockFilter');
@@ -608,6 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentPageProductIds = [];
 
     wireImagePreview(prodImageUrlInput, prodImagePreviewBox, '<i class="fa-solid fa-image"></i>', prodImageStatus);
+    wireFileUpload(prodImageFile, prodImageUrlInput, prodImageStatus, 'products');
 
     function getFilteredProducts() {
         const q = (productSearchInput?.value || '').trim().toLowerCase();
@@ -823,11 +877,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const vidUrlStatus = document.getElementById('vidUrlStatus');
     const vidThumbUrlInput = document.getElementById('vidThumbUrl');
     const vidImagePreviewBox = document.getElementById('vidImagePreviewBox');
+    const vidImageStatus = document.getElementById('vidImageStatus');
+    const vidImageFile = document.getElementById('vidImageFile');
     const videoLivePreview = document.getElementById('videoLivePreview');
     const videoLivePreviewFrame = document.getElementById('videoLivePreviewFrame');
     let editingVideoId = null;
 
-    wireImagePreview(vidThumbUrlInput, vidImagePreviewBox, '<i class="fa-brands fa-tiktok"></i>', null);
+    wireImagePreview(vidThumbUrlInput, vidImagePreviewBox, '<i class="fa-brands fa-tiktok"></i>', vidImageStatus);
+    wireFileUpload(vidImageFile, vidThumbUrlInput, vidImageStatus, 'videos');
 
     function updateVideoUrlPreview() {
         const tiktokId = extractTikTokId(vidUrlInput?.value || '');

@@ -577,6 +577,13 @@
                                 "Anyone with the link can view" and paste the normal share link here.
                                 Leave blank to show the category icon instead.
                             </p>
+                            <div class="upload-row">
+                                <label for="prodImageFile" class="btn-upload">
+                                    <i class="fa-solid fa-upload"></i> Or upload a photo
+                                </label>
+                                <input type="file" id="prodImageFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+                                <span class="field-hint">JPG, PNG, WebP or GIF, up to 5MB.</span>
+                            </div>
                             <p class="field-status" id="prodImageStatus"></p>
                         </div>
                     </div>
@@ -629,6 +636,14 @@
                         <div class="image-field-input">
                             <input type="url" id="vidThumbUrl" placeholder="Paste an image URL, or a Google Drive share link">
                             <p class="field-hint">Google Drive links are converted automatically. This is only a quick-reference thumbnail here in the CMS &mdash; visitors always see the live TikTok embed.</p>
+                            <div class="upload-row">
+                                <label for="vidImageFile" class="btn-upload">
+                                    <i class="fa-solid fa-upload"></i> Or upload a photo
+                                </label>
+                                <input type="file" id="vidImageFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+                                <span class="field-hint">JPG, PNG, WebP or GIF, up to 5MB.</span>
+                            </div>
+                            <p class="field-status" id="vidImageStatus"></p>
                         </div>
                     </div>
                 </div>
