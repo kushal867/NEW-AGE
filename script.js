@@ -92,21 +92,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =========================================================================
-    // 1b. Accent color theme (blue / orange) - persisted, no page reload
+    // 1b. Site theme (blue / orange / white) - persisted, no page reload
     // =========================================================================
     const ACCENT_STORAGE_KEY = 'NEWAGE_ACCENT_THEME';
-    const ACCENT_RGB_BY_THEME = { blue: '47, 111, 237', orange: '255, 90, 31' };
+    const THEME_ORDER = ['blue', 'orange', 'white'];
+    const ACCENT_RGB_BY_THEME = { blue: '47, 111, 237', orange: '255, 90, 31', white: '47, 111, 237' };
+    const PARTICLE_RGB_BY_THEME = { blue: '245, 245, 245', orange: '245, 245, 245', white: '35, 38, 43' };
     const accentToggleBtn = document.getElementById('accentToggleBtn');
 
     let accentTheme = 'blue';
     let accentRGB = ACCENT_RGB_BY_THEME.blue;
+    let particleRGB = PARTICLE_RGB_BY_THEME.blue;
     try {
-        if (localStorage.getItem(ACCENT_STORAGE_KEY) === 'orange') accentTheme = 'orange';
+        const saved = localStorage.getItem(ACCENT_STORAGE_KEY);
+        if (THEME_ORDER.includes(saved)) accentTheme = saved;
     } catch (e) { /* localStorage unavailable */ }
 
     function applyAccentTheme(theme) {
         accentTheme = theme;
         accentRGB = ACCENT_RGB_BY_THEME[theme];
+        particleRGB = PARTICLE_RGB_BY_THEME[theme];
         document.documentElement.setAttribute('data-accent', theme);
         accentToggleBtn?.querySelectorAll('.accent-toggle-dot').forEach(dot => {
             dot.classList.toggle('is-active', dot.getAttribute('data-accent-option') === theme);
@@ -115,8 +120,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     applyAccentTheme(accentTheme);
 
-    accentToggleBtn?.addEventListener('click', () => {
-        applyAccentTheme(accentTheme === 'blue' ? 'orange' : 'blue');
+    accentToggleBtn?.addEventListener('click', (e) => {
+        const dot = e.target.closest('[data-accent-option]');
+        const next = dot ? dot.getAttribute('data-accent-option') : THEME_ORDER[(THEME_ORDER.indexOf(accentTheme) + 1) % THEME_ORDER.length];
+        applyAccentTheme(next);
     });
 
     // =========================================================================
@@ -260,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.r * devicePixelRatio, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(245, 245, 245, ${p.a})`;
+                ctx.fillStyle = `rgba(${particleRGB}, ${p.a})`;
                 ctx.fill();
             });
 

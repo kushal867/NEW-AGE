@@ -4,10 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        // Applied before CSS loads so a saved orange preference doesn't flash blue first.
+        // Applied before CSS loads so a saved theme preference doesn't flash blue first.
         try {
-            if (localStorage.getItem('NEWAGE_ACCENT_THEME') === 'orange') {
-                document.documentElement.setAttribute('data-accent', 'orange');
+            var savedTheme = localStorage.getItem('NEWAGE_ACCENT_THEME');
+            if (savedTheme === 'orange' || savedTheme === 'white') {
+                document.documentElement.setAttribute('data-accent', savedTheme);
             }
         } catch (e) {}
     </script>
@@ -56,9 +57,10 @@
             </ul>
 
             <div class="nav-actions">
-                <button type="button" class="accent-toggle" id="accentToggleBtn" title="Switch accent color" aria-label="Switch accent color between blue and orange">
-                    <span class="accent-toggle-dot is-blue" data-accent-option="blue"></span>
-                    <span class="accent-toggle-dot is-orange" data-accent-option="orange"></span>
+                <button type="button" class="accent-toggle" id="accentToggleBtn" title="Switch site theme" aria-label="Switch site theme between blue, orange and white">
+                    <span class="accent-toggle-dot is-blue" data-accent-option="blue" title="Blue"></span>
+                    <span class="accent-toggle-dot is-orange" data-accent-option="orange" title="Orange"></span>
+                    <span class="accent-toggle-dot is-white" data-accent-option="white" title="White"></span>
                 </button>
                 <a href="#repairs" class="btn-track">
                     <i class="fa-solid fa-magnifying-glass"></i> Track Repair

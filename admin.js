@@ -18,15 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!sb) console.warn('Supabase not configured - config.js is missing or empty. See .env.example.');
 
     // =========================================================================
-    // Accent color theme (blue / orange) - same control and localStorage key
+    // Site theme (blue / orange / white) - same control and localStorage key
     // as the public site, so switching one switches the other too.
     // =========================================================================
     (function initAccentTheme() {
         const ACCENT_STORAGE_KEY = 'NEWAGE_ACCENT_THEME';
+        const THEME_ORDER = ['blue', 'orange', 'white'];
         const accentToggleBtn = document.getElementById('accentToggleBtn');
         let accentTheme = 'blue';
         try {
-            if (localStorage.getItem(ACCENT_STORAGE_KEY) === 'orange') accentTheme = 'orange';
+            const saved = localStorage.getItem(ACCENT_STORAGE_KEY);
+            if (THEME_ORDER.includes(saved)) accentTheme = saved;
         } catch (e) { /* localStorage unavailable */ }
 
         function applyAccentTheme(theme) {
@@ -39,8 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         applyAccentTheme(accentTheme);
 
-        accentToggleBtn?.addEventListener('click', () => {
-            applyAccentTheme(accentTheme === 'blue' ? 'orange' : 'blue');
+        accentToggleBtn?.addEventListener('click', (e) => {
+            const dot = e.target.closest('[data-accent-option]');
+            const next = dot ? dot.getAttribute('data-accent-option') : THEME_ORDER[(THEME_ORDER.indexOf(accentTheme) + 1) % THEME_ORDER.length];
+            applyAccentTheme(next);
         });
     })();
 
