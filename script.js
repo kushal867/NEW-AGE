@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.clearRect(0, 0, w, h);
 
             // connecting lines between nearby nodes
-            ctx.strokeStyle = 'rgba(255, 90, 31, 0.10)';
+            ctx.strokeStyle = 'rgba(47, 111, 237, 0.10)';
             ctx.lineWidth = 1;
             for (let i = 0; i < nodes.length; i++) {
                 for (let k = i + 1; k < nodes.length; k++) {
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lit = Math.max(0, 1 - distToScan / (h * 0.12));
                 ctx.beginPath();
                 ctx.arc(n.x, n.y, n.r * devicePixelRatio * (1 + lit), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 90, 31, ${0.15 + lit * 0.65})`;
+                ctx.fillStyle = `rgba(47, 111, 237, ${0.15 + lit * 0.65})`;
                 ctx.fill();
             });
 
@@ -227,12 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // horizontal scan line
             const grad = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40);
-            grad.addColorStop(0, 'rgba(255, 90, 31, 0)');
-            grad.addColorStop(0.5, 'rgba(255, 90, 31, 0.35)');
-            grad.addColorStop(1, 'rgba(255, 90, 31, 0)');
+            grad.addColorStop(0, 'rgba(47, 111, 237, 0)');
+            grad.addColorStop(0.5, 'rgba(47, 111, 237, 0.35)');
+            grad.addColorStop(1, 'rgba(47, 111, 237, 0)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, scanY - 40, w, 80);
-            ctx.fillStyle = 'rgba(255, 90, 31, 0.55)';
+            ctx.fillStyle = 'rgba(47, 111, 237, 0.55)';
             ctx.fillRect(0, scanY - 0.75, w, 1.5);
 
             scanY += scanSpeed * devicePixelRatio;
@@ -551,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="repair-card">
                 <div class="repair-header">
                     <div class="repair-title-group">
-                        <h3><i class="fa-solid fa-screwdriver-wrench" style="color:var(--orange);"></i> ${escapeHtml(item.ticketId)}</h3>
+                        <h3><i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent);"></i> ${escapeHtml(item.ticketId)}</h3>
                         <p>${escapeHtml(item.customerName || 'Valued Customer')} &bull; Received ${escapeHtml(item.dateReceived || 'recently')}${isLive ? ' &bull; <span style="color:#4ade80;">Live from Google Sheet</span>' : ''}</p>
                     </div>
                     <span class="status-badge stage-${stage}">Stage ${stage}/8 &middot; ${escapeHtml(statusLabel)}</span>
@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="repair-detail-box"><div class="detail-label">Device</div><div class="detail-val">${escapeHtml(item.device || 'N/A')}</div></div>
                     <div class="repair-detail-box"><div class="detail-label">Reported Issue</div><div class="detail-val">${escapeHtml(item.issue || 'Diagnostic required')}</div></div>
                     <div class="repair-detail-box"><div class="detail-label">Est. Completion</div><div class="detail-val">${escapeHtml(item.estimatedDelivery || 'In Progress')}</div></div>
-                    <div class="repair-detail-box"><div class="detail-label">Cost Quote</div><div class="detail-val" style="color:var(--orange);">${escapeHtml(item.cost || 'Quote upon diagnosis')}</div></div>
+                    <div class="repair-detail-box"><div class="detail-label">Cost Quote</div><div class="detail-val" style="color:var(--accent);">${escapeHtml(item.cost || 'Quote upon diagnosis')}</div></div>
                 </div>
 
                 <div class="tech-note-box">
@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     formFeedback.className = 'form-feedback success';
                     formFeedback.innerHTML = `
                         <strong>Inquiry logged.</strong> Your tracking reference is
-                        <strong style="font-family: var(--font-mono); color: var(--orange);">${ticketId}</strong>.
+                        <strong style="font-family: var(--font-mono); color: var(--accent);">${ticketId}</strong>.
                         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
                             <button type="button" id="quickTrackBtn" class="btn-solid" style="padding:8px 16px; font-size:0.85rem;">Track ${ticketId}</button>
                             <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn-ghost" style="padding:8px 16px; font-size:0.85rem;">Confirm on WhatsApp</a>
