@@ -1140,7 +1140,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //     Prices marked `from: true` are starting estimates ("... dekhi" on
   //     the printed chart) - final cost is confirmed after diagnosis.
   // =========================================================================
-  const PRICE_LIST = [
+  let PRICE_LIST = [
     {
       cat: "Installation & Upgrades",
       item: "OS Installation (Only)",
@@ -1712,10 +1712,39 @@ document.addEventListener("DOMContentLoaded", () => {
     return `Rs. ${entry.price.toLocaleString("en-IN")}${entry.from ? " onwards" : ""}`;
   }
 
-  const PB_CANDIDATES = PRICE_LIST.map((entry) => ({
-    entry,
-    tokens: pbTokenize(`${entry.item} ${entry.cat} ${entry.kw}`),
-  }));
+  // The admin-managed catalogue (Supabase table "chatbot_services") replaces
+  // this hardcoded default once it loads successfully - see loadChatbotServices()
+  // below. Kept as a fallback so the assistant still works if that table is
+  // empty, unreachable, or not yet migrated.
+  let PB_CANDIDATES = [];
+  function rebuildPriceCandidates() {
+    PB_CANDIDATES = PRICE_LIST.map((entry) => ({
+      entry,
+      tokens: pbTokenize(`${entry.item} ${entry.cat} ${entry.kw}`),
+    }));
+  }
+  rebuildPriceCandidates();
+
+  async function loadChatbotServices() {
+    if (!sb) return;
+    try {
+      const { data, error } = await sb.from("chatbot_services").select("*").order("category").order("item");
+      if (error) throw error;
+      if (Array.isArray(data) && data.length) {
+        PRICE_LIST = data.map((row) => ({
+          cat: row.category,
+          item: row.item,
+          price: Number(row.price) || 0,
+          from: !!row.price_from,
+          kw: row.keywords || "",
+        }));
+        rebuildPriceCandidates();
+      }
+    } catch (e) {
+      console.warn("Chatbot services load error (using built-in default price list):", e);
+    }
+  }
+  loadChatbotServices();
 
   // Searches once for a single phrase. Tier 1 requires every query word to
   // match something in the entry (keeps a generic word like "repair" from

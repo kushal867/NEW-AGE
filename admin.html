@@ -96,6 +96,9 @@
                 <button type="button" class="menu-item" data-tab="videosTab">
                     <i class="fa-brands fa-tiktok"></i> <span>TikTok Videos</span>
                 </button>
+                <button type="button" class="menu-item" data-tab="chatbotTab">
+                    <i class="fa-solid fa-comment-dollar"></i> <span>Price Assistant</span>
+                </button>
                 <button type="button" class="menu-item" data-tab="siteContentTab">
                     <i class="fa-solid fa-pen-nib"></i> <span>Site Content</span>
                 </button>
@@ -410,6 +413,41 @@
                                 </tr>
                             </thead>
                             <tbody id="videosTableBody">
+                                <!-- Populated dynamically by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Tab: Price Assistant chatbot catalogue -->
+                <section id="chatbotTab" class="tab-pane">
+                    <div class="section-toolbar">
+                        <div class="toolbar-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="chatbotSearchInput" placeholder="Search by service name or category...">
+                        </div>
+                        <div class="toolbar-actions">
+                            <select id="chatbotCategoryFilter" class="filter-select">
+                                <option value="">All Categories</option>
+                            </select>
+                            <button type="button" class="btn-primary" id="openAddChatbotModalBtn">
+                                <i class="fa-solid fa-plus"></i> Add Service
+                            </button>
+                        </div>
+                    </div>
+                    <p class="field-hint" style="margin: -8px 0 16px;">These are the services the website's "Price Assistant" chatbot answers questions from. Add a service, its price, and it's live on the site immediately - no code changes needed.</p>
+
+                    <div class="table-responsive glass-panel">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Service Name</th>
+                                    <th>Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chatbotTableBody">
                                 <!-- Populated dynamically by admin.js -->
                             </tbody>
                         </table>
@@ -733,6 +771,48 @@
                 <div class="modal-footer">
                     <button type="button" class="btn-secondary" id="cancelVideoModalBtn">Cancel</button>
                     <button type="submit" class="btn-primary">Add Video</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Price Assistant Service -->
+    <div id="chatbotModal" class="cms-modal" style="display: none;">
+        <div class="cms-modal-content glass-panel">
+            <div class="cms-modal-header">
+                <h3 id="chatbotModalTitle"><i class="fa-solid fa-comment-dollar text-primary"></i> Add Chatbot Service</h3>
+                <button type="button" class="modal-close-btn" id="closeChatbotModalBtn">&times;</button>
+            </div>
+            <form id="chatbotForm" class="cms-modal-form">
+                <div class="form-group">
+                    <label for="cbCategory">Category *</label>
+                    <select id="cbCategory" required></select>
+                    <input type="text" id="cbNewCategory" placeholder="Type the new category name" hidden style="margin-top: 8px;">
+                </div>
+                <div class="form-group">
+                    <label for="cbItem">Service Name *</label>
+                    <input type="text" id="cbItem" placeholder="e.g. Laptop Screen Change" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cbPrice">Price (NPR) *</label>
+                        <input type="number" id="cbPrice" min="0" step="1" placeholder="e.g. 5500" required>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; padding-top: 26px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="cbPriceFrom" style="width: auto;">
+                            "Starting from" price (may vary after diagnosis)
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cbKeywords">Extra Search Keywords (optional)</label>
+                    <input type="text" id="cbKeywords" placeholder="e.g. broken cracked monitor display">
+                    <p class="field-hint">Helps the chatbot match related words customers might type. Not shown to visitors.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" id="cancelChatbotModalBtn">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Service</button>
                 </div>
             </form>
         </div>

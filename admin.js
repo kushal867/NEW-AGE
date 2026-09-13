@@ -297,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inquiriesTab: 'Customer Inquiries & Messages',
         productsTab: 'In-Store Product Catalogue',
         videosTab: 'Featured TikTok Tech Videos',
+        chatbotTab: 'Price Assistant Chatbot Catalogue',
         siteContentTab: 'Website Text & Content',
         settingsTab: 'System Security & Database Settings'
     };
@@ -312,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tabId === 'inquiriesTab') { fetchInquiries().then(renderInquiriesTable); }
         if (tabId === 'productsTab') { fetchProducts().then(renderProductsTable); }
         if (tabId === 'videosTab') { fetchVideos().then(renderVideosTable); }
+        if (tabId === 'chatbotTab') { fetchChatbotServices().then(renderChatbotTable); }
         if (tabId === 'siteContentTab') loadSiteContentForm();
     }
 
@@ -1128,6 +1130,195 @@ document.addEventListener('DOMContentLoaded', () => {
             videoModal.style.display = 'none';
             await fetchVideos();
             renderVideosTable();
+        });
+    }
+
+    // =========================================================================
+    // 8a. Price Assistant Tab (chatbot's editable service/price catalogue)
+    // =========================================================================
+    let chatbotServicesCache = [];
+    const DEFAULT_CHATBOT_CATEGORIES = [
+        'Installation & Upgrades', 'Password Decrypt', 'Device Setup', 'Data Backup & Recovery',
+        'Mobile & Smartphone Repair', 'Printer & Photocopy', 'Power System', 'Online/Offline Support',
+        'Chip Level Repair', 'TV Repair'
+    ];
+
+    async function fetchChatbotServices() {
+        if (!sb) return;
+        const { data, error } = await sb.from('chatbot_services').select('*').order('category').order('item');
+        if (error) { console.warn('Fetch chatbot services error:', error); return; }
+        chatbotServicesCache = data || [];
+        populateChatbotCategoryOptions();
+    }
+
+    function populateChatbotCategoryOptions() {
+        const fromServices = chatbotServicesCache.map(s => s.category).filter(Boolean);
+        const allCategories = [...new Set([...DEFAULT_CHATBOT_CATEGORIES, ...fromServices])];
+
+        const filterSelect = document.getElementById('chatbotCategoryFilter');
+        if (filterSelect) {
+            const current = filterSelect.value;
+            filterSelect.innerHTML = '<option value="">All Categories</option>' +
+                allCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            filterSelect.value = allCategories.includes(current) ? current : '';
+        }
+
+        const formSelect = document.getElementById('cbCategory');
+        if (formSelect) {
+            const current = formSelect.value;
+            formSelect.innerHTML = allCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') +
+                '<option value="__new__">+ Add New Category&hellip;</option>';
+            if (allCategories.includes(current)) formSelect.value = current;
+        }
+    }
+
+    const chatbotSearchInput = document.getElementById('chatbotSearchInput');
+    const chatbotCategoryFilter = document.getElementById('chatbotCategoryFilter');
+    const chatbotTableBody = document.getElementById('chatbotTableBody');
+    const chatbotModal = document.getElementById('chatbotModal');
+    const chatbotForm = document.getElementById('chatbotForm');
+    const chatbotModalTitleEl = document.getElementById('chatbotModalTitle');
+    const cbCategorySelect = document.getElementById('cbCategory');
+    const cbNewCategoryInput = document.getElementById('cbNewCategory');
+    let editingChatbotId = null;
+
+    function getFilteredChatbotServices() {
+        const q = (chatbotSearchInput?.value || '').trim().toLowerCase();
+        const cat = chatbotCategoryFilter?.value || '';
+        return chatbotServicesCache.filter(item => {
+            if (cat && item.category !== cat) return false;
+            if (q && !`${item.item} ${item.category}`.toLowerCase().includes(q)) return false;
+            return true;
+        });
+    }
+
+    function formatChatbotPrice(item) {
+        const price = Number(item.price) || 0;
+        return `Rs. ${price.toLocaleString('en-IN')}${item.price_from ? ' onwards' : ''}`;
+    }
+
+    function renderChatbotTable() {
+        if (!chatbotTableBody) return;
+        const list = getFilteredChatbotServices();
+
+        if (list.length === 0) {
+            chatbotTableBody.innerHTML = `
+                <tr><td colspan="4" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                    <i class="fa-solid fa-comment-dollar" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
+                    No services match your search or filter.
+                </td></tr>`;
+            return;
+        }
+
+        chatbotTableBody.innerHTML = list.map(item => `
+            <tr>
+                <td><span class="badge" style="background: rgba(0, 210, 255, 0.1); color: var(--primary);">${escapeHtml(item.category)}</span></td>
+                <td><strong>${escapeHtml(item.item)}</strong></td>
+                <td><strong style="color: var(--primary);">${escapeHtml(formatChatbotPrice(item))}</strong></td>
+                <td>
+                    <div class="action-btn-group">
+                        <button type="button" class="btn-icon btn-edit-chatbot" data-id="${escapeHtml(item.id)}" title="Edit Service"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button type="button" class="btn-icon btn-icon-del btn-del-chatbot" data-id="${escapeHtml(item.id)}" title="Delete Service"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                </td>
+            </tr>`).join('');
+
+        chatbotTableBody.querySelectorAll('.btn-edit-chatbot').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = chatbotServicesCache.find(s => s.id === btn.getAttribute('data-id'));
+                if (item) openChatbotModal(item);
+            });
+        });
+        chatbotTableBody.querySelectorAll('.btn-del-chatbot').forEach(btn => {
+            btn.addEventListener('click', () => deleteChatbotService(btn.getAttribute('data-id')));
+        });
+    }
+
+    async function deleteChatbotService(id) {
+        if (!confirm('Remove this service from the Price Assistant chatbot?')) return;
+        const { error } = await sb.from('chatbot_services').delete().eq('id', id);
+        if (error) { alert('Could not delete service: ' + error.message); return; }
+        await fetchChatbotServices();
+        renderChatbotTable();
+    }
+
+    cbCategorySelect?.addEventListener('change', () => {
+        const isNew = cbCategorySelect.value === '__new__';
+        if (cbNewCategoryInput) {
+            cbNewCategoryInput.hidden = !isNew;
+            if (isNew) cbNewCategoryInput.focus(); else cbNewCategoryInput.value = '';
+        }
+    });
+
+    function openChatbotModal(item = null) {
+        if (!chatbotModal) return;
+        chatbotForm?.reset();
+        editingChatbotId = item ? item.id : null;
+        populateChatbotCategoryOptions();
+        if (cbNewCategoryInput) cbNewCategoryInput.hidden = true;
+
+        if (chatbotModalTitleEl) {
+            chatbotModalTitleEl.innerHTML = item
+                ? '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Chatbot Service'
+                : '<i class="fa-solid fa-comment-dollar text-primary"></i> Add Chatbot Service';
+        }
+
+        if (item) {
+            document.getElementById('cbCategory').value = item.category || DEFAULT_CHATBOT_CATEGORIES[0];
+            document.getElementById('cbItem').value = item.item || '';
+            document.getElementById('cbPrice').value = item.price || 0;
+            document.getElementById('cbPriceFrom').checked = !!item.price_from;
+            document.getElementById('cbKeywords').value = item.keywords || '';
+        }
+        chatbotModal.style.display = 'flex';
+    }
+
+    document.getElementById('openAddChatbotModalBtn')?.addEventListener('click', () => openChatbotModal());
+    document.getElementById('closeChatbotModalBtn')?.addEventListener('click', () => { if (chatbotModal) chatbotModal.style.display = 'none'; });
+    document.getElementById('cancelChatbotModalBtn')?.addEventListener('click', () => { if (chatbotModal) chatbotModal.style.display = 'none'; });
+
+    chatbotSearchInput?.addEventListener('input', renderChatbotTable);
+    chatbotCategoryFilter?.addEventListener('change', renderChatbotTable);
+
+    if (chatbotForm) {
+        chatbotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!sb) return;
+
+            let category = cbCategorySelect?.value || DEFAULT_CHATBOT_CATEGORIES[0];
+            if (category === '__new__') {
+                category = cbNewCategoryInput?.value?.trim() || '';
+                if (!category) { alert('Type a name for the new category, or pick an existing one.'); return; }
+            }
+
+            const serviceData = {
+                category,
+                item: document.getElementById('cbItem')?.value?.trim() || '',
+                price: Math.max(0, parseFloat(document.getElementById('cbPrice')?.value) || 0),
+                price_from: !!document.getElementById('cbPriceFrom')?.checked,
+                keywords: document.getElementById('cbKeywords')?.value?.trim() || ''
+            };
+
+            const submitBtn = chatbotForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const { error } = editingChatbotId
+                ? await sb.from('chatbot_services').update(serviceData).eq('id', editingChatbotId)
+                : await sb.from('chatbot_services').insert(serviceData);
+
+            if (submitBtn) submitBtn.disabled = false;
+            if (error) {
+                const friendly = error.code === '23505'
+                    ? 'A service with this exact name already exists in this category.'
+                    : error.message;
+                alert('Could not save service: ' + friendly);
+                return;
+            }
+
+            editingChatbotId = null;
+            chatbotModal.style.display = 'none';
+            await fetchChatbotServices();
+            renderChatbotTable();
         });
     }
 
