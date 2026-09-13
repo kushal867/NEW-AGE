@@ -60,6 +60,33 @@ document.addEventListener('DOMContentLoaded', () => {
         'Power & Cases': 'fa-microchip'
     };
 
+    const DEFAULT_PRODUCT_CATEGORIES = ['Storage', 'Memory', 'Peripherals', 'Laptop Hardware', 'Printing', 'Power & Cases'];
+
+    // Keeps the "Category" dropdowns (add/edit form + table filter) in sync
+    // with whatever categories actually exist, so a custom category typed in
+    // via "+ Add New Category..." shows up as a normal option everywhere
+    // from then on - not just for the product that introduced it.
+    function populateCategoryOptions() {
+        const fromProducts = productsCache.map(p => p.category).filter(Boolean);
+        const allCategories = [...new Set([...DEFAULT_PRODUCT_CATEGORIES, ...fromProducts])];
+
+        const filterSelect = document.getElementById('productCategoryFilter');
+        if (filterSelect) {
+            const current = filterSelect.value;
+            filterSelect.innerHTML = '<option value="">All Categories</option>' +
+                allCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            filterSelect.value = allCategories.includes(current) ? current : '';
+        }
+
+        const formSelect = document.getElementById('prodCategory');
+        if (formSelect) {
+            const current = formSelect.value;
+            formSelect.innerHTML = allCategories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') +
+                '<option value="__new__">+ Add New Category&hellip;</option>';
+            if (allCategories.includes(current)) formSelect.value = current;
+        }
+    }
+
     function resolveImageUrl(rawUrl) {
         const url = (rawUrl || '').trim();
         if (!url) return '';
@@ -330,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
         if (error) { console.warn('Fetch products error:', error); return; }
         productsCache = data || [];
+        populateCategoryOptions();
     }
 
     async function fetchVideos() {
@@ -372,8 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const repairStageFilter = document.getElementById('repairStageFilter');
     const repairsTableBody = document.getElementById('repairsTableBody');
 
-    function renderRepairsTable() {
-        if (!repairsTableBody) return;
+    function getFilteredRepairs() {
         let list = repairsCache;
 
         const q = (repairSearchInput?.value || '').trim().toLowerCase();
@@ -388,6 +415,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const stageF = repairStageFilter?.value;
         if (stageF) list = list.filter(r => String(r.stage) === stageF);
+
+        return list;
+    }
+
+    function renderRepairsTable() {
+        if (!repairsTableBody) return;
+        const list = getFilteredRepairs();
 
         if (list.length === 0) {
             repairsTableBody.innerHTML = `
@@ -459,6 +493,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     repairSearchInput?.addEventListener('input', renderRepairsTable);
     repairStageFilter?.addEventListener('change', renderRepairsTable);
+
+    document.getElementById('exportRepairsExcelBtn')?.addEventListener('click', () => {
+        if (typeof XLSX === 'undefined') { alert('Excel export library did not load. Check your connection and try again.'); return; }
+
+        const rows = getFilteredRepairs().map(r => ({
+            'Ticket ID': r.ticket_id || '',
+            'Customer Name': r.customer_name || '',
+            'Phone': r.phone || '',
+            'Device': r.device || '',
+            'Reported Issue': r.issue || '',
+            'Stage': STAGE_NAMES[Number(r.stage) || 1] || '',
+            'Date Received': r.date_received || '',
+            'Estimated Delivery': r.estimated_delivery || '',
+            'Cost': r.cost || '',
+            'Technician Notes': r.technician_notes || '',
+            'Date Created': r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : ''
+        }));
+
+        if (!rows.length) { alert('No repair jobs to export - clear your search/filter or add a job first.'); return; }
+
+        const sheet = XLSX.utils.json_to_sheet(rows);
+        sheet['!cols'] = [
+            { wch: 12 }, { wch: 22 }, { wch: 14 }, { wch: 24 }, { wch: 34 }, { wch: 20 }, { wch: 14 }, { wch: 18 }, { wch: 14 }, { wch: 46 }, { wch: 12 }
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, sheet, 'Repair Jobs');
+        XLSX.writeFile(workbook, `newage-it-repairs-${new Date().toISOString().split('T')[0]}.xlsx`);
+    });
 
     // Modal: New/Edit Repair Job
     const repairModal = document.getElementById('repairModal');
@@ -709,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (pageItems.length === 0) {
             productsTableBody.innerHTML = `
-                <tr><td colspan="9" style="text-align:center; color: var(--text-muted); padding: 30px;">
+                <tr><td colspan="10" style="text-align:center; color: var(--text-muted); padding: 30px;">
                     <i class="fa-solid fa-box-open" style="font-size: 1.5rem; margin-bottom: 10px; display: block;"></i>
                     No products match your search or filters.
                 </td></tr>`;
@@ -732,6 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><span style="text-decoration: line-through; color: #64748b;">${escapeHtml(item.mrp || '')}</span></td>
                     <td><strong style="color: var(--primary);">${escapeHtml(item.price)}</strong></td>
                     <td><span class="status-pill ${item.stock === 'in-stock' ? 'stock' : 'preorder'}">${item.stock === 'in-stock' ? 'In Stock' : 'Available on Order'}</span></td>
+                    <td>${Number(item.stock_qty) || 0}</td>
                     <td>
                         <div class="action-btn-group">
                             <button type="button" class="btn-icon btn-edit-prod" data-id="${escapeHtml(item.id)}" title="Edit Product"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -795,6 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'MRP (NPR)': p.mrp || '',
             'Selling Price (NPR)': p.price || '',
             'Stock Status': p.stock === 'in-stock' ? 'In Stock' : 'Available on Order',
+            'Stock Qty': Number(p.stock_qty) || 0,
             'Image URL': p.image || '',
             'Date Added': p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : ''
         }));
@@ -803,7 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sheet = XLSX.utils.json_to_sheet(rows);
         sheet['!cols'] = [
-            { wch: 16 }, { wch: 34 }, { wch: 46 }, { wch: 12 }, { wch: 16 }, { wch: 16 }, { wch: 40 }, { wch: 12 }
+            { wch: 16 }, { wch: 34 }, { wch: 46 }, { wch: 12 }, { wch: 16 }, { wch: 16 }, { wch: 10 }, { wch: 40 }, { wch: 12 }
         ];
 
         const workbook = XLSX.utils.book_new();
@@ -833,10 +898,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProductsTable();
     }
 
+    const prodCategorySelect = document.getElementById('prodCategory');
+    const prodNewCategoryInput = document.getElementById('prodNewCategory');
+
+    prodCategorySelect?.addEventListener('change', () => {
+        const isNew = prodCategorySelect.value === '__new__';
+        if (prodNewCategoryInput) {
+            prodNewCategoryInput.hidden = !isNew;
+            if (isNew) prodNewCategoryInput.focus(); else prodNewCategoryInput.value = '';
+        }
+    });
+
     function openProductModal(productData = null) {
         if (!productModal) return;
         productForm?.reset();
         editingProductId = productData ? productData.id : null;
+        populateCategoryOptions();
+        if (prodNewCategoryInput) prodNewCategoryInput.hidden = true;
 
         if (productModalTitleEl) {
             productModalTitleEl.innerHTML = productData
@@ -851,6 +929,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('prodMrp').value = productData.mrp || '';
             document.getElementById('prodPrice').value = productData.price || '';
             document.getElementById('prodStock').value = productData.stock || 'in-stock';
+            document.getElementById('prodStockQty').value = productData.stock_qty ?? 0;
             if (prodImageUrlInput) prodImageUrlInput.value = productData.image || '';
         }
         prodImageUrlInput?._previewUpdate?.();
@@ -865,13 +944,21 @@ document.addEventListener('DOMContentLoaded', () => {
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!sb) return;
+
+            let category = document.getElementById('prodCategory')?.value || 'Storage';
+            if (category === '__new__') {
+                category = prodNewCategoryInput?.value?.trim() || '';
+                if (!category) { alert('Type a name for the new category, or pick an existing one.'); return; }
+            }
+
             const prodData = {
                 title: document.getElementById('prodTitle')?.value?.trim() || '',
-                category: document.getElementById('prodCategory')?.value || 'Storage',
+                category,
                 spec: document.getElementById('prodSpec')?.value?.trim() || '',
                 mrp: document.getElementById('prodMrp')?.value?.trim() || '',
                 price: document.getElementById('prodPrice')?.value?.trim() || '',
                 stock: document.getElementById('prodStock')?.value || 'in-stock',
+                stock_qty: Math.max(0, parseInt(document.getElementById('prodStockQty')?.value, 10) || 0),
                 image: prodImageUrlInput?.value?.trim() || ''
             };
 

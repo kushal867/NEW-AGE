@@ -249,6 +249,9 @@
                                 <option value="7">7. Ready for Pickup</option>
                                 <option value="8">8. Delivered</option>
                             </select>
+                            <button type="button" class="btn-secondary" id="exportRepairsExcelBtn" title="Export the repair jobs shown below to an Excel file">
+                                <i class="fa-solid fa-file-excel"></i> Export to Excel
+                            </button>
                             <button type="button" class="btn-primary" id="openNewJobModalBtn">
                                 <i class="fa-solid fa-plus"></i> New Repair Job
                             </button>
@@ -358,6 +361,7 @@
                                     <th>MRP</th>
                                     <th>Selling Price</th>
                                     <th>Status</th>
+                                    <th>Qty</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -545,7 +549,9 @@
                             <option value="Laptop Hardware">Laptop Hardware (Screens/Batteries)</option>
                             <option value="Printing">Printing & Toners</option>
                             <option value="Power & Cases">Power & Cases</option>
+                            <option value="__new__">+ Add New Category&hellip;</option>
                         </select>
+                        <input type="text" id="prodNewCategory" placeholder="Type the new category name" hidden style="margin-top: 8px;">
                     </div>
                 </div>
                 <div class="form-group">
@@ -562,12 +568,19 @@
                         <input type="text" id="prodPrice" placeholder="e.g. NPR 9,800" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="prodStock">Stock Availability</label>
-                    <select id="prodStock" required>
-                        <option value="in-stock" selected>In Stock</option>
-                        <option value="pre-order">Available on Order</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prodStock">Stock Availability</label>
+                        <select id="prodStock" required>
+                            <option value="in-stock" selected>In Stock</option>
+                            <option value="pre-order">Available on Order</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="prodStockQty">Stock Quantity</label>
+                        <input type="number" id="prodStockQty" min="0" step="1" placeholder="e.g. 12" value="0">
+                        <p class="field-hint">For your own tracking - not shown to website visitors.</p>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="prodImageUrl">Product Photo URL (optional)</label>
