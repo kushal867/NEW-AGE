@@ -96,6 +96,9 @@
                 <button type="button" class="menu-item" data-tab="videosTab">
                     <i class="fa-brands fa-tiktok"></i> <span>TikTok Videos</span>
                 </button>
+                <button type="button" class="menu-item" data-tab="siteContentTab">
+                    <i class="fa-solid fa-pen-nib"></i> <span>Site Content</span>
+                </button>
                 <button type="button" class="menu-item" data-tab="settingsTab">
                     <i class="fa-solid fa-gear"></i> <span>Security & Settings</span>
                 </button>
@@ -410,6 +413,68 @@
                                 <!-- Populated dynamically by admin.js -->
                             </tbody>
                         </table>
+                    </div>
+                </section>
+
+                <!-- Tab 6: Site Content -->
+                <section id="siteContentTab" class="tab-pane">
+                    <div class="settings-grid">
+                        <div class="settings-card glass-panel" style="grid-column: 1 / -1;">
+                            <h3><i class="fa-solid fa-pen-nib text-primary"></i> Edit Website Text</h3>
+                            <p>Leave a field blank and save to revert it to the site's normal default text. Product/video photos are already editable from their own tabs.</p>
+
+                            <form id="siteContentForm" class="settings-form">
+                                <h4 class="content-form-heading">Homepage Hero</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="scHeroTitle1">Title - Line 1</label>
+                                        <input type="text" id="scHeroTitle1" data-key="hero_title_line1" placeholder="Default: NEWAGE I.T.">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="scHeroTitle2">Title - Line 2 (accent color)</label>
+                                        <input type="text" id="scHeroTitle2" data-key="hero_title_line2" placeholder="Default: SOLUTION CENTER">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scHeroTagline">Tagline</label>
+                                    <input type="text" id="scHeroTagline" data-key="hero_tagline" placeholder="Default: Technology repaired properly.">
+                                </div>
+                                <div class="form-group">
+                                    <label for="scHeroDesc">Description</label>
+                                    <input type="text" id="scHeroDesc" data-key="hero_desc" placeholder="Default: From chip-level repairs to complete IT solutions...">
+                                </div>
+
+                                <h4 class="content-form-heading">Contact Details</h4>
+                                <p class="field-hint" style="margin-top: -8px; margin-bottom: 14px;">These update everywhere on the site at once - navbar, contact section, footer, and every WhatsApp/call button.</p>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="scPhone">Phone / WhatsApp Number</label>
+                                        <input type="text" id="scPhone" data-key="contact_phone" placeholder="Default: +977 9841301930">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="scEmail">Email</label>
+                                        <input type="email" id="scEmail" data-key="contact_email" placeholder="Default: cyberbhagwati@gmail.com">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scAddress">Address (Contact section)</label>
+                                    <input type="text" id="scAddress" data-key="contact_address" placeholder="Default: Tinthana, Chandragiri-15, Kathmandu, Nepal">
+                                </div>
+                                <div class="form-group">
+                                    <label for="scHours">Operating Hours (Contact section)</label>
+                                    <input type="text" id="scHours" data-key="contact_hours" placeholder="Default: Sunday - Friday: 7:30 AM - 7:30 PM (Saturday on call)">
+                                </div>
+
+                                <h4 class="content-form-heading">Footer</h4>
+                                <div class="form-group">
+                                    <label for="scFooterBlurb">Footer Tagline (under the logo)</label>
+                                    <input type="text" id="scFooterBlurb" data-key="footer_blurb" placeholder="Default: Kathmandu, Nepal &bull; ESTD. 2069 B.S.">
+                                </div>
+
+                                <button type="submit" class="btn-primary">Save Website Text</button>
+                                <div id="siteContentFeedback" class="login-feedback" style="display: none; margin-top: 10px;"></div>
+                            </form>
+                        </div>
                     </div>
                 </section>
 

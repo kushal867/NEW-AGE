@@ -39,6 +39,75 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =========================================================================
+  // 0b. Site content (admin-editable text) - overrides the hardcoded
+  //     defaults below only where the admin has actually saved a value, so
+  //     the site behaves exactly as before until someone customizes it.
+  // =========================================================================
+  const SITE_CONTENT_DEFAULTS = {
+    contact_phone: "+977 9841301930",
+    contact_email: "cyberbhagwati@gmail.com",
+  };
+  const siteContent = {};
+
+  function getContentPhone() {
+    return siteContent.contact_phone || SITE_CONTENT_DEFAULTS.contact_phone;
+  }
+  function getContentPhoneDigits() {
+    return getContentPhone().replace(/\D/g, "") || "9779841301930";
+  }
+  function getContentEmail() {
+    return siteContent.contact_email || SITE_CONTENT_DEFAULTS.contact_email;
+  }
+
+  // Updates an element's text without wiping out an icon child
+  // (e.g. <a><i class="fa-solid fa-phone"></i> +977 ...</a>).
+  function applyContentValue(el, value) {
+    const hasIconChild = Array.from(el.children).some((c) => c.tagName === "I");
+    if (hasIconChild) {
+      const textNode = Array.from(el.childNodes).find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+      );
+      if (textNode) textNode.textContent = " " + value;
+      else el.appendChild(document.createTextNode(" " + value));
+    } else {
+      el.textContent = value;
+    }
+  }
+
+  async function loadSiteContent() {
+    if (sb) {
+      try {
+        const { data, error } = await sb.from("site_content").select("key, value");
+        if (error) throw error;
+        (data || []).forEach((row) => { siteContent[row.key] = row.value; });
+      } catch (e) {
+        console.warn("Site content load error:", e);
+      }
+    }
+
+    document.querySelectorAll("[data-content-key]").forEach((el) => {
+      const value = siteContent[el.getAttribute("data-content-key")];
+      if (value) applyContentValue(el, value);
+    });
+
+    const defaultDigits = "9779841301930";
+    const phoneDigits = getContentPhoneDigits();
+    if (phoneDigits !== defaultDigits) {
+      document.querySelectorAll(`a[href*="${defaultDigits}"]`).forEach((a) => {
+        a.setAttribute("href", a.getAttribute("href").split(defaultDigits).join(phoneDigits));
+      });
+    }
+
+    const email = getContentEmail();
+    if (email !== SITE_CONTENT_DEFAULTS.contact_email) {
+      document.querySelectorAll(`a[href^="mailto:${SITE_CONTENT_DEFAULTS.contact_email}"]`).forEach((a) => {
+        a.setAttribute("href", a.getAttribute("href").replace(SITE_CONTENT_DEFAULTS.contact_email, email));
+      });
+    }
+  }
+  loadSiteContent();
+
+  // =========================================================================
   // 1. Navbar: scroll state + mobile menu
   // =========================================================================
   const navbar = document.getElementById("navbar");
@@ -711,7 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const waMessage = encodeURIComponent(
       `Hello NewAge I.T. Solution Center, I am inquiring about my repair ticket ${item.ticket_id} for my ${item.device}. Could you please update me?`,
     );
-    const waLink = `https://wa.me/9779841301930?text=${waMessage}`;
+    const waLink = `https://wa.me/${getContentPhoneDigits()}?text=${waMessage}`;
 
     const timelineHtml = TIMELINE_NODES.map((node, idx) => {
       const isDone = node.stages[node.stages.length - 1] < stage;
@@ -772,7 +841,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderNotFound(query) {
-    const waLink = `https://wa.me/9779841301930?text=${encodeURIComponent("Hello NewAge I.T., I searched for repair ticket or phone: " + query + " but could not find it. Could you please assist me?")}`;
+    const waLink = `https://wa.me/${getContentPhoneDigits()}?text=${encodeURIComponent("Hello NewAge I.T., I searched for repair ticket or phone: " + query + " but could not find it. Could you please assist me?")}`;
     trackResult.innerHTML = `
             <div class="track-error">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -780,7 +849,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <p>We could not find an active repair matching "${escapeHtml(query)}". Verify the ticket ID on your receipt, or the phone number given at drop-off.</p>
                 <div class="track-error-actions">
                     <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-solid"><i class="fa-brands fa-whatsapp"></i> Ask on WhatsApp</a>
-                    <a href="tel:+9779841301930" class="btn-ghost"><i class="fa-solid fa-phone"></i> Call +977 9841301930</a>
+                    <a href="tel:+${getContentPhoneDigits()}" class="btn-ghost"><i class="fa-solid fa-phone"></i> Call ${escapeHtml(getContentPhone())}</a>
                 </div>
             </div>
         `;
@@ -894,7 +963,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const waText = encodeURIComponent(
         `Hello NewAge I.T. Solution Center, I just submitted an inquiry on your website!\n\nTicket ID: ${ticketId}\nName: ${name}\nPhone: ${phone}\nService: ${service}\nMessage: ${message}`,
       );
-      const waUrl = `https://wa.me/9779841301930?text=${waText}`;
+      const waUrl = `https://wa.me/${getContentPhoneDigits()}?text=${waText}`;
 
       setTimeout(() => {
         submitBtn.disabled = false;
@@ -1015,7 +1084,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <p class="product-spec">${escapeHtml(p.spec)}</p>
                             <div class="product-price-row">
                                 <div class="price-box">${p.mrp ? `<span class="mrp">${escapeHtml(p.mrp)}</span>` : ""}<span class="price">${escapeHtml(p.price)}</span></div>
-                                <a href="https://wa.me/9779841301930?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="btn-buy-wa"><i class="fa-brands fa-whatsapp"></i> Order</a>
+                                <a href="https://wa.me/${getContentPhoneDigits()}?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="btn-buy-wa"><i class="fa-brands fa-whatsapp"></i> Order</a>
                             </div>
                         </div>
                     </div>
@@ -1718,7 +1787,7 @@ document.addEventListener("DOMContentLoaded", () => {
     howareyou: "<p>Running perfectly, thanks for asking! What repair or service would you like a price for?</p>",
     thanks: "<p>You're welcome! Anything else I can look up for you?</p>",
     bye: "<p>Take care! We're here whenever you need us — come back any time.</p>",
-    human: `<p>Sure — our team can help directly:</p><p><a href="https://wa.me/9779841301930" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Chat on WhatsApp <i class="fa-brands fa-whatsapp"></i></a> or call <a href="tel:+9779841301930" style="color:var(--accent); font-weight:600;">+977 9841301930</a>.</p>`,
+    human: () => `<p>Sure — our team can help directly:</p><p><a href="https://wa.me/${getContentPhoneDigits()}" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Chat on WhatsApp <i class="fa-brands fa-whatsapp"></i></a> or call <a href="tel:+${getContentPhoneDigits()}" style="color:var(--accent); font-weight:600;">${escapeHtml(getContentPhone())}</a>.</p>`,
   };
 
   const priceBotToggle = document.getElementById("priceBotToggle");
@@ -1790,7 +1859,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const intent = pbDetectIntent(pbNormalize(text));
       if (intent) {
-        pbReplyWithDelay(PB_INTENT_REPLIES[intent]);
+        const reply = PB_INTENT_REPLIES[intent];
+        pbReplyWithDelay(typeof reply === "function" ? reply() : reply);
         return;
       }
 
@@ -1800,7 +1870,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         pbReplyWithDelay(`
                     <p>I couldn't match that to a listed service. Try a shorter phrase (e.g. "laptop screen" or "printer service"), or ask our team directly:</p>
-                    <p><a href="https://wa.me/9779841301930" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Ask on WhatsApp <i class="fa-brands fa-whatsapp"></i></a></p>
+                    <p><a href="https://wa.me/${getContentPhoneDigits()}" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Ask on WhatsApp <i class="fa-brands fa-whatsapp"></i></a></p>
                 `);
       }
     }

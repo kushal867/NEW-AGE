@@ -297,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inquiriesTab: 'Customer Inquiries & Messages',
         productsTab: 'In-Store Product Catalogue',
         videosTab: 'Featured TikTok Tech Videos',
+        siteContentTab: 'Website Text & Content',
         settingsTab: 'System Security & Database Settings'
     };
 
@@ -311,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tabId === 'inquiriesTab') { fetchInquiries().then(renderInquiriesTable); }
         if (tabId === 'productsTab') { fetchProducts().then(renderProductsTable); }
         if (tabId === 'videosTab') { fetchVideos().then(renderVideosTable); }
+        if (tabId === 'siteContentTab') loadSiteContentForm();
     }
 
     menuItems.forEach(item => {
@@ -1126,6 +1128,69 @@ document.addEventListener('DOMContentLoaded', () => {
             videoModal.style.display = 'none';
             await fetchVideos();
             renderVideosTable();
+        });
+    }
+
+    // =========================================================================
+    // 8b. Site Content Tab (admin-editable homepage text)
+    // =========================================================================
+    let siteContentCache = {};
+    const siteContentForm = document.getElementById('siteContentForm');
+    const siteContentFeedback = document.getElementById('siteContentFeedback');
+
+    async function loadSiteContentForm() {
+        if (!sb || !siteContentForm) return;
+        const { data, error } = await sb.from('site_content').select('key, value');
+        if (error) { console.warn('Fetch site content error:', error); return; }
+        siteContentCache = {};
+        (data || []).forEach(row => { siteContentCache[row.key] = row.value; });
+
+        siteContentForm.querySelectorAll('[data-key]').forEach(input => {
+            input.value = siteContentCache[input.getAttribute('data-key')] || '';
+        });
+    }
+
+    function showSiteContentFeedback(msg, type) {
+        if (!siteContentFeedback) return;
+        siteContentFeedback.style.display = 'block';
+        siteContentFeedback.className = `login-feedback ${type}`;
+        siteContentFeedback.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i> ${escapeHtml(msg)}`;
+    }
+
+    if (siteContentForm) {
+        siteContentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!sb) return;
+
+            const inputs = Array.from(siteContentForm.querySelectorAll('[data-key]'));
+            const toUpsert = [];
+            const toDelete = [];
+            inputs.forEach(input => {
+                const key = input.getAttribute('data-key');
+                const value = input.value.trim();
+                if (value) toUpsert.push({ key, value });
+                else toDelete.push(key);
+            });
+
+            const submitBtn = siteContentForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            try {
+                if (toUpsert.length) {
+                    const { error } = await sb.from('site_content').upsert(toUpsert, { onConflict: 'key' });
+                    if (error) throw error;
+                }
+                if (toDelete.length) {
+                    const { error } = await sb.from('site_content').delete().in('key', toDelete);
+                    if (error) throw error;
+                }
+                showSiteContentFeedback('Website text saved - live on the site now.', 'success');
+                await loadSiteContentForm();
+            } catch (err) {
+                showSiteContentFeedback('Could not save: ' + err.message, 'error');
+            }
+
+            if (submitBtn) submitBtn.disabled = false;
         });
     }
 

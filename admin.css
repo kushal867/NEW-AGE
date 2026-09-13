@@ -1172,6 +1172,22 @@ h1, h2, h3, h4 {
     margin-bottom: 20px;
 }
 
+.content-form-heading {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--primary);
+    margin: 22px 0 14px;
+    padding-top: 18px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.content-form-heading:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
 /* ==========================================================================
    Responsive Overrides
    ========================================================================== */
