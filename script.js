@@ -1370,13 +1370,29 @@ document.addEventListener("DOMContentLoaded", () => {
             `Hello NewAge IT, I am interested in buying the ${p.title} (${p.price}).`,
           );
           const isStock = p.stock === "in-stock";
+          const isOutOfStock = isStock && Number(p.stock_qty) <= 0;
+          const badgeClass = isOutOfStock
+            ? "out-of-stock"
+            : isStock
+              ? "in-stock"
+              : "pre-order";
+          const badgeIcon = isOutOfStock
+            ? "fa-ban"
+            : isStock
+              ? "fa-check"
+              : "fa-clock";
+          const badgeLabel = isOutOfStock
+            ? "Out of Stock"
+            : isStock
+              ? "In Stock"
+              : "Fast Sourcing";
           const resolvedImg = resolveImageUrl(p.image);
           const mediaHtml = resolvedImg
             ? `<img src="${escapeHtml(resolvedImg)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'fa-solid ${icon}\\'></i>'">`
             : `<i class="fa-solid ${icon}"></i>`;
           return `
                     <div class="product-card">
-                        <div class="product-badge ${isStock ? "in-stock" : "pre-order"}"><i class="fa-solid ${isStock ? "fa-check" : "fa-clock"}"></i> ${isStock ? "In Stock" : "Fast Sourcing"}</div>
+                        <div class="product-badge ${badgeClass}"><i class="fa-solid ${badgeIcon}"></i> ${badgeLabel}</div>
                         <div class="product-icon-wrap${resolvedImg ? " has-photo" : ""}">${mediaHtml}</div>
                         <div class="product-info">
                             <span class="product-cat">${escapeHtml(p.category)}</span>
