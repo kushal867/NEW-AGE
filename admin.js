@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stockf_all: { en: 'In Stock & On Order', np: 'स्टकमा र अर्डरमा' },
         stockf_instock: { en: 'In Stock Only', np: 'स्टकमा मात्र' },
         stockf_onorder: { en: 'Available on Order Only', np: 'अर्डरमा मात्र उपलब्ध' },
+        stockf_outofstock: { en: 'Out of Stock Only', np: 'स्टक सकिएका मात्र' },
         products_add_btn: { en: 'Add Product', np: 'प्रोडक्ट थप्नुहोस्' },
         bulk_delete_btn: { en: 'Delete Selected', np: 'छानिएका मेटाउनुहोस्' },
         bulk_clear_btn: { en: 'Clear selection', np: 'छनोट हटाउनुहोस्' },
@@ -233,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pm_label_stock: { en: 'Stock Availability', np: 'स्टक उपलब्धता' },
         stockf_instock_opt: { en: 'In Stock', np: 'स्टकमा छ' },
         stockf_onorder_opt: { en: 'Available on Order', np: 'अर्डरमा उपलब्ध' },
+        stockf_outofstock_opt: { en: 'Out of Stock', np: 'स्टक सकियो' },
         pm_label_qty: { en: 'Stock Quantity', np: 'स्टक परिमाण' },
         pm_hint_qty: { en: 'For your own tracking - not shown to website visitors.', np: 'तपाईंको आफ्नै ट्र्याकिङका लागि - वेबसाइट भ्रमणकर्तालाई देखाइँदैन।' },
         pm_label_photo: { en: 'Product Photo URL (optional)', np: 'प्रोडक्ट फोटो URL (वैकल्पिक)' },
@@ -1063,6 +1065,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function productStockMeta(stock) {
+        if (stock === 'in-stock') return { cls: 'stock', label: 'In Stock' };
+        if (stock === 'out-of-stock') return { cls: 'outofstock', label: 'Out of Stock' };
+        return { cls: 'preorder', label: 'Available on Order' };
+    }
+
     function renderProductsTable() {
         if (!productsTableBody) return;
         const filtered = getFilteredProducts();
@@ -1097,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><small style="color: var(--text-muted);">${escapeHtml(item.spec)}</small></td>
                     <td><span style="text-decoration: line-through; color: #64748b;">${escapeHtml(item.mrp || '')}</span></td>
                     <td><strong style="color: var(--primary);">${escapeHtml(item.price)}</strong></td>
-                    <td><span class="status-pill ${item.stock === 'in-stock' ? 'stock' : 'preorder'}">${item.stock === 'in-stock' ? 'In Stock' : 'Available on Order'}</span></td>
+                    <td><span class="status-pill ${productStockMeta(item.stock).cls}">${productStockMeta(item.stock).label}</span></td>
                     <td>${Number(item.stock_qty) || 0}</td>
                     <td>
                         <div class="action-btn-group">
@@ -1161,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'Specifications': p.spec || '',
             'MRP (NPR)': p.mrp || '',
             'Selling Price (NPR)': p.price || '',
-            'Stock Status': p.stock === 'in-stock' ? 'In Stock' : 'Available on Order',
+            'Stock Status': productStockMeta(p.stock).label,
             'Stock Qty': Number(p.stock_qty) || 0,
             'Image URL': p.image || '',
             'Date Added': p.created_at ? new Date(p.created_at).toISOString().split('T')[0] : ''

@@ -1370,7 +1370,9 @@ document.addEventListener("DOMContentLoaded", () => {
             `Hello NewAge IT, I am interested in buying the ${p.title} (${p.price}).`,
           );
           const isStock = p.stock === "in-stock";
-          const isOutOfStock = isStock && Number(p.stock_qty) <= 0;
+          const isOutOfStock =
+            p.stock === "out-of-stock" ||
+            (isStock && Number(p.stock_qty) <= 0);
           const badgeClass = isOutOfStock
             ? "out-of-stock"
             : isStock
