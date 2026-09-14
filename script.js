@@ -253,6 +253,288 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =========================================================================
+  // 1c. Language toggle (English / Nepali) - persisted, no page reload.
+  //     Admin-editable fields (data-content-key) are intentionally left
+  //     alone; they stay whatever the admin typed regardless of language.
+  // =========================================================================
+  const LANG_STORAGE_KEY = "NEWAGE_LANG";
+  const I18N = {
+    nav_home: { en: "Home", np: "गृह पृष्ठ" },
+    nav_services: { en: "Services", np: "सेवाहरू" },
+    nav_repairs: { en: "Repairs", np: "मर्मत" },
+    nav_custompc: { en: "Custom PC", np: "कस्टम पीसी" },
+    nav_products: { en: "Products", np: "प्रोडक्टहरू" },
+    nav_about: { en: "About", np: "हाम्रो बारे" },
+    nav_contact: { en: "Contact", np: "सम्पर्क" },
+    theme_label: { en: "Theme", np: "थिम" },
+    lang_label: { en: "Language", np: "भाषा" },
+    nav_track_repair: { en: "Track Repair", np: "मर्मत ट्र्याक गर्नुहोस्" },
+    hero_status: { en: "REPAIR LAB ONLINE", np: "मर्मत ल्याब अनलाइन छ" },
+    hero_stack_1: { en: "Computer Repair.", np: "कम्प्युटर मर्मत।" },
+    hero_stack_2: { en: "Electronics.", np: "इलेक्ट्रोनिक्स।" },
+    hero_stack_3: { en: "IT Solutions.", np: "आईटी समाधान।" },
+    hero_stack_4: { en: "Custom Systems.", np: "कस्टम सिस्टम।" },
+    hero_book_repair: { en: "Book a Repair", np: "मर्मत बुक गर्नुहोस्" },
+    hero_explore_services: { en: "Explore Services", np: "सेवाहरू हेर्नुहोस्" },
+    hero_meta: { en: "Kathmandu • Since 2069 B.S.", np: "काठमाडौं • २०६९ सालदेखि" },
+    hero_scroll: { en: "Scroll", np: "स्क्रोल" },
+    stat_years: { en: "Years of Experience", np: "वर्षको अनुभव" },
+    stat_devices: { en: "Devices Serviced", np: "मर्मत गरिएका डिभाइस" },
+    stat_diagnostics: { en: "Typical Diagnostics", np: "सामान्य परीक्षण समय" },
+    stat_focus: { en: "Customer Focus", np: "ग्राहक सन्तुष्टि" },
+    services_eyebrow: { en: "01 — Services", np: "०१ — सेवाहरू" },
+    services_h2: { en: "What We Actually Do", np: "हामी वास्तवमा के गर्छौं" },
+    services_p: {
+      en: "Professional technology services from component-level repair to complete IT infrastructure.",
+      np: "कम्पोनेन्ट स्तरको मर्मतदेखि पूर्ण आईटी पूर्वाधारसम्म व्यावसायिक प्रविधि सेवाहरू।",
+    },
+    svc_a_title: { en: "Hardware & Chip-Level Repair", np: "हार्डवेयर र चिप-स्तरको मर्मत" },
+    tag_laptops: { en: "Laptops", np: "ल्यापटप" },
+    tag_desktops: { en: "Desktops", np: "डेस्कटप" },
+    tag_motherboards: { en: "Motherboards", np: "मदरबोर्ड" },
+    tag_mobile_devices: { en: "Mobile Devices", np: "मोबाइल डिभाइस" },
+    tag_tvs: { en: "TVs", np: "टिभी" },
+    tag_printers: { en: "Printers", np: "प्रिन्टर" },
+    tag_inverters: { en: "Inverters", np: "इन्भर्टर" },
+    svc_b_title: { en: "Software & Systems", np: "सफ्टवेयर र सिस्टम" },
+    tag_os_install: { en: "OS Installation", np: "ओएस इन्स्टलेसन" },
+    tag_virus_removal: { en: "Virus Removal", np: "भाइरस हटाउने" },
+    tag_data_recovery: { en: "Data Recovery", np: "डाटा रिकभरी" },
+    tag_sys_opt: { en: "System Optimization", np: "सिस्टम अप्टिमाइजेसन" },
+    tag_app_troubleshoot: { en: "App Troubleshooting", np: "एप समस्या समाधान" },
+    svc_c_title: { en: "Custom PC & Workstations", np: "कस्टम पीसी र वर्कस्टेसन" },
+    tag_gaming_pcs: { en: "Gaming PCs", np: "गेमिङ पीसी" },
+    tag_workstations: { en: "Workstations", np: "वर्कस्टेसन" },
+    tag_office_systems: { en: "Office Systems", np: "अफिस सिस्टम" },
+    tag_content_pcs: { en: "Content Creation PCs", np: "कन्टेन्ट क्रिएसन पीसी" },
+    svc_d_title: { en: "Networking & IT", np: "नेटवर्किङ र आईटी" },
+    tag_data_backup: { en: "Data Backup", np: "डाटा ब्याकअप" },
+    tag_office_infra: { en: "Office Infrastructure", np: "अफिस पूर्वाधार" },
+    svc_e_title: { en: "Electronics & Power", np: "इलेक्ट्रोनिक्स र पावर" },
+    tag_solar: { en: "Solar Inverters", np: "सोलार इन्भर्टर" },
+    tag_power_supplies: { en: "Power Supplies", np: "पावर सप्लाई" },
+    tag_smart_tvs: { en: "Smart TVs", np: "स्मार्ट टिभी" },
+    tag_audio: { en: "Audio Systems", np: "अडियो सिस्टम" },
+    tag_electronic_projects: { en: "Electronic Projects", np: "इलेक्ट्रोनिक प्रोजेक्ट" },
+    svc_f_title: { en: "Documentation & Printing", np: "कागजात र प्रिन्टिङ" },
+    tag_printing: { en: "Printing", np: "प्रिन्टिङ" },
+    tag_scanning: { en: "Scanning", np: "स्क्यानिङ" },
+    tag_photocopy: { en: "Photocopy", np: "फोटोकपी" },
+    tag_typing: { en: "Typing", np: "टाइपिङ" },
+    tag_photo_printing: { en: "Photo Printing", np: "फोटो प्रिन्टिङ" },
+    tag_mobile_topup: { en: "Mobile Top-up", np: "मोबाइल टपअप" },
+    diagnose_eyebrow: { en: "02 — Diagnose", np: "०२ — परीक्षण" },
+    diagnose_h2: { en: "Something wrong with your device?", np: "तपाईंको डिभाइसमा समस्या छ?" },
+    diagnose_p: {
+      en: "Tell us what happened. We'll help you find the problem.",
+      np: "के भयो हामीलाई बताउनुहोस्। हामी समस्या पत्ता लगाउन मद्दत गर्छौं।",
+    },
+    diagnose_step1: { en: "STEP 1 / SELECT DEVICE", np: "चरण १ / डिभाइस छान्नुहोस्" },
+    diagnose_step2: { en: "STEP 2 / SELECT PROBLEM", np: "चरण २ / समस्या छान्नुहोस्" },
+    diagnose_likely: { en: "LIKELY DIAGNOSIS", np: "सम्भावित निदान" },
+    diagnose_request_btn: { en: "Request Diagnosis", np: "निदान अनुरोध गर्नुहोस्" },
+    repairs_eyebrow: { en: "03 — Repairs", np: "०३ — मर्मत" },
+    repairs_h2: { en: "Track Your Repair", np: "आफ्नो मर्मत ट्र्याक गर्नुहोस्" },
+    repairs_p: {
+      en: "Enter your Repair ID or the phone number used at drop-off to see live status.",
+      np: "लाइभ स्थिति हेर्न आफ्नो मर्मत आईडी वा ड्रप-अफमा प्रयोग गरिएको फोन नम्बर हाल्नुहोस्।",
+    },
+    track_input_placeholder: {
+      en: "Repair ID (e.g. NA-1001) or phone number",
+      np: "मर्मत आईडी (जस्तै NA-1001) वा फोन नम्बर",
+    },
+    track_btn: { en: "Track", np: "ट्र्याक गर्नुहोस्" },
+    track_try_sample: { en: "Try a sample:", np: "नमूना प्रयास गर्नुहोस्:" },
+    custompc_eyebrow: { en: "04 — Custom PC", np: "०४ — कस्टम पीसी" },
+    custompc_h2: { en: "Built For Your Work.", np: "तपाईंको कामका लागि बनाइएको।" },
+    custompc_p: {
+      en: "From competitive gaming to professional workloads, we build systems around how you actually work — not a catalogue template.",
+      np: "प्रतिस्पर्धात्मक गेमिङदेखि व्यावसायिक कामसम्म, हामी क्याटलग टेम्प्लेट होइन, तपाईं कसरी काम गर्नुहुन्छ सो अनुसार सिस्टम बनाउँछौं।",
+    },
+    custompc_btn: { en: "Build Your PC", np: "आफ्नो पीसी बनाउनुहोस्" },
+    workshop_eyebrow: { en: "05 — The Lab", np: "०५ — ल्याब" },
+    workshop_h2: { en: "Inside The Repair Lab", np: "मर्मत ल्याब भित्र" },
+    workshop_p: {
+      en: "Real bench work, not a stock photo — drop your own shop photography into these slots any time.",
+      np: "वास्तविक कार्यस्थल, स्टक फोटो होइन — यहाँ आफ्नै पसलका तस्बिरहरू जुनसुकै बेला राख्न सकिन्छ।",
+    },
+    slide_repair_lab: { en: "REPAIR LAB", np: "मर्मत ल्याब" },
+    slide_board_diag: { en: "BOARD DIAGNOSTICS", np: "बोर्ड परीक्षण" },
+    slide_pc_assembly: { en: "PC ASSEMBLY", np: "पीसी एसेम्बली" },
+    slide_electronics: { en: "ELECTRONICS", np: "इलेक्ट्रोनिक्स" },
+    slide_quality_check: { en: "QUALITY CHECK", np: "गुणस्तर जाँच" },
+    slide_finished_systems: { en: "FINISHED SYSTEMS", np: "तयार सिस्टम" },
+    why_eyebrow: { en: "06 — Why NewAge", np: "०६ — किन न्यूएज" },
+    why_h2: { en: "Why People Bring Their Devices To Us", np: "मानिसहरूले किन आफ्ना डिभाइस हामीलाई ल्याउँछन्" },
+    why_1_title: { en: "Experienced technicians", np: "अनुभवी प्राविधिकहरू" },
+    why_1_p: {
+      en: "Certified, hands-on engineers who have handled thousands of repair tickets since 2069 B.S.",
+      np: "प्रमाणित इन्जिनियरहरू जसले २०६९ सालदेखि हजारौं मर्मत टिकट सम्हालेका छन्।",
+    },
+    why_2_title: { en: "Component-level diagnosis", np: "कम्पोनेन्ट स्तरको निदान" },
+    why_2_p: {
+      en: "We trace faults to the exact IC or trace instead of swapping whole boards by default.",
+      np: "हामी सामान्यतया पूरै बोर्ड नबदली सही IC वा ट्रेससम्म खराबी पत्ता लगाउँछौं।",
+    },
+    why_3_title: { en: "Genuine replacement parts", np: "मौलिक रिप्लेसमेन्ट पार्ट्स" },
+    why_3_p: {
+      en: "Original and OEM-grade components only, with the part sourced before we touch your device.",
+      np: "मौलिक र OEM-स्तरका पार्ट्स मात्र प्रयोग गरिन्छ, डिभाइस छुनुअघि नै पार्ट्स ल्याइन्छ।",
+    },
+    why_4_title: { en: "Transparent repair process", np: "पारदर्शी मर्मत प्रक्रिया" },
+    why_4_p: {
+      en: "A quote before any repair begins, and a live ticket you can track from drop-off to pickup.",
+      np: "मर्मत सुरु हुनुअघि नै मूल्य कोटेसन, र ड्रप-अफदेखि पिकअपसम्म ट्र्याक गर्न सकिने लाइभ टिकट।",
+    },
+    why_5_title: { en: "Business IT support", np: "व्यावसायिक आईटी सहयोग" },
+    why_5_p: {
+      en: "Networking, backups and infrastructure for small offices, not just single-device repairs.",
+      np: "साना अफिसका लागि नेटवर्किङ, ब्याकअप र पूर्वाधार, एउटै डिभाइस मर्मत मात्र होइन।",
+    },
+    why_6_title: { en: "Post-repair testing", np: "मर्मत पछिको परीक्षण" },
+    why_6_p: {
+      en: "Every job is stress-tested before collection, with a warranty slip on completed repairs.",
+      np: "सुम्पनुअघि हरेक काम राम्ररी परीक्षण गरिन्छ, र सम्पन्न मर्मतमा वारेन्टी स्लिप दिइन्छ।",
+    },
+    products_eyebrow: { en: "07 — Store", np: "०७ — स्टोर" },
+    products_h2: { en: "Products & Peripherals", np: "प्रोडक्ट र सामग्री" },
+    products_p: {
+      en: "Genuine parts, high-speed storage, and accessories available in-store.",
+      np: "मौलिक पार्ट्स, हाई-स्पिड स्टोरेज, र एक्सेसरीहरू पसलमा उपलब्ध छन्।",
+    },
+    videos_h2: { en: "Watch Us in Action", np: "हामीलाई काम गर्दा हेर्नुहोस्" },
+    videos_p: {
+      en: "Diagnostic breakdowns and real repair footage from our TikTok channel.",
+      np: "हाम्रो टिकटक च्यानलबाट निदान विश्लेषण र वास्तविक मर्मत भिडियो।",
+    },
+    videos_follow: { en: "Follow @newageit2069 for daily tech tips", np: "दैनिक टेक टिप्सका लागि @newageit2069 फलो गर्नुहोस्" },
+    contact_eyebrow: { en: "08 — Contact", np: "०८ — सम्पर्क" },
+    contact_h2: { en: "Get In Touch", np: "सम्पर्कमा रहनुहोस्" },
+    contact_p: {
+      en: "Have a damaged device, need a custom PC quote, or want to check part availability? Visit our center or reach out below.",
+      np: "डिभाइस बिग्रियो, कस्टम पीसी कोटेसन चाहियो, वा पार्ट्स उपलब्धता जाँच्नु छ? हाम्रो सेन्टरमा आउनुहोस् वा तल सम्पर्क गर्नुहोस्।",
+    },
+    contact_location_label: { en: "Location", np: "ठेगाना" },
+    contact_hotline_label: { en: "Direct Hotline", np: "सिधा हटलाइन" },
+    contact_email_label: { en: "Email", np: "इमेल" },
+    contact_hours_label: { en: "Operating Hours", np: "सञ्चालन समय" },
+    contact_form_title: { en: "Send Us a Message", np: "हामीलाई सन्देश पठाउनुहोस्" },
+    contact_form_note: {
+      en: "Submitted inquiries are logged and generate an immediate tracking ID.",
+      np: "पठाइएका सोधपुछहरू रेकर्ड हुन्छन् र तुरुन्तै ट्र्याकिङ आईडी बन्छ।",
+    },
+    ph_name: { en: "Your Full Name *", np: "तपाईंको पूरा नाम *" },
+    ph_phone: { en: "Mobile / WhatsApp Number *", np: "मोबाइल / ह्वाट्सएप नम्बर *" },
+    ph_email: { en: "Your Email Address *", np: "तपाईंको इमेल ठेगाना *" },
+    opt_select: { en: "Select Service or Inquiry Needed *", np: "सेवा वा सोधपुछ छान्नुहोस् *" },
+    opt_hardware: { en: "Laptop / Desktop / Mobile Hardware Repair", np: "ल्यापटप / डेस्कटप / मोबाइल हार्डवेयर मर्मत" },
+    opt_tv: { en: "TV / Printer / Inverter / UPS Repair", np: "टिभी / प्रिन्टर / इन्भर्टर / यूपीएस मर्मत" },
+    opt_software: { en: "Software Installation, Virus Removal & OS", np: "सफ्टवेयर इन्स्टलेसन, भाइरस हटाउने र ओएस" },
+    opt_custom: { en: "Custom Gaming PC / Workstation Build", np: "कस्टम गेमिङ पीसी / वर्कस्टेसन निर्माण" },
+    opt_parts: { en: "Computer Parts, SSD, RAM & Peripherals", np: "कम्प्युटर पार्ट्स, SSD, RAM र एक्सेसरी" },
+    opt_docs: { en: "Document Printing, Scanning & Mobile Top-up", np: "कागजात प्रिन्टिङ, स्क्यानिङ र मोबाइल टपअप" },
+    opt_other: { en: "General IT Consulting / Other Inquiries", np: "सामान्य आईटी परामर्श / अन्य सोधपुछ" },
+    ph_message: {
+      en: "Describe your device brand, model, and the issue you are facing...",
+      np: "आफ्नो डिभाइसको ब्रान्ड, मोडेल, र समस्या बताउनुहोस्...",
+    },
+    contact_submit_btn: { en: "Submit & Get Tracking Ticket", np: "पठाउनुहोस् र ट्र्याकिङ टिकट पाउनुहोस्" },
+    map_address: {
+      en: "Tinthana, Chandragiri-15, Kathmandu, Nepal • Near Kalanki & Ring Road Access",
+      np: "टिन्थाना, चन्द्रागिरी-१५, काठमाडौं, नेपाल • कलंकी र रिङ रोड नजिक",
+    },
+    map_open_btn: { en: "Open in Google Maps", np: "गुगल म्यापमा खोल्नुहोस्" },
+    wa_tooltip: { en: "Chat with NewAge I.T.", np: "न्यूएज आईटीसँग च्याट गर्नुहोस्" },
+    pb_title: { en: "Price Assistant", np: "मूल्य सहायक" },
+    pb_status: { en: "Online • replies instantly", np: "अनलाइन • तुरुन्तै जवाफ दिन्छ" },
+    footer_status: { en: "REPAIR LAB STATUS • ONLINE", np: "मर्मत ल्याब स्थिति • अनलाइन" },
+    footer_services_head: { en: "Services", np: "सेवाहरू" },
+    footer_link_repair: { en: "Repair", np: "मर्मत" },
+    footer_link_networking: { en: "Networking", np: "नेटवर्किङ" },
+    footer_follow_head: { en: "Follow", np: "फलो गर्नुहोस्" },
+    footer_copyright: {
+      en: "© 2026 NewAge I.T. Solution Center. All rights reserved.",
+      np: "© २०२६ न्यूएज आईटी सोलुसन सेन्टर। सर्वाधिकार सुरक्षित।",
+    },
+    stage_received: { en: "Device Received", np: "डिभाइस प्राप्त भयो" },
+    stage_diagnosing: { en: "Diagnosing", np: "परीक्षण हुँदैछ" },
+    stage_awaiting_approval: { en: "Awaiting Approval", np: "स्वीकृतिको पर्खाइमा" },
+    stage_repairing: { en: "Repairing", np: "मर्मत हुँदैछ" },
+    stage_quality_check: { en: "Quality Check", np: "गुणस्तर जाँच" },
+    stage_ready: { en: "Ready for Collection", np: "लिन तयार" },
+    timeline_received: { en: "Received", np: "प्राप्त भयो" },
+    timeline_diagnosing: { en: "Diagnosing", np: "परीक्षण" },
+    timeline_awaiting_approval: { en: "Awaiting Approval", np: "स्वीकृति पर्खाइ" },
+    timeline_repairing: { en: "Repairing", np: "मर्मत" },
+    timeline_quality_check: { en: "Quality Check", np: "गुणस्तर जाँच" },
+    timeline_ready: { en: "Ready", np: "तयार" },
+  };
+
+  let currentLang = "en";
+  try {
+    const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+    if (savedLang === "en" || savedLang === "np") currentLang = savedLang;
+  } catch (e) {
+    /* localStorage unavailable */
+  }
+
+  function t(key) {
+    const entry = I18N[key];
+    if (!entry) return "";
+    return entry[currentLang] || entry.en || "";
+  }
+
+  // Both toggle instances (top navbar + mobile dropdown) share this class,
+  // same pattern as the accent-theme toggle above.
+  const langToggleBtns = document.querySelectorAll(".lang-toggle");
+
+  function applyLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.setAttribute("lang", lang === "np" ? "ne" : "en");
+
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const value = t(el.getAttribute("data-i18n"));
+      if (value) applyContentValue(el, value);
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      const value = t(el.getAttribute("data-i18n-placeholder"));
+      if (value) el.setAttribute("placeholder", value);
+    });
+    document.querySelectorAll("[data-i18n-label]").forEach((el) => {
+      const value = t(el.getAttribute("data-i18n-label"));
+      if (value) el.setAttribute("data-label", value);
+    });
+
+    langToggleBtns.forEach((btn) => {
+      btn.querySelectorAll(".lang-toggle-opt").forEach((opt) => {
+        opt.classList.toggle(
+          "is-active",
+          opt.getAttribute("data-lang-option") === lang,
+        );
+      });
+    });
+
+    try {
+      localStorage.setItem(LANG_STORAGE_KEY, lang);
+    } catch (e) {
+      /* localStorage unavailable */
+    }
+  }
+  applyLanguage(currentLang);
+
+  langToggleBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const opt = e.target.closest("[data-lang-option]");
+      const next = opt
+        ? opt.getAttribute("data-lang-option")
+        : currentLang === "en"
+          ? "np"
+          : "en";
+      applyLanguage(next);
+    });
+  });
+
+  // =========================================================================
   // 2. Custom cursor (fine pointer only)
   // =========================================================================
   if (isFinePointer && !prefersReducedMotion) {
@@ -711,23 +993,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // 7. Repair stage definitions
   // =========================================================================
   const STAGE_DEFINITIONS = [
-    { num: 1, title: "Device Received" },
-    { num: 2, title: "Diagnosing" },
-    { num: 3, title: "Awaiting Approval" },
-    { num: 4, title: "Awaiting Approval" },
-    { num: 5, title: "Repairing" },
-    { num: 6, title: "Quality Check" },
-    { num: 7, title: "Ready for Collection" },
-    { num: 8, title: "Ready for Collection" },
+    { num: 1, key: "stage_received" },
+    { num: 2, key: "stage_diagnosing" },
+    { num: 3, key: "stage_awaiting_approval" },
+    { num: 4, key: "stage_awaiting_approval" },
+    { num: 5, key: "stage_repairing" },
+    { num: 6, key: "stage_quality_check" },
+    { num: 7, key: "stage_ready" },
+    { num: 8, key: "stage_ready" },
   ];
   // Collapsed 6-node display timeline (stage numbers 1-8 map onto 6 visual nodes)
   const TIMELINE_NODES = [
-    { label: "Received", stages: [1] },
-    { label: "Diagnosing", stages: [2] },
-    { label: "Awaiting Approval", stages: [3, 4] },
-    { label: "Repairing", stages: [5] },
-    { label: "Quality Check", stages: [6] },
-    { label: "Ready", stages: [7, 8] },
+    { key: "timeline_received", stages: [1] },
+    { key: "timeline_diagnosing", stages: [2] },
+    { key: "timeline_awaiting_approval", stages: [3, 4] },
+    { key: "timeline_repairing", stages: [5] },
+    { key: "timeline_quality_check", stages: [6] },
+    { key: "timeline_ready", stages: [7, 8] },
   ];
 
   // =========================================================================
@@ -792,7 +1074,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderRepairCard(item) {
     const stage = Number(item.stage) || 1;
-    const statusLabel = STAGE_DEFINITIONS[stage - 1]?.title || "In Progress";
+    const statusLabel = t(STAGE_DEFINITIONS[stage - 1]?.key) || "In Progress";
     const waMessage = encodeURIComponent(
       `Hello NewAge I.T. Solution Center, I am inquiring about my repair ticket ${item.ticket_id} for my ${item.device}. Could you please update me?`,
     );
@@ -807,7 +1089,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return `
                 <div class="timeline-node ${cls}">
                     <div class="timeline-dot">${isDone ? '<i class="fa-solid fa-check"></i>' : idx + 1}</div>
-                    <span class="node-label">${node.label}</span>
+                    <span class="node-label">${t(node.key)}</span>
                 </div>
             `;
     }).join("");

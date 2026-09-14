@@ -44,22 +44,29 @@
             </a>
 
             <ul class="nav-links" id="navLinks">
-                <li><a href="#home" class="nav-link active">Home</a></li>
-                <li><a href="#services" class="nav-link">Services</a></li>
-                <li><a href="#repairs" class="nav-link">Repairs</a></li>
-                <li><a href="#custompc" class="nav-link">Custom PC</a></li>
-                <li><a href="#products" class="nav-link">Products</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
+                <li><a href="#home" class="nav-link active" data-i18n="nav_home">Home</a></li>
+                <li><a href="#services" class="nav-link" data-i18n="nav_services">Services</a></li>
+                <li><a href="#repairs" class="nav-link" data-i18n="nav_repairs">Repairs</a></li>
+                <li><a href="#custompc" class="nav-link" data-i18n="nav_custompc">Custom PC</a></li>
+                <li><a href="#products" class="nav-link" data-i18n="nav_products">Products</a></li>
+                <li><a href="#about" class="nav-link" data-i18n="nav_about">About</a></li>
+                <li><a href="#contact" class="nav-link" data-i18n="nav_contact">Contact</a></li>
                 <li class="nav-mobile-only">
                     <a href="tel:+9779841301930" class="nav-mobile-call" data-content-key="contact_phone"><i class="fa-solid fa-phone"></i> +977 9841301930</a>
                 </li>
                 <li class="nav-mobile-only nav-mobile-theme-row">
-                    <span class="nav-mobile-theme-label">Theme</span>
+                    <span class="nav-mobile-theme-label" data-i18n="theme_label">Theme</span>
                     <button type="button" class="accent-toggle" title="Switch site theme" aria-label="Switch site theme between blue, orange and white">
                         <span class="accent-toggle-dot is-blue" data-accent-option="blue" title="Blue"></span>
                         <span class="accent-toggle-dot is-orange" data-accent-option="orange" title="Orange"></span>
                         <span class="accent-toggle-dot is-white" data-accent-option="white" title="White"></span>
+                    </button>
+                </li>
+                <li class="nav-mobile-only nav-mobile-theme-row">
+                    <span class="nav-mobile-theme-label" data-i18n="lang_label">Language</span>
+                    <button type="button" class="lang-toggle" id="langToggleBtnMobile" title="Switch language" aria-label="Switch language between English and Nepali">
+                        <span class="lang-toggle-opt" data-lang-option="en">EN</span>
+                        <span class="lang-toggle-opt" data-lang-option="np">नेपाली</span>
                     </button>
                 </li>
             </ul>
@@ -70,8 +77,12 @@
                     <span class="accent-toggle-dot is-orange" data-accent-option="orange" title="Orange"></span>
                     <span class="accent-toggle-dot is-white" data-accent-option="white" title="White"></span>
                 </button>
+                <button type="button" class="lang-toggle" id="langToggleBtn" title="Switch language" aria-label="Switch language between English and Nepali">
+                    <span class="lang-toggle-opt" data-lang-option="en">EN</span>
+                    <span class="lang-toggle-opt" data-lang-option="np">नेपाली</span>
+                </button>
                 <a href="#repairs" class="btn-track">
-                    <i class="fa-solid fa-magnifying-glass"></i> <span>Track Repair</span>
+                    <i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="nav_track_repair">Track Repair</span>
                 </a>
                 <button type="button" class="nav-burger" id="mobileMenuBtn" aria-label="Toggle navigation menu" aria-expanded="false">
                     <span></span><span></span><span></span>
@@ -102,7 +113,7 @@
 
         <div class="hero-inner">
             <div class="hero-status">
-                <span class="status-dot"></span> REPAIR LAB ONLINE
+                <span class="status-dot"></span> <span data-i18n="hero_status">REPAIR LAB ONLINE</span>
             </div>
 
             <h1 class="hero-title">
@@ -113,10 +124,10 @@
             <p class="hero-tagline" data-content-key="hero_tagline">Technology repaired properly.</p>
 
             <ul class="hero-stack" aria-label="What we do">
-                <li>Computer Repair.</li>
-                <li>Electronics.</li>
-                <li>IT Solutions.</li>
-                <li>Custom Systems.</li>
+                <li data-i18n="hero_stack_1">Computer Repair.</li>
+                <li data-i18n="hero_stack_2">Electronics.</li>
+                <li data-i18n="hero_stack_3">IT Solutions.</li>
+                <li data-i18n="hero_stack_4">Custom Systems.</li>
             </ul>
 
             <p class="hero-desc" data-content-key="hero_desc">
@@ -126,18 +137,18 @@
 
             <div class="hero-actions">
                 <a href="#repairs" class="btn-solid" data-cursor="repair">
-                    <i class="fa-solid fa-screwdriver-wrench"></i> Book a Repair
+                    <i class="fa-solid fa-screwdriver-wrench"></i> <span data-i18n="hero_book_repair">Book a Repair</span>
                 </a>
                 <a href="#services" class="btn-ghost">
-                    Explore Services <i class="fa-solid fa-arrow-right"></i>
+                    <span data-i18n="hero_explore_services">Explore Services</span> <i class="fa-solid fa-arrow-right"></i>
                 </a>
             </div>
 
-            <p class="hero-meta">Kathmandu &bull; Since 2069 B.S.</p>
+            <p class="hero-meta" data-i18n="hero_meta">Kathmandu &bull; Since 2069 B.S.</p>
         </div>
 
         <div class="hero-scroll-cue" aria-hidden="true">
-            <span></span> Scroll
+            <span></span> <span data-i18n="hero_scroll">Scroll</span>
         </div>
     </section>
 
@@ -148,19 +159,19 @@
         <div class="stats-inner">
             <div class="stat-item">
                 <div class="stat-number" data-count="15" data-suffix="+">0</div>
-                <div class="stat-label">Years of Experience</div>
+                <div class="stat-label" data-i18n="stat_years">Years of Experience</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number" data-count="5000" data-suffix="+">0</div>
-                <div class="stat-label">Devices Serviced</div>
+                <div class="stat-label" data-i18n="stat_devices">Devices Serviced</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number" data-count="24" data-suffix="&ndash;48h" data-static-suffix="true">0</div>
-                <div class="stat-label">Typical Diagnostics</div>
+                <div class="stat-label" data-i18n="stat_diagnostics">Typical Diagnostics</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number" data-count="100" data-suffix="%">0</div>
-                <div class="stat-label">Customer Focus</div>
+                <div class="stat-label" data-i18n="stat_focus">Customer Focus</div>
             </div>
         </div>
     </section>
@@ -170,9 +181,9 @@
     <!-- ============================================================ -->
     <section id="services" class="services">
         <div class="section-head">
-            <span class="eyebrow">01 &mdash; Services</span>
-            <h2>What We Actually Do</h2>
-            <p>Professional technology services from component-level repair to complete IT infrastructure.</p>
+            <span class="eyebrow" data-i18n="services_eyebrow">01 &mdash; Services</span>
+            <h2 data-i18n="services_h2">What We Actually Do</h2>
+            <p data-i18n="services_p">Professional technology services from component-level repair to complete IT infrastructure.</p>
         </div>
 
         <div class="services-editorial">
@@ -204,10 +215,10 @@
                 </div>
                 <div class="svc-body">
                     <span class="svc-index">01</span>
-                    <h3>Hardware &amp; Chip-Level Repair</h3>
+                    <h3 data-i18n="svc_a_title">Hardware &amp; Chip-Level Repair</h3>
                     <ul class="svc-tags">
-                        <li>Laptops</li><li>Desktops</li><li>Motherboards</li><li>Mobile Devices</li>
-                        <li>TVs</li><li>Printers</li><li>UPS</li><li>Inverters</li>
+                        <li data-i18n="tag_laptops">Laptops</li><li data-i18n="tag_desktops">Desktops</li><li data-i18n="tag_motherboards">Motherboards</li><li data-i18n="tag_mobile_devices">Mobile Devices</li>
+                        <li data-i18n="tag_tvs">TVs</li><li data-i18n="tag_printers">Printers</li><li>UPS</li><li data-i18n="tag_inverters">Inverters</li>
                     </ul>
                 </div>
             </article>
@@ -223,10 +234,10 @@
                 </div>
                 <div class="svc-body">
                     <span class="svc-index">02</span>
-                    <h3>Software &amp; Systems</h3>
+                    <h3 data-i18n="svc_b_title">Software &amp; Systems</h3>
                     <ul class="svc-tags">
-                        <li>OS Installation</li><li>Virus Removal</li><li>Data Recovery</li>
-                        <li>System Optimization</li><li>App Troubleshooting</li>
+                        <li data-i18n="tag_os_install">OS Installation</li><li data-i18n="tag_virus_removal">Virus Removal</li><li data-i18n="tag_data_recovery">Data Recovery</li>
+                        <li data-i18n="tag_sys_opt">System Optimization</li><li data-i18n="tag_app_troubleshoot">App Troubleshooting</li>
                     </ul>
                 </div>
             </article>
@@ -240,9 +251,9 @@
                 </div>
                 <div class="svc-body">
                     <span class="svc-index">03</span>
-                    <h3>Custom PC &amp; Workstations</h3>
+                    <h3 data-i18n="svc_c_title">Custom PC &amp; Workstations</h3>
                     <ul class="svc-tags">
-                        <li>Gaming PCs</li><li>Workstations</li><li>Office Systems</li><li>Content Creation PCs</li>
+                        <li data-i18n="tag_gaming_pcs">Gaming PCs</li><li data-i18n="tag_workstations">Workstations</li><li data-i18n="tag_office_systems">Office Systems</li><li data-i18n="tag_content_pcs">Content Creation PCs</li>
                     </ul>
                 </div>
             </article>
@@ -269,9 +280,9 @@
                 </div>
                 <div class="svc-body">
                     <span class="svc-index">04</span>
-                    <h3>Networking &amp; IT</h3>
+                    <h3 data-i18n="svc_d_title">Networking &amp; IT</h3>
                     <ul class="svc-tags">
-                        <li>Wi-Fi</li><li>LAN</li><li>CCTV</li><li>Data Backup</li><li>Office Infrastructure</li>
+                        <li>Wi-Fi</li><li>LAN</li><li>CCTV</li><li data-i18n="tag_data_backup">Data Backup</li><li data-i18n="tag_office_infra">Office Infrastructure</li>
                     </ul>
                 </div>
             </article>
@@ -285,10 +296,10 @@
                 </div>
                 <div class="svc-body">
                     <span class="svc-index">05</span>
-                    <h3>Electronics &amp; Power</h3>
+                    <h3 data-i18n="svc_e_title">Electronics &amp; Power</h3>
                     <ul class="svc-tags">
-                        <li>Solar Inverters</li><li>Power Supplies</li><li>Smart TVs</li>
-                        <li>Audio Systems</li><li>Electronic Projects</li>
+                        <li data-i18n="tag_solar">Solar Inverters</li><li data-i18n="tag_power_supplies">Power Supplies</li><li data-i18n="tag_smart_tvs">Smart TVs</li>
+                        <li data-i18n="tag_audio">Audio Systems</li><li data-i18n="tag_electronic_projects">Electronic Projects</li>
                     </ul>
                 </div>
             </article>
@@ -302,10 +313,10 @@
                 </div>
                 <div class="svc-body">
                     <span class="svc-index">06</span>
-                    <h3>Documentation &amp; Printing</h3>
+                    <h3 data-i18n="svc_f_title">Documentation &amp; Printing</h3>
                     <ul class="svc-tags">
-                        <li>Printing</li><li>Scanning</li><li>Photocopy</li><li>Typing</li>
-                        <li>Photo Printing</li><li>Mobile Top-up</li>
+                        <li data-i18n="tag_printing">Printing</li><li data-i18n="tag_scanning">Scanning</li><li data-i18n="tag_photocopy">Photocopy</li><li data-i18n="tag_typing">Typing</li>
+                        <li data-i18n="tag_photo_printing">Photo Printing</li><li data-i18n="tag_mobile_topup">Mobile Top-up</li>
                     </ul>
                 </div>
             </article>
@@ -318,14 +329,14 @@
     <!-- ============================================================ -->
     <section id="diagnose" class="diagnose">
         <div class="section-head">
-            <span class="eyebrow">02 &mdash; Diagnose</span>
-            <h2>Something wrong with your device?</h2>
-            <p>Tell us what happened. We'll help you find the problem.</p>
+            <span class="eyebrow" data-i18n="diagnose_eyebrow">02 &mdash; Diagnose</span>
+            <h2 data-i18n="diagnose_h2">Something wrong with your device?</h2>
+            <p data-i18n="diagnose_p">Tell us what happened. We'll help you find the problem.</p>
         </div>
 
         <div class="diagnose-panel">
             <div class="diagnose-step" id="deviceStep">
-                <span class="diagnose-step-label">STEP 1 / SELECT DEVICE</span>
+                <span class="diagnose-step-label" data-i18n="diagnose_step1">STEP 1 / SELECT DEVICE</span>
                 <div class="device-chips" id="deviceChips">
                     <button type="button" class="device-chip" data-device="Laptop"><i class="fa-solid fa-laptop"></i> Laptop</button>
                     <button type="button" class="device-chip" data-device="Desktop"><i class="fa-solid fa-desktop"></i> Desktop</button>
@@ -337,15 +348,15 @@
             </div>
 
             <div class="diagnose-step" id="issueStep" hidden>
-                <span class="diagnose-step-label">STEP 2 / SELECT PROBLEM</span>
+                <span class="diagnose-step-label" data-i18n="diagnose_step2">STEP 2 / SELECT PROBLEM</span>
                 <div class="issue-list" id="issueList"></div>
             </div>
 
             <div class="diagnose-result" id="diagnoseResult" hidden>
-                <span class="diagnose-step-label">LIKELY DIAGNOSIS</span>
+                <span class="diagnose-step-label" data-i18n="diagnose_likely">LIKELY DIAGNOSIS</span>
                 <p class="diagnose-result-text" id="diagnoseResultText"></p>
                 <button type="button" class="btn-solid" id="requestDiagnosisBtn">
-                    <i class="fa-solid fa-paper-plane"></i> Request Diagnosis
+                    <i class="fa-solid fa-paper-plane"></i> <span data-i18n="diagnose_request_btn">Request Diagnosis</span>
                 </button>
             </div>
         </div>
@@ -356,20 +367,20 @@
     <!-- ============================================================ -->
     <section id="repairs" class="repairs">
         <div class="section-head">
-            <span class="eyebrow">03 &mdash; Repairs</span>
-            <h2>Track Your Repair</h2>
-            <p>Enter your Repair ID or the phone number used at drop-off to see live status.</p>
+            <span class="eyebrow" data-i18n="repairs_eyebrow">03 &mdash; Repairs</span>
+            <h2 data-i18n="repairs_h2">Track Your Repair</h2>
+            <p data-i18n="repairs_p">Enter your Repair ID or the phone number used at drop-off to see live status.</p>
         </div>
 
         <div class="track-panel">
             <form class="track-form" id="trackForm">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="trackInput" placeholder="Repair ID (e.g. NA-1001) or phone number" autocomplete="off" required>
-                <button type="submit" class="btn-solid" id="trackBtn">Track</button>
+                <input type="text" id="trackInput" data-i18n-placeholder="track_input_placeholder" placeholder="Repair ID (e.g. NA-1001) or phone number" autocomplete="off" required>
+                <button type="submit" class="btn-solid" id="trackBtn" data-i18n="track_btn">Track</button>
             </form>
 
             <div class="track-samples">
-                <span>Try a sample:</span>
+                <span data-i18n="track_try_sample">Try a sample:</span>
                 <button type="button" class="sample-chip" data-ticket="NA-1001">NA-1001</button>
                 <button type="button" class="sample-chip" data-ticket="NA-1002">NA-1002</button>
                 <button type="button" class="sample-chip" data-ticket="NA-1003">NA-1003</button>
@@ -384,11 +395,11 @@
     <!-- ============================================================ -->
     <section id="custompc" class="custompc">
         <div class="custompc-copy">
-            <span class="eyebrow">04 &mdash; Custom PC</span>
-            <h2>Built For Your Work.</h2>
-            <p>From competitive gaming to professional workloads, we build systems around how you actually work &mdash; not a catalogue template.</p>
+            <span class="eyebrow" data-i18n="custompc_eyebrow">04 &mdash; Custom PC</span>
+            <h2 data-i18n="custompc_h2">Built For Your Work.</h2>
+            <p data-i18n="custompc_p">From competitive gaming to professional workloads, we build systems around how you actually work &mdash; not a catalogue template.</p>
             <a href="#contact" class="btn-solid" id="buildPcBtn">
-                <i class="fa-solid fa-microchip"></i> Build Your PC
+                <i class="fa-solid fa-microchip"></i> <span data-i18n="custompc_btn">Build Your PC</span>
             </a>
         </div>
 
@@ -417,18 +428,18 @@
     <!-- ============================================================ -->
     <section class="workshop">
         <div class="section-head">
-            <span class="eyebrow">05 &mdash; The Lab</span>
-            <h2>Inside The Repair Lab</h2>
-            <p>Real bench work, not a stock photo &mdash; drop your own shop photography into these slots any time.</p>
+            <span class="eyebrow" data-i18n="workshop_eyebrow">05 &mdash; The Lab</span>
+            <h2 data-i18n="workshop_h2">Inside The Repair Lab</h2>
+            <p data-i18n="workshop_p">Real bench work, not a stock photo &mdash; drop your own shop photography into these slots any time.</p>
         </div>
 
         <div class="workshop-gallery" id="workshopGallery">
-            <div class="workshop-slide" data-label="REPAIR LAB"><i class="fa-solid fa-screwdriver-wrench"></i></div>
-            <div class="workshop-slide" data-label="BOARD DIAGNOSTICS"><i class="fa-solid fa-microchip"></i></div>
-            <div class="workshop-slide" data-label="PC ASSEMBLY"><i class="fa-solid fa-computer"></i></div>
-            <div class="workshop-slide" data-label="ELECTRONICS"><i class="fa-solid fa-bolt"></i></div>
-            <div class="workshop-slide" data-label="QUALITY CHECK"><i class="fa-solid fa-clipboard-check"></i></div>
-            <div class="workshop-slide" data-label="FINISHED SYSTEMS"><i class="fa-solid fa-box-open"></i></div>
+            <div class="workshop-slide" data-label="REPAIR LAB" data-i18n-label="slide_repair_lab"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+            <div class="workshop-slide" data-label="BOARD DIAGNOSTICS" data-i18n-label="slide_board_diag"><i class="fa-solid fa-microchip"></i></div>
+            <div class="workshop-slide" data-label="PC ASSEMBLY" data-i18n-label="slide_pc_assembly"><i class="fa-solid fa-computer"></i></div>
+            <div class="workshop-slide" data-label="ELECTRONICS" data-i18n-label="slide_electronics"><i class="fa-solid fa-bolt"></i></div>
+            <div class="workshop-slide" data-label="QUALITY CHECK" data-i18n-label="slide_quality_check"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div class="workshop-slide" data-label="FINISHED SYSTEMS" data-i18n-label="slide_finished_systems"><i class="fa-solid fa-box-open"></i></div>
         </div>
     </section>
 
@@ -437,40 +448,40 @@
     <!-- ============================================================ -->
     <section id="about" class="why">
         <div class="section-head">
-            <span class="eyebrow">06 &mdash; Why NewAge</span>
-            <h2>Why People Bring Their Devices To Us</h2>
+            <span class="eyebrow" data-i18n="why_eyebrow">06 &mdash; Why NewAge</span>
+            <h2 data-i18n="why_h2">Why People Bring Their Devices To Us</h2>
         </div>
 
         <div class="why-list">
             <div class="why-item" data-reveal>
                 <span class="why-num">01</span>
-                <h3>Experienced technicians</h3>
-                <p>Certified, hands-on engineers who have handled thousands of repair tickets since 2069 B.S.</p>
+                <h3 data-i18n="why_1_title">Experienced technicians</h3>
+                <p data-i18n="why_1_p">Certified, hands-on engineers who have handled thousands of repair tickets since 2069 B.S.</p>
             </div>
             <div class="why-item" data-reveal>
                 <span class="why-num">02</span>
-                <h3>Component-level diagnosis</h3>
-                <p>We trace faults to the exact IC or trace instead of swapping whole boards by default.</p>
+                <h3 data-i18n="why_2_title">Component-level diagnosis</h3>
+                <p data-i18n="why_2_p">We trace faults to the exact IC or trace instead of swapping whole boards by default.</p>
             </div>
             <div class="why-item" data-reveal>
                 <span class="why-num">03</span>
-                <h3>Genuine replacement parts</h3>
-                <p>Original and OEM-grade components only, with the part sourced before we touch your device.</p>
+                <h3 data-i18n="why_3_title">Genuine replacement parts</h3>
+                <p data-i18n="why_3_p">Original and OEM-grade components only, with the part sourced before we touch your device.</p>
             </div>
             <div class="why-item" data-reveal>
                 <span class="why-num">04</span>
-                <h3>Transparent repair process</h3>
-                <p>A quote before any repair begins, and a live ticket you can track from drop-off to pickup.</p>
+                <h3 data-i18n="why_4_title">Transparent repair process</h3>
+                <p data-i18n="why_4_p">A quote before any repair begins, and a live ticket you can track from drop-off to pickup.</p>
             </div>
             <div class="why-item" data-reveal>
                 <span class="why-num">05</span>
-                <h3>Business IT support</h3>
-                <p>Networking, backups and infrastructure for small offices, not just single-device repairs.</p>
+                <h3 data-i18n="why_5_title">Business IT support</h3>
+                <p data-i18n="why_5_p">Networking, backups and infrastructure for small offices, not just single-device repairs.</p>
             </div>
             <div class="why-item" data-reveal>
                 <span class="why-num">06</span>
-                <h3>Post-repair testing</h3>
-                <p>Every job is stress-tested before collection, with a warranty slip on completed repairs.</p>
+                <h3 data-i18n="why_6_title">Post-repair testing</h3>
+                <p data-i18n="why_6_p">Every job is stress-tested before collection, with a warranty slip on completed repairs.</p>
             </div>
         </div>
     </section>
@@ -480,9 +491,9 @@
     <!-- ============================================================ -->
     <section id="products" class="products-section">
         <div class="section-head">
-            <span class="eyebrow">07 &mdash; Store</span>
-            <h2>Products &amp; Peripherals</h2>
-            <p>Genuine parts, high-speed storage, and accessories available in-store.</p>
+            <span class="eyebrow" data-i18n="products_eyebrow">07 &mdash; Store</span>
+            <h2 data-i18n="products_h2">Products &amp; Peripherals</h2>
+            <p data-i18n="products_p">Genuine parts, high-speed storage, and accessories available in-store.</p>
         </div>
         <div class="products-grid">
             <div class="product-card">
@@ -624,8 +635,8 @@
     <section id="videos" class="videos-section">
         <div class="section-head">
             <span class="eyebrow tiktok">@newageit2069</span>
-            <h2>Watch Us in Action</h2>
-            <p>Diagnostic breakdowns and real repair footage from our TikTok channel.</p>
+            <h2 data-i18n="videos_h2">Watch Us in Action</h2>
+            <p data-i18n="videos_p">Diagnostic breakdowns and real repair footage from our TikTok channel.</p>
         </div>
         <div class="videos-grid" id="videosGrid">
             <div class="video-card" data-card-id="vid-1">
@@ -671,7 +682,7 @@
         </div>
         <div class="videos-follow">
             <a href="https://www.tiktok.com/@newageit2069" target="_blank" rel="noopener noreferrer" class="btn-ghost">
-                <i class="fa-brands fa-tiktok"></i> Follow @newageit2069 for daily tech tips
+                <i class="fa-brands fa-tiktok"></i> <span data-i18n="videos_follow">Follow @newageit2069 for daily tech tips</span>
             </a>
         </div>
     </section>
@@ -681,59 +692,59 @@
     <!-- ============================================================ -->
     <section id="contact" class="contact">
         <div class="contact-info">
-            <span class="eyebrow">08 &mdash; Contact</span>
-            <h2>Get In Touch</h2>
-            <p>Have a damaged device, need a custom PC quote, or want to check part availability? Visit our center or reach out below.</p>
+            <span class="eyebrow" data-i18n="contact_eyebrow">08 &mdash; Contact</span>
+            <h2 data-i18n="contact_h2">Get In Touch</h2>
+            <p data-i18n="contact_p">Have a damaged device, need a custom PC quote, or want to check part availability? Visit our center or reach out below.</p>
             <div class="contact-details">
                 <div class="contact-item">
                     <i class="fa-solid fa-location-dot"></i>
-                    <div><h4>Location</h4><p data-content-key="contact_address">Tinthana, Chandragiri-15, Kathmandu, Nepal</p></div>
+                    <div><h4 data-i18n="contact_location_label">Location</h4><p data-content-key="contact_address">Tinthana, Chandragiri-15, Kathmandu, Nepal</p></div>
                 </div>
                 <div class="contact-item">
                     <i class="fa-solid fa-phone"></i>
-                    <div><h4>Direct Hotline</h4><p><a href="tel:+9779841301930" class="contact-link" data-content-key="contact_phone">+977 9841301930</a></p></div>
+                    <div><h4 data-i18n="contact_hotline_label">Direct Hotline</h4><p><a href="tel:+9779841301930" class="contact-link" data-content-key="contact_phone">+977 9841301930</a></p></div>
                 </div>
                 <div class="contact-item">
                     <i class="fa-solid fa-envelope"></i>
-                    <div><h4>Email</h4><p><a href="mailto:cyberbhagwati@gmail.com" class="contact-link" data-content-key="contact_email">cyberbhagwati@gmail.com</a></p></div>
+                    <div><h4 data-i18n="contact_email_label">Email</h4><p><a href="mailto:cyberbhagwati@gmail.com" class="contact-link" data-content-key="contact_email">cyberbhagwati@gmail.com</a></p></div>
                 </div>
                 <div class="contact-item">
                     <i class="fa-solid fa-clock"></i>
-                    <div><h4>Operating Hours</h4><p data-content-key="contact_hours">Sunday &ndash; Friday: 7:30 AM &ndash; 7:30 PM (Saturday on call)</p></div>
+                    <div><h4 data-i18n="contact_hours_label">Operating Hours</h4><p data-content-key="contact_hours">Sunday &ndash; Friday: 7:30 AM &ndash; 7:30 PM (Saturday on call)</p></div>
                 </div>
             </div>
         </div>
 
         <form class="contact-form" id="contactForm">
-            <h3><i class="fa-solid fa-paper-plane"></i> Send Us a Message</h3>
-            <p class="contact-form-note">Submitted inquiries are logged and generate an immediate tracking ID.</p>
+            <h3><i class="fa-solid fa-paper-plane"></i> <span data-i18n="contact_form_title">Send Us a Message</span></h3>
+            <p class="contact-form-note" data-i18n="contact_form_note">Submitted inquiries are logged and generate an immediate tracking ID.</p>
             <div class="form-row">
-                <input type="text" id="senderName" placeholder="Your Full Name *" required>
+                <input type="text" id="senderName" data-i18n-placeholder="ph_name" placeholder="Your Full Name *" required>
             </div>
             <div class="form-row">
-                <input type="tel" id="senderPhone" placeholder="Mobile / WhatsApp Number *" required>
+                <input type="tel" id="senderPhone" data-i18n-placeholder="ph_phone" placeholder="Mobile / WhatsApp Number *" required>
             </div>
             <div class="form-row">
-                <input type="email" id="senderEmail" placeholder="Your Email Address *" required>
+                <input type="email" id="senderEmail" data-i18n-placeholder="ph_email" placeholder="Your Email Address *" required>
             </div>
             <div class="form-row">
                 <select id="serviceType" required aria-label="Select Service or Inquiry Needed">
-                    <option value="" disabled selected>Select Service or Inquiry Needed *</option>
-                    <option value="hardware-repair">Laptop / Desktop / Mobile Hardware Repair</option>
-                    <option value="tv-printer-inverter">TV / Printer / Inverter / UPS Repair</option>
-                    <option value="software-issue">Software Installation, Virus Removal &amp; OS</option>
-                    <option value="custom-build">Custom Gaming PC / Workstation Build</option>
-                    <option value="parts-peripherals">Computer Parts, SSD, RAM &amp; Peripherals</option>
-                    <option value="documentation-print">Document Printing, Scanning &amp; Mobile Top-up</option>
-                    <option value="other">General IT Consulting / Other Inquiries</option>
+                    <option value="" disabled selected data-i18n="opt_select">Select Service or Inquiry Needed *</option>
+                    <option value="hardware-repair" data-i18n="opt_hardware">Laptop / Desktop / Mobile Hardware Repair</option>
+                    <option value="tv-printer-inverter" data-i18n="opt_tv">TV / Printer / Inverter / UPS Repair</option>
+                    <option value="software-issue" data-i18n="opt_software">Software Installation, Virus Removal &amp; OS</option>
+                    <option value="custom-build" data-i18n="opt_custom">Custom Gaming PC / Workstation Build</option>
+                    <option value="parts-peripherals" data-i18n="opt_parts">Computer Parts, SSD, RAM &amp; Peripherals</option>
+                    <option value="documentation-print" data-i18n="opt_docs">Document Printing, Scanning &amp; Mobile Top-up</option>
+                    <option value="other" data-i18n="opt_other">General IT Consulting / Other Inquiries</option>
                 </select>
             </div>
             <div class="form-row">
-                <textarea id="messageText" placeholder="Describe your device brand, model, and the issue you are facing..." rows="4" required></textarea>
+                <textarea id="messageText" data-i18n-placeholder="ph_message" placeholder="Describe your device brand, model, and the issue you are facing..." rows="4" required></textarea>
             </div>
             <input type="text" name="website_hp" id="websiteHp" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
             <button type="submit" class="btn-solid btn-block" id="submitBtn">
-                <i class="fa-solid fa-paper-plane"></i> Submit &amp; Get Tracking Ticket
+                <i class="fa-solid fa-paper-plane"></i> <span data-i18n="contact_submit_btn">Submit &amp; Get Tracking Ticket</span>
             </button>
             <div id="formFeedback" class="form-feedback" aria-live="polite"></div>
         </form>
@@ -742,10 +753,10 @@
             <div class="map-header">
                 <div>
                     <h3><i class="fa-solid fa-location-dot"></i> NewAge I.T Solution Center</h3>
-                    <p>Tinthana, Chandragiri-15, Kathmandu, Nepal &bull; Near Kalanki &amp; Ring Road Access</p>
+                    <p data-i18n="map_address">Tinthana, Chandragiri-15, Kathmandu, Nepal &bull; Near Kalanki &amp; Ring Road Access</p>
                 </div>
                 <a href="https://www.google.com/maps/search/?api=1&query=New+Age+I.T+Solution+Center,+Tinthana,+Chandragiri-15,+Kathmandu,+Nepal" target="_blank" rel="noopener noreferrer" class="btn-ghost">
-                    <i class="fa-solid fa-diamond-turn-right"></i> Open in Google Maps
+                    <i class="fa-solid fa-diamond-turn-right"></i> <span data-i18n="map_open_btn">Open in Google Maps</span>
                 </a>
             </div>
             <div class="map-embed-wrapper">
@@ -759,7 +770,7 @@
     <!-- Floating WhatsApp -->
     <a href="https://wa.me/9779841301930" class="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with NewAge I.T. on WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
-        <span class="fw-tooltip">Chat with NewAge I.T.</span>
+        <span class="fw-tooltip" data-i18n="wa_tooltip">Chat with NewAge I.T.</span>
     </a>
 
     <!-- Price Assistant (client-side lookup against the official service charge list) -->
@@ -772,8 +783,8 @@
         <div class="price-bot-header">
             <div class="pb-avatar pb-avatar-lg">NA<span class="pb-presence"></span></div>
             <div class="pb-header-text">
-                <strong>Price Assistant</strong>
-                <span><span class="pb-presence-dot"></span> Online &bull; replies instantly</span>
+                <strong data-i18n="pb_title">Price Assistant</strong>
+                <span><span class="pb-presence-dot"></span> <span data-i18n="pb_status">Online &bull; replies instantly</span></span>
             </div>
             <button type="button" class="price-bot-close" id="priceBotClose" aria-label="Close price assistant">
                 <i class="fa-solid fa-xmark"></i>
@@ -800,21 +811,21 @@
                 </div>
                 <p data-content-key="footer_blurb">Kathmandu, Nepal &bull; ESTD. 2069 B.S.</p>
                 <div class="footer-status">
-                    <span class="status-dot"></span> REPAIR LAB STATUS &bull; ONLINE
+                    <span class="status-dot"></span> <span data-i18n="footer_status">REPAIR LAB STATUS &bull; ONLINE</span>
                 </div>
             </div>
 
             <div class="footer-col">
-                <h4>Services</h4>
-                <a href="#services">Repair</a>
-                <a href="#custompc">Custom PC</a>
-                <a href="#services">Networking</a>
-                <a href="#products">Products</a>
-                <a href="#contact">Contact</a>
+                <h4 data-i18n="footer_services_head">Services</h4>
+                <a href="#services" data-i18n="footer_link_repair">Repair</a>
+                <a href="#custompc" data-i18n="nav_custompc">Custom PC</a>
+                <a href="#services" data-i18n="footer_link_networking">Networking</a>
+                <a href="#products" data-i18n="nav_products">Products</a>
+                <a href="#contact" data-i18n="nav_contact">Contact</a>
             </div>
 
             <div class="footer-col">
-                <h4>Contact</h4>
+                <h4 data-i18n="nav_contact">Contact</h4>
                 <a href="tel:+9779841301930" data-content-key="contact_phone"><i class="fa-solid fa-phone"></i> +977 9841301930</a>
                 <a href="https://wa.me/9779841301930" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
                 <a href="mailto:cyberbhagwati@gmail.com" data-content-key="contact_email"><i class="fa-solid fa-envelope"></i> cyberbhagwati@gmail.com</a>
@@ -822,14 +833,14 @@
             </div>
 
             <div class="footer-col">
-                <h4>Follow</h4>
+                <h4 data-i18n="footer_follow_head">Follow</h4>
                 <a href="https://www.tiktok.com/@newageit2069" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-tiktok"></i> TikTok</a>
                 <a href="https://www.facebook.com/newageit2069" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i> Facebook</a>
                 <a href="https://www.youtube.com/@newage2069" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-youtube"></i> YouTube</a>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 NewAge I.T. Solution Center. All rights reserved.</p>
+            <p data-i18n="footer_copyright">&copy; 2026 NewAge I.T. Solution Center. All rights reserved.</p>
         </div>
     </footer>
 
