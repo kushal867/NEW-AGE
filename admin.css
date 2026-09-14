@@ -604,7 +604,7 @@ h1, h2, h3, h4 {
    ========================================================================== */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
     gap: 20px;
     margin-bottom: 30px;
 }
@@ -762,6 +762,7 @@ h1, h2, h3, h4 {
     display: flex;
     gap: 12px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .filter-select {
@@ -1226,4 +1227,16 @@ h1, h2, h3, h4 {
     .content-area {
         padding: 20px 14px;
     }
+
+    /* Top nav has to fit hamburger + page title + theme toggle + "View Live
+       Site" + status badge in one row - on a phone that's too much. Truncate
+       the (sometimes long, per-tab) title instead of letting it force
+       horizontal scroll, and drop the purely decorative status badge. */
+    .top-nav { padding: 14px 16px; gap: 10px; }
+    .nav-left { flex: 1; min-width: 0; gap: 10px; }
+    .nav-left h1 { font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-right { flex-shrink: 0; gap: 8px; }
+    .db-sync-indicator { display: none; }
+    .nav-btn-outline span { display: none; }
+    .nav-btn-outline { padding: 8px 10px; }
 }

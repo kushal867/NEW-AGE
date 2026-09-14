@@ -374,9 +374,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     // 4. Dashboard Overview Tab
     // =========================================================================
-    async function renderOverviewStats() {
-        await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts()]);
-
+    // Paints the overview cards from whatever is already in the in-memory
+    // caches - no fetch. Split out from renderOverviewStats() so callers who
+    // just fetched fresh data (e.g. initDashboard on login) don't pay for a
+    // second, redundant round-trip before the dashboard shows real numbers.
+    function paintOverviewStats() {
         const totalRepairs = repairsCache.length;
         const pendingRepairs = repairsCache.filter(r => Number(r.stage) < 8).length;
         const totalInquiries = inquiriesCache.length;
@@ -390,6 +392,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('repairsCountBadge').textContent = pendingRepairs;
         document.getElementById('inquiriesCountBadge').textContent = newInquiries;
+    }
+
+    async function renderOverviewStats() {
+        await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts()]);
+        paintOverviewStats();
     }
 
     // =========================================================================
@@ -557,7 +564,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('jobNotes').value = ticketData.technician_notes || '';
         } else {
             if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-screwdriver-wrench text-primary"></i> Add Repair Job`;
-            if (idInput) { idInput.value = 'NA-' + Math.floor(1000 + Math.random() * 9000); idInput.readOnly = false; }
+            if (idInput) {
+                const existingIds = new Set(repairsCache.map(r => r.ticket_id));
+                let suggested;
+                do { suggested = 'NA-' + Math.floor(1000 + Math.random() * 9000); } while (existingIds.has(suggested));
+                idInput.value = suggested;
+                idInput.readOnly = false;
+            }
             document.getElementById('jobReceivedDate').value = new Date().toISOString().split('T')[0];
         }
 
@@ -1450,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Dashboard
     async function initDashboard() {
         await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts(), fetchVideos()]);
-        renderOverviewStats();
+        paintOverviewStats();
         renderRepairsTable();
         renderInquiriesTable();
         renderProductsTable();
