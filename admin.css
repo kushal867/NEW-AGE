@@ -477,6 +477,7 @@ h1, h2, h3, h4 {
 /* Main Workspace */
 .dashboard-main {
     flex: 1;
+    min-width: 0;
     margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
@@ -583,6 +584,7 @@ h1, h2, h3, h4 {
 .content-area {
     padding: 30px;
     flex: 1;
+    min-width: 0;
 }
 
 .tab-pane {
