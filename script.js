@@ -77,9 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadSiteContent() {
     if (sb) {
       try {
-        const { data, error } = await sb.from("site_content").select("key, value");
+        const { data, error } = await sb
+          .from("site_content")
+          .select("key, value");
         if (error) throw error;
-        (data || []).forEach((row) => { siteContent[row.key] = row.value; });
+        (data || []).forEach((row) => {
+          siteContent[row.key] = row.value;
+        });
       } catch (e) {
         console.warn("Site content load error:", e);
       }
@@ -94,15 +98,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const phoneDigits = getContentPhoneDigits();
     if (phoneDigits !== defaultDigits) {
       document.querySelectorAll(`a[href*="${defaultDigits}"]`).forEach((a) => {
-        a.setAttribute("href", a.getAttribute("href").split(defaultDigits).join(phoneDigits));
+        a.setAttribute(
+          "href",
+          a.getAttribute("href").split(defaultDigits).join(phoneDigits),
+        );
       });
     }
 
     const email = getContentEmail();
     if (email !== SITE_CONTENT_DEFAULTS.contact_email) {
-      document.querySelectorAll(`a[href^="mailto:${SITE_CONTENT_DEFAULTS.contact_email}"]`).forEach((a) => {
-        a.setAttribute("href", a.getAttribute("href").replace(SITE_CONTENT_DEFAULTS.contact_email, email));
-      });
+      document
+        .querySelectorAll(
+          `a[href^="mailto:${SITE_CONTENT_DEFAULTS.contact_email}"]`,
+        )
+        .forEach((a) => {
+          a.setAttribute(
+            "href",
+            a
+              .getAttribute("href")
+              .replace(SITE_CONTENT_DEFAULTS.contact_email, email),
+          );
+        });
     }
   }
   loadSiteContent();
@@ -914,23 +930,20 @@ document.addEventListener("DOMContentLoaded", () => {
       let submissionFailed = false;
 
       if (sb) {
-        try {
-          const { error: inquiryErr } = await sb.rpc("submit_inquiry", {
+        // Both RPCs are independent (different tables, neither depends on
+        // the other's result) - run them in parallel instead of one after
+        // another, so a customer on a slow connection isn't stuck staring
+        // at a spinner for two sequential round-trips' worth of latency.
+        const [inquiryResult, repairResult] = await Promise.allSettled([
+          sb.rpc("submit_inquiry", {
             p_ticket_id: ticketId,
             p_customer_name: name,
             p_phone: phone,
             p_email: email,
             p_service: service,
             p_message: message,
-          });
-          if (inquiryErr) throw inquiryErr;
-        } catch (err) {
-          console.warn("Inquiry insert error:", err);
-          submissionFailed = true;
-        }
-
-        try {
-          const { error: repairErr } = await sb.rpc("submit_repair", {
+          }),
+          sb.rpc("submit_repair", {
             p_ticket_id: ticketId,
             p_customer_name: name,
             p_phone: phone,
@@ -941,10 +954,15 @@ document.addEventListener("DOMContentLoaded", () => {
                   ? "Custom PC Build Order"
                   : "IT Service Inquiry",
             p_issue: message,
-          });
-          if (repairErr) throw repairErr;
-        } catch (err) {
-          console.warn("Repair ticket insert error:", err);
+          }),
+        ]);
+
+        if (inquiryResult.status === "rejected" || inquiryResult.value?.error) {
+          console.warn("Inquiry insert error:", inquiryResult.reason || inquiryResult.value?.error);
+          submissionFailed = true;
+        }
+        if (repairResult.status === "rejected" || repairResult.value?.error) {
+          console.warn("Repair ticket insert error:", repairResult.reason || repairResult.value?.error);
           submissionFailed = true;
         }
       }
@@ -1587,33 +1605,115 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const PB_STOPWORDS = new Set([
-    "the", "a", "an", "is", "my", "i", "to", "for", "of", "do", "you",
-    "much", "how", "what", "price", "cost", "charge", "rate", "in", "on",
-    "at", "it", "want", "need", "please", "and", "or", "me", "can", "will",
-    "your", "there", "with", "have", "has", "any", "about",
+    "the",
+    "a",
+    "an",
+    "is",
+    "my",
+    "i",
+    "to",
+    "for",
+    "of",
+    "do",
+    "you",
+    "much",
+    "how",
+    "what",
+    "price",
+    "cost",
+    "charge",
+    "rate",
+    "in",
+    "on",
+    "at",
+    "it",
+    "want",
+    "need",
+    "please",
+    "and",
+    "or",
+    "me",
+    "can",
+    "will",
+    "your",
+    "there",
+    "with",
+    "have",
+    "has",
+    "any",
+    "about",
   ]);
 
   // Common alternate phrasings mapped to the word the price list actually
   // uses, so "notebook"/"pc"/"cracked"/"won't start" etc. still hit the
   // right entry instead of only rewarding the exact chart wording.
   const PB_SYNONYMS = {
-    notebook: "laptop", laptops: "laptop",
-    pc: "desktop", computer: "desktop", computers: "desktop", cpu: "desktop",
-    cell: "mobile", cellphone: "mobile", phone: "mobile", smartphone: "mobile", android: "mobile", iphone: "mobile",
-    monitor: "screen", display: "screen", lcd: "screen", panel: "screen",
-    broken: "change", cracked: "change", damaged: "change", damage: "change", spoiled: "change", smashed: "change",
-    wont: "not", cant: "not", isnt: "not", doesnt: "not", dont: "not",
-    hang: "tune", hanging: "tune", freeze: "tune", freezing: "tune", lag: "tune", lagging: "tune",
-    virus: "scanning", malware: "scanning", hacked: "scanning",
-    internet: "router", wifi: "router", network: "router",
-    keys: "keyboard", key: "keyboard",
-    charger: "adaptor", adapter: "adaptor",
-    tv: "tv", television: "tv",
-    battery: "battery", bettery: "battery",
-    windows: "os", format: "os", formatting: "os", reinstall: "os",
-    forgotten: "remove", forgot: "remove", locked: "remove", unlock: "remove",
-    turning: "power", starting: "power", boot: "power", booting: "power", start: "power", turn: "power", dead: "power",
-    fix: "repair", fixing: "repair", repairing: "repair", servicing: "service",
+    notebook: "laptop",
+    laptops: "laptop",
+    pc: "desktop",
+    computer: "desktop",
+    computers: "desktop",
+    cpu: "desktop",
+    cell: "mobile",
+    cellphone: "mobile",
+    phone: "mobile",
+    smartphone: "mobile",
+    android: "mobile",
+    iphone: "mobile",
+    monitor: "screen",
+    display: "screen",
+    lcd: "screen",
+    panel: "screen",
+    broken: "change",
+    cracked: "change",
+    damaged: "change",
+    damage: "change",
+    spoiled: "change",
+    smashed: "change",
+    wont: "not",
+    cant: "not",
+    isnt: "not",
+    doesnt: "not",
+    dont: "not",
+    hang: "tune",
+    hanging: "tune",
+    freeze: "tune",
+    freezing: "tune",
+    lag: "tune",
+    lagging: "tune",
+    virus: "scanning",
+    malware: "scanning",
+    hacked: "scanning",
+    internet: "router",
+    wifi: "router",
+    network: "router",
+    keys: "keyboard",
+    key: "keyboard",
+    charger: "adaptor",
+    adapter: "adaptor",
+    tv: "tv",
+    television: "tv",
+    battery: "battery",
+    bettery: "battery",
+    windows: "os",
+    format: "os",
+    formatting: "os",
+    reinstall: "os",
+    forgotten: "remove",
+    forgot: "remove",
+    locked: "remove",
+    unlock: "remove",
+    turning: "power",
+    starting: "power",
+    boot: "power",
+    booting: "power",
+    start: "power",
+    turn: "power",
+    dead: "power",
+    fix: "repair",
+    fixing: "repair",
+    repairing: "repair",
+    servicing: "service",
   };
 
   function pbNormalize(str) {
@@ -1631,7 +1731,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (word.length > 5 && word.endsWith("ing")) return word.slice(0, -3);
     if (word.length > 4 && word.endsWith("ies")) return word.slice(0, -3) + "y";
     if (word.length > 4 && word.endsWith("es")) return word.slice(0, -2);
-    if (word.length > 3 && word.endsWith("s") && !word.endsWith("ss")) return word.slice(0, -1);
+    if (word.length > 3 && word.endsWith("s") && !word.endsWith("ss"))
+      return word.slice(0, -1);
     return word;
   }
 
@@ -1654,7 +1755,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const stemmed = pbStem(word);
     if (PB_SYNONYMS[word]) return PB_SYNONYMS[word];
     if (PB_SYNONYMS[stemmed]) return PB_SYNONYMS[stemmed];
-    return pbFuzzySynonymLookup(stemmed) || pbFuzzySynonymLookup(word) || stemmed;
+    return (
+      pbFuzzySynonymLookup(stemmed) || pbFuzzySynonymLookup(word) || stemmed
+    );
   }
 
   function pbTokenize(str) {
@@ -1672,9 +1775,10 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let i = 1; i <= a.length; i++) {
       const cur = [i];
       for (let j = 1; j <= b.length; j++) {
-        cur[j] = a[i - 1] === b[j - 1]
-          ? prev[j - 1]
-          : 1 + Math.min(prev[j - 1], prev[j], cur[j - 1]);
+        cur[j] =
+          a[i - 1] === b[j - 1]
+            ? prev[j - 1]
+            : 1 + Math.min(prev[j - 1], prev[j], cur[j - 1]);
       }
       prev = cur;
     }
@@ -1697,12 +1801,21 @@ document.addEventListener("DOMContentLoaded", () => {
   function pbTokenMatches(qWord, haystackTokens) {
     if (haystackTokens.includes(qWord)) return true;
     for (const t of haystackTokens) {
-      if (t.length > 3 && qWord.length > 3 && (t.startsWith(qWord) || qWord.startsWith(t))) return true;
+      if (
+        t.length > 3 &&
+        qWord.length > 3 &&
+        (t.startsWith(qWord) || qWord.startsWith(t))
+      )
+        return true;
     }
     const tolerance = pbFuzzyTolerance(qWord.length);
     if (tolerance > 0) {
       for (const t of haystackTokens) {
-        if (Math.abs(t.length - qWord.length) <= tolerance && pbLevenshtein(qWord, t) <= tolerance) return true;
+        if (
+          Math.abs(t.length - qWord.length) <= tolerance &&
+          pbLevenshtein(qWord, t) <= tolerance
+        )
+          return true;
       }
     }
     return false;
@@ -1712,39 +1825,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return `Rs. ${entry.price.toLocaleString("en-IN")}${entry.from ? " onwards" : ""}`;
   }
 
-  // The admin-managed catalogue (Supabase table "chatbot_services") replaces
-  // this hardcoded default once it loads successfully - see loadChatbotServices()
-  // below. Kept as a fallback so the assistant still works if that table is
-  // empty, unreachable, or not yet migrated.
-  let PB_CANDIDATES = [];
-  function rebuildPriceCandidates() {
-    PB_CANDIDATES = PRICE_LIST.map((entry) => ({
-      entry,
-      tokens: pbTokenize(`${entry.item} ${entry.cat} ${entry.kw}`),
-    }));
-  }
-  rebuildPriceCandidates();
-
-  async function loadChatbotServices() {
-    if (!sb) return;
-    try {
-      const { data, error } = await sb.from("chatbot_services").select("*").order("category").order("item");
-      if (error) throw error;
-      if (Array.isArray(data) && data.length) {
-        PRICE_LIST = data.map((row) => ({
-          cat: row.category,
-          item: row.item,
-          price: Number(row.price) || 0,
-          from: !!row.price_from,
-          kw: row.keywords || "",
-        }));
-        rebuildPriceCandidates();
-      }
-    } catch (e) {
-      console.warn("Chatbot services load error (using built-in default price list):", e);
-    }
-  }
-  loadChatbotServices();
+  const PB_CANDIDATES = PRICE_LIST.map((entry) => ({
+    entry,
+    tokens: pbTokenize(`${entry.item} ${entry.cat} ${entry.kw}`),
+  }));
 
   // Searches once for a single phrase. Tier 1 requires every query word to
   // match something in the entry (keeps a generic word like "repair" from
@@ -1763,8 +1847,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // query) - otherwise a 3+ word question would fall back to showing
       // every entry that happens to share just one generic word.
       const minScore = Math.min(words.length, 2);
-      matches = PB_CANDIDATES
-        .map((c) => ({ ...c, score: words.filter((w) => pbTokenMatches(w, c.tokens)).length }))
+      matches = PB_CANDIDATES.map((c) => ({
+        ...c,
+        score: words.filter((w) => pbTokenMatches(w, c.tokens)).length,
+      }))
         .filter((c) => c.score >= minScore)
         .sort((a, b) => b.score - a.score);
     }
@@ -1797,11 +1883,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const PB_INTENT_PATTERNS = {
-    greeting: /^(hi+|hello+|hey+|yo|namaste|namaskar|good\s?(morning|afternoon|evening))\b/,
+    greeting:
+      /^(hi+|hello+|hey+|yo|namaste|namaskar|good\s?(morning|afternoon|evening))\b/,
     howareyou: /how\s*(are|r)\s*(you|u)|whats\s*up/,
     thanks: /\b(thank(s|you)?|thnx|thx|thanku)\b/,
     bye: /\b(bye|goodbye|see\s*ya|see\s*you|good\s*night)\b/,
-    human: /\b(human|agent|real\s*person|talk\s*to\s*(someone|somebody|staff)|call\s*(you|someone))\b/,
+    human:
+      /\b(human|agent|real\s*person|talk\s*to\s*(someone|somebody|staff)|call\s*(you|someone))\b/,
   };
 
   function pbDetectIntent(normQuery) {
@@ -1812,11 +1900,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const PB_INTENT_REPLIES = {
-    greeting: "<p>Hey there! Ask me about any repair or service charge — e.g. \"laptop screen change price\" — or tap a category below.</p>",
-    howareyou: "<p>Running perfectly, thanks for asking! What repair or service would you like a price for?</p>",
+    greeting:
+      '<p>Hey there! Ask me about any repair or service charge — e.g. "laptop screen change price" — or tap a category below.</p>',
+    howareyou:
+      "<p>Running perfectly, thanks for asking! What repair or service would you like a price for?</p>",
     thanks: "<p>You're welcome! Anything else I can look up for you?</p>",
     bye: "<p>Take care! We're here whenever you need us — come back any time.</p>",
-    human: () => `<p>Sure — our team can help directly:</p><p><a href="https://wa.me/${getContentPhoneDigits()}" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Chat on WhatsApp <i class="fa-brands fa-whatsapp"></i></a> or call <a href="tel:+${getContentPhoneDigits()}" style="color:var(--accent); font-weight:600;">${escapeHtml(getContentPhone())}</a>.</p>`,
+    human: () =>
+      `<p>Sure — our team can help directly:</p><p><a href="https://wa.me/${getContentPhoneDigits()}" target="_blank" rel="noopener noreferrer" style="color:var(--accent); font-weight:600;">Chat on WhatsApp <i class="fa-brands fa-whatsapp"></i></a> or call <a href="tel:+${getContentPhoneDigits()}" style="color:var(--accent); font-weight:600;">${escapeHtml(getContentPhone())}</a>.</p>`,
   };
 
   const priceBotToggle = document.getElementById("priceBotToggle");
