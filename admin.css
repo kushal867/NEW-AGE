@@ -782,6 +782,7 @@ h1, h2, h3, h4 {
 .bulk-action-bar {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 16px;
     padding: 12px 18px;
     margin-bottom: 14px;
@@ -791,6 +792,12 @@ h1, h2, h3, h4 {
     font-size: 0.88rem;
     color: var(--text-main);
 }
+
+/* .bulk-action-bar's own "display: flex" above has the same specificity as
+   the browser's default [hidden] { display: none } rule, and being an
+   author-stylesheet rule it wins the tie - so the JS toggling .hidden alone
+   never actually hid it. This selector is more specific and restores that. */
+.bulk-action-bar[hidden] { display: none; }
 
 .btn-icon-del-text {
     display: inline-flex;
