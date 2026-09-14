@@ -35,8 +35,8 @@
             <img src="assets/logo.png" alt="NewAge I.T. Solution Center" />
             <span>NewAge I.T.</span>
           </div>
-          <h2>CMS Administration</h2>
-          <p>
+          <h2 data-i18n="login_h2">CMS Administration</h2>
+          <p data-i18n="login_p">
             Enter your authorized credentials to manage repairs, inquiries, and
             store catalogue.
           </p>
@@ -44,7 +44,7 @@
 
         <form id="loginForm" class="auth-form" autocomplete="off">
           <div class="form-group">
-            <label for="adminUsername"
+            <label for="adminUsername" data-i18n="login_email_label"
               ><i class="fa-solid fa-user-shield"></i> Admin Email</label
             >
             <input
@@ -56,13 +56,14 @@
             />
           </div>
           <div class="form-group">
-            <label for="adminPassword"
+            <label for="adminPassword" data-i18n="login_password_label"
               ><i class="fa-solid fa-lock"></i> Master Password</label
             >
             <div class="password-input-wrap">
               <input
                 type="password"
                 id="adminPassword"
+                data-i18n-placeholder="login_password_placeholder"
                 placeholder="Enter secure password"
                 required
               />
@@ -80,6 +81,7 @@
             type="submit"
             class="btn-primary btn-block"
             id="loginSubmitBtn"
+            data-i18n="login_submit_btn"
           >
             <i class="fa-solid fa-right-to-bracket"></i> Authenticate & Enter
             CMS
@@ -93,10 +95,10 @@
         </form>
 
         <div class="auth-footer">
-          <a href="index.html" class="back-link"
+          <a href="index.html" class="back-link" data-i18n="login_back_link"
             ><i class="fa-solid fa-arrow-left"></i> Return to Live Website</a
           >
-          <span class="security-tag"
+          <span class="security-tag" data-i18n="login_security_tag"
             ><i class="fa-solid fa-shield-halved"></i> Supabase Auth
             Secured</span
           >
@@ -113,7 +115,7 @@
             <img src="assets/logo.png" alt="NewAge I.T. Solution Center" />
             <div>
               <span class="brand-title">NewAge I.T.</span>
-              <span class="brand-sub">CMS Portal</span>
+              <span class="brand-sub" data-i18n="sidebar_brand_sub">CMS Portal</span>
             </div>
           </div>
           <button
@@ -127,33 +129,33 @@
 
         <nav class="sidebar-menu">
           <button type="button" class="menu-item active" data-tab="overviewTab">
-            <i class="fa-solid fa-chart-pie"></i> <span>Overview</span>
+            <i class="fa-solid fa-chart-pie"></i> <span data-i18n="nav_overview">Overview</span>
           </button>
           <button type="button" class="menu-item" data-tab="repairsTab">
             <i class="fa-solid fa-screwdriver-wrench"></i>
-            <span>Repair Jobs</span>
+            <span data-i18n="nav_repairs">Repair Jobs</span>
             <span class="badge" id="repairsCountBadge">0</span>
           </button>
           <button type="button" class="menu-item" data-tab="inquiriesTab">
             <i class="fa-solid fa-envelope-open-text"></i>
-            <span>Inquiries</span>
+            <span data-i18n="nav_inquiries">Inquiries</span>
             <span class="badge badge-accent" id="inquiriesCountBadge">0</span>
           </button>
           <button type="button" class="menu-item" data-tab="productsTab">
-            <i class="fa-solid fa-boxes-stacked"></i> <span>Products</span>
+            <i class="fa-solid fa-boxes-stacked"></i> <span data-i18n="nav_products">Products</span>
           </button>
           <button type="button" class="menu-item" data-tab="videosTab">
-            <i class="fa-brands fa-tiktok"></i> <span>TikTok Videos</span>
+            <i class="fa-brands fa-tiktok"></i> <span data-i18n="nav_videos">TikTok Videos</span>
           </button>
           <button type="button" class="menu-item" data-tab="chatbotTab">
             <i class="fa-solid fa-comment-dollar"></i>
-            <span>Price Assistant</span>
+            <span data-i18n="nav_chatbot">Price Assistant</span>
           </button>
           <button type="button" class="menu-item" data-tab="siteContentTab">
-            <i class="fa-solid fa-pen-nib"></i> <span>Site Content</span>
+            <i class="fa-solid fa-pen-nib"></i> <span data-i18n="nav_sitecontent">Site Content</span>
           </button>
           <button type="button" class="menu-item" data-tab="settingsTab">
-            <i class="fa-solid fa-gear"></i> <span>Security & Settings</span>
+            <i class="fa-solid fa-gear"></i> <span data-i18n="nav_settings">Security & Settings</span>
           </button>
         </nav>
 
@@ -162,7 +164,7 @@
             <i class="fa-solid fa-circle-user"></i>
             <div>
               <strong id="sessionUserLabel">Admin</strong>
-              <span>Super Administrator</span>
+              <span data-i18n="sidebar_role">Super Administrator</span>
             </div>
           </div>
           <button
@@ -193,6 +195,16 @@
           <div class="nav-right">
             <button
               type="button"
+              class="lang-toggle"
+              id="langToggleBtn"
+              title="Switch language"
+              aria-label="Switch language between English and Nepali"
+            >
+              <span class="lang-toggle-opt" data-lang-option="en">EN</span>
+              <span class="lang-toggle-opt" data-lang-option="np">नेपाली</span>
+            </button>
+            <button
+              type="button"
               class="accent-toggle"
               id="accentToggleBtn"
               title="Switch site theme"
@@ -221,10 +233,10 @@
               title="Open Live Website in New Tab"
             >
               <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span>View Live Site</span>
+              <span data-i18n="topnav_view_live">View Live Site</span>
             </a>
             <span class="db-sync-indicator" id="topDbIndicator">
-              <i class="fa-solid fa-circle-check"></i> System Operational
+              <i class="fa-solid fa-circle-check"></i> <span data-i18n="topnav_system_operational">System Operational</span>
             </span>
           </div>
         </header>
@@ -238,7 +250,7 @@
                   <i class="fa-solid fa-screwdriver-wrench"></i>
                 </div>
                 <div class="stat-info">
-                  <span class="stat-label">Active Repair Jobs</span>
+                  <span class="stat-label" data-i18n="ov_stat_repairs_label">Active Repair Jobs</span>
                   <h3 id="statTotalRepairs">0</h3>
                   <span class="stat-sub" id="statPendingRepairs"
                     >0 in progress</span
@@ -250,7 +262,7 @@
                   <i class="fa-solid fa-envelope-open-text"></i>
                 </div>
                 <div class="stat-info">
-                  <span class="stat-label">Total Inquiries</span>
+                  <span class="stat-label" data-i18n="ov_stat_inquiries_label">Total Inquiries</span>
                   <h3 id="statTotalInquiries">0</h3>
                   <span class="stat-sub" id="statNewInquiries"
                     >0 new messages</span
@@ -262,9 +274,9 @@
                   <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
                 <div class="stat-info">
-                  <span class="stat-label">Product Catalogue</span>
+                  <span class="stat-label" data-i18n="ov_stat_products_label">Product Catalogue</span>
                   <h3 id="statTotalProducts">0</h3>
-                  <span class="stat-sub">Active in store</span>
+                  <span class="stat-sub" data-i18n="ov_stat_products_sub">Active in store</span>
                 </div>
               </div>
               <div class="stat-card glass-panel stat-card-clickable" id="statLowStockCard" title="Click to view in Products">
@@ -272,7 +284,7 @@
                   <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <div class="stat-info">
-                  <span class="stat-label">Low Stock Alerts</span>
+                  <span class="stat-label" data-i18n="ov_stat_lowstock_label">Low Stock Alerts</span>
                   <h3 id="statLowStock">0</h3>
                   <span class="stat-sub" id="statLowStockSub">All items well stocked</span>
                 </div>
@@ -282,9 +294,9 @@
                   <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <div class="stat-info">
-                  <span class="stat-label">Security Posture</span>
-                  <h3 style="color: #4ade80">Active</h3>
-                  <span class="stat-sub">Session timeout: 2 hrs</span>
+                  <span class="stat-label" data-i18n="ov_stat_security_label">Security Posture</span>
+                  <h3 style="color: #4ade80" data-i18n="ov_stat_security_value">Active</h3>
+                  <span class="stat-sub" data-i18n="ov_stat_security_sub">Session timeout: 2 hrs</span>
                 </div>
               </div>
             </div>
@@ -293,7 +305,7 @@
             <div class="overview-split">
               <div class="split-card glass-panel">
                 <div class="card-header">
-                  <h3>
+                  <h3 data-i18n="ov_quick_actions_h3">
                     <i class="fa-solid fa-bolt text-primary"></i> Quick Actions
                   </h3>
                 </div>
@@ -304,7 +316,7 @@
                     id="quickNewJobBtn"
                   >
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>New Repair Job</span>
+                    <span data-i18n="ov_qa_newjob">New Repair Job</span>
                   </button>
                   <button
                     type="button"
@@ -312,7 +324,7 @@
                     id="quickViewInqBtn"
                   >
                     <i class="fa-solid fa-envelope"></i>
-                    <span>Review Inquiries</span>
+                    <span data-i18n="ov_qa_reviewinq">Review Inquiries</span>
                   </button>
                   <button
                     type="button"
@@ -320,7 +332,7 @@
                     id="quickAddProductBtn"
                   >
                     <i class="fa-solid fa-box"></i>
-                    <span>Add Product</span>
+                    <span data-i18n="ov_qa_addproduct">Add Product</span>
                   </button>
                   <button
                     type="button"
@@ -328,33 +340,33 @@
                     id="quickSyncSheetBtn"
                   >
                     <i class="fa-solid fa-gear"></i>
-                    <span>Security & Settings</span>
+                    <span data-i18n="nav_settings">Security & Settings</span>
                   </button>
                 </div>
               </div>
 
               <div class="split-card glass-panel">
                 <div class="card-header">
-                  <h3>
+                  <h3 data-i18n="ov_summary_h3">
                     <i class="fa-solid fa-clock-rotate-left text-primary"></i>
                     System Summary
                   </h3>
                 </div>
                 <div class="system-summary-list">
                   <div class="summary-item">
-                    <span>Business Name:</span>
+                    <span data-i18n="ov_sum_bizname">Business Name:</span>
                     <strong>NewAge I.T. Solution Center</strong>
                   </div>
                   <div class="summary-item">
-                    <span>Established:</span>
+                    <span data-i18n="ov_sum_established">Established:</span>
                     <strong>2069 B.S. (Tinthana, Kathmandu)</strong>
                   </div>
                   <div class="summary-item">
-                    <span>Proprietor:</span>
+                    <span data-i18n="ov_sum_proprietor">Proprietor:</span>
                     <strong>Indra Kumar Shrestha</strong>
                   </div>
                   <div class="summary-item">
-                    <span>Repair Lifecycle:</span>
+                    <span data-i18n="ov_sum_lifecycle">Repair Lifecycle:</span>
                     <strong>8 Stages (PDF Specification)</strong>
                   </div>
                 </div>
@@ -370,20 +382,21 @@
                 <input
                   type="text"
                   id="repairSearchInput"
+                  data-i18n-placeholder="repairs_search_ph"
                   placeholder="Filter by Ticket ID, Customer, or Phone..."
                 />
               </div>
               <div class="toolbar-actions">
                 <select id="repairStageFilter" class="filter-select">
-                  <option value="">All 8 Stages</option>
-                  <option value="1">1. Received</option>
-                  <option value="2">2. Diagnosis</option>
-                  <option value="3">3. Quotation</option>
-                  <option value="4">4. Approval</option>
-                  <option value="5">5. Repairing</option>
-                  <option value="6">6. Testing</option>
-                  <option value="7">7. Ready for Pickup</option>
-                  <option value="8">8. Delivered</option>
+                  <option value="" data-i18n="repairs_opt_all">All 8 Stages</option>
+                  <option value="1" data-i18n="repairs_opt_s1">1. Received</option>
+                  <option value="2" data-i18n="repairs_opt_s2">2. Diagnosis</option>
+                  <option value="3" data-i18n="repairs_opt_s3">3. Quotation</option>
+                  <option value="4" data-i18n="repairs_opt_s4">4. Approval</option>
+                  <option value="5" data-i18n="repairs_opt_s5">5. Repairing</option>
+                  <option value="6" data-i18n="repairs_opt_s6">6. Testing</option>
+                  <option value="7" data-i18n="repairs_opt_s7">7. Ready for Pickup</option>
+                  <option value="8" data-i18n="repairs_opt_s8">8. Delivered</option>
                 </select>
                 <button
                   type="button"
@@ -391,14 +404,14 @@
                   id="exportRepairsExcelBtn"
                   title="Export the repair jobs shown below to an Excel file"
                 >
-                  <i class="fa-solid fa-file-excel"></i> Export to Excel
+                  <i class="fa-solid fa-file-excel"></i> <span data-i18n="btn_export_excel">Export to Excel</span>
                 </button>
                 <button
                   type="button"
                   class="btn-primary"
                   id="openNewJobModalBtn"
                 >
-                  <i class="fa-solid fa-plus"></i> New Repair Job
+                  <i class="fa-solid fa-plus"></i> <span data-i18n="repairs_new_job_btn">New Repair Job</span>
                 </button>
               </div>
             </div>
@@ -407,13 +420,13 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Ticket ID</th>
-                    <th>Customer</th>
-                    <th>Device</th>
-                    <th>Reported Issue</th>
-                    <th>Current Stage (1-8)</th>
-                    <th>Est. Cost</th>
-                    <th>Actions</th>
+                    <th data-i18n="th_ticket_id">Ticket ID</th>
+                    <th data-i18n="th_customer">Customer</th>
+                    <th data-i18n="th_device">Device</th>
+                    <th data-i18n="th_reported_issue">Reported Issue</th>
+                    <th data-i18n="th_stage_1_8">Current Stage (1-8)</th>
+                    <th data-i18n="th_est_cost">Est. Cost</th>
+                    <th data-i18n="th_actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="repairsTableBody">
@@ -431,6 +444,7 @@
                 <input
                   type="text"
                   id="inquirySearchInput"
+                  data-i18n-placeholder="inq_search_ph"
                   placeholder="Search inquiries by name, phone, message..."
                 />
               </div>
@@ -439,7 +453,7 @@
                 class="btn-secondary"
                 id="clearArchivedInquiriesBtn"
               >
-                <i class="fa-solid fa-trash-can"></i> Clear Closed
+                <i class="fa-solid fa-trash-can"></i> <span data-i18n="inq_clear_btn">Clear Closed</span>
               </button>
             </div>
 
@@ -447,13 +461,13 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Ticket Ref</th>
-                    <th>Customer</th>
-                    <th>Service</th>
-                    <th>Message</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th data-i18n="th_date">Date</th>
+                    <th data-i18n="th_ticket_ref">Ticket Ref</th>
+                    <th data-i18n="th_customer">Customer</th>
+                    <th data-i18n="th_service">Service</th>
+                    <th data-i18n="th_message">Message</th>
+                    <th data-i18n="th_status">Status</th>
+                    <th data-i18n="th_actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="inquiriesTableBody">
@@ -471,23 +485,24 @@
                 <input
                   type="text"
                   id="productSearchInput"
+                  data-i18n-placeholder="prod_search_ph"
                   placeholder="Search by product name, spec, or category..."
                 />
               </div>
               <div class="toolbar-actions">
                 <select id="productCategoryFilter" class="filter-select">
-                  <option value="">All Categories</option>
-                  <option value="Storage">Storage</option>
-                  <option value="Memory">Memory</option>
-                  <option value="Peripherals">Peripherals</option>
-                  <option value="Laptop Hardware">Laptop Hardware</option>
-                  <option value="Printing">Printing</option>
-                  <option value="Power & Cases">Power & Cases</option>
+                  <option value="" data-i18n="opt_all_categories">All Categories</option>
+                  <option value="Storage" data-i18n="cat_storage">Storage</option>
+                  <option value="Memory" data-i18n="cat_memory">Memory</option>
+                  <option value="Peripherals" data-i18n="cat_peripherals">Peripherals</option>
+                  <option value="Laptop Hardware" data-i18n="cat_laptop_hw">Laptop Hardware</option>
+                  <option value="Printing" data-i18n="cat_printing">Printing</option>
+                  <option value="Power & Cases" data-i18n="cat_power_cases">Power & Cases</option>
                 </select>
                 <select id="productStockFilter" class="filter-select">
-                  <option value="">In Stock &amp; On Order</option>
-                  <option value="in-stock">In Stock Only</option>
-                  <option value="pre-order">Available on Order Only</option>
+                  <option value="" data-i18n="stockf_all">In Stock &amp; On Order</option>
+                  <option value="in-stock" data-i18n="stockf_instock">In Stock Only</option>
+                  <option value="pre-order" data-i18n="stockf_onorder">Available on Order Only</option>
                 </select>
                 <button
                   type="button"
@@ -495,14 +510,14 @@
                   id="exportProductsExcelBtn"
                   title="Export the products shown below to an Excel file"
                 >
-                  <i class="fa-solid fa-file-excel"></i> Export to Excel
+                  <i class="fa-solid fa-file-excel"></i> <span data-i18n="btn_export_excel">Export to Excel</span>
                 </button>
                 <button
                   type="button"
                   class="btn-primary"
                   id="openAddProductModalBtn"
                 >
-                  <i class="fa-solid fa-plus"></i> Add Product
+                  <i class="fa-solid fa-plus"></i> <span data-i18n="products_add_btn">Add Product</span>
                 </button>
               </div>
             </div>
@@ -514,9 +529,9 @@
                 class="btn-icon-del-text"
                 id="productBulkDeleteBtn"
               >
-                <i class="fa-solid fa-trash-can"></i> Delete Selected
+                <i class="fa-solid fa-trash-can"></i> <span data-i18n="bulk_delete_btn">Delete Selected</span>
               </button>
-              <button type="button" class="btn-link" id="productBulkClearBtn">
+              <button type="button" class="btn-link" id="productBulkClearBtn" data-i18n="bulk_clear_btn">
                 Clear selection
               </button>
             </div>
@@ -532,15 +547,15 @@
                         title="Select all on this page"
                       />
                     </th>
-                    <th>Image</th>
-                    <th>Category</th>
-                    <th>Product Name</th>
-                    <th>Specifications</th>
-                    <th>MRP</th>
-                    <th>Selling Price</th>
-                    <th>Status</th>
-                    <th>Qty</th>
-                    <th>Actions</th>
+                    <th data-i18n="th_image">Image</th>
+                    <th data-i18n="th_category">Category</th>
+                    <th data-i18n="th_product_name">Product Name</th>
+                    <th data-i18n="th_specifications">Specifications</th>
+                    <th data-i18n="th_mrp">MRP</th>
+                    <th data-i18n="th_selling_price">Selling Price</th>
+                    <th data-i18n="th_status">Status</th>
+                    <th data-i18n="th_qty">Qty</th>
+                    <th data-i18n="th_actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="productsTableBody">
@@ -576,13 +591,13 @@
           <!-- Tab 5: TikTok Videos Manager -->
           <section id="videosTab" class="tab-pane">
             <div class="section-toolbar">
-              <h3>Featured TikTok Tech Repair Reels (@newageit2069)</h3>
+              <h3 data-i18n="vid_h3">Featured TikTok Tech Repair Reels (@newageit2069)</h3>
               <button
                 type="button"
                 class="btn-primary"
                 id="openAddVideoModalBtn"
               >
-                <i class="fa-solid fa-plus"></i> Add TikTok Reel
+                <i class="fa-solid fa-plus"></i> <span data-i18n="vid_add_btn">Add TikTok Reel</span>
               </button>
             </div>
 
@@ -590,12 +605,12 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Thumbnail</th>
-                    <th>Title</th>
-                    <th>Topic / Category</th>
-                    <th>TikTok Video URL</th>
-                    <th>Views Badge</th>
-                    <th>Actions</th>
+                    <th data-i18n="th_thumbnail">Thumbnail</th>
+                    <th data-i18n="th_title">Title</th>
+                    <th data-i18n="th_topic_category">Topic / Category</th>
+                    <th data-i18n="th_tiktok_url">TikTok Video URL</th>
+                    <th data-i18n="th_views_badge">Views Badge</th>
+                    <th data-i18n="th_actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="videosTableBody">
@@ -613,23 +628,24 @@
                 <input
                   type="text"
                   id="chatbotSearchInput"
+                  data-i18n-placeholder="cb_search_ph"
                   placeholder="Search by service name or category..."
                 />
               </div>
               <div class="toolbar-actions">
                 <select id="chatbotCategoryFilter" class="filter-select">
-                  <option value="">All Categories</option>
+                  <option value="" data-i18n="opt_all_categories">All Categories</option>
                 </select>
                 <button
                   type="button"
                   class="btn-primary"
                   id="openAddChatbotModalBtn"
                 >
-                  <i class="fa-solid fa-plus"></i> Add Service
+                  <i class="fa-solid fa-plus"></i> <span data-i18n="cb_add_btn">Add Service</span>
                 </button>
               </div>
             </div>
-            <p class="field-hint" style="margin: -8px 0 16px">
+            <p class="field-hint" style="margin: -8px 0 16px" data-i18n="cb_hint_p">
               These are the services the website's "Price Assistant" chatbot
               answers questions from. Add a service, its price, and it's live on
               the site immediately - no code changes needed.
@@ -639,10 +655,10 @@
               <table class="data-table">
                 <thead>
                   <tr>
-                    <th>Category</th>
-                    <th>Service Name</th>
-                    <th>Price</th>
-                    <th>Actions</th>
+                    <th data-i18n="th_category">Category</th>
+                    <th data-i18n="th_service_name">Service Name</th>
+                    <th data-i18n="th_price">Price</th>
+                    <th data-i18n="th_actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="chatbotTableBody">
@@ -659,21 +675,21 @@
                 class="settings-card glass-panel"
                 style="grid-column: 1 / -1"
               >
-                <h3>
+                <h3 data-i18n="sc_h3">
                   <i class="fa-solid fa-pen-nib text-primary"></i> Edit Website
                   Text
                 </h3>
-                <p>
+                <p data-i18n="sc_p">
                   Leave a field blank and save to revert it to the site's normal
                   default text. Product/video photos are already editable from
                   their own tabs.
                 </p>
 
                 <form id="siteContentForm" class="settings-form">
-                  <h4 class="content-form-heading">Homepage Hero</h4>
+                  <h4 class="content-form-heading" data-i18n="sc_heading_hero">Homepage Hero</h4>
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="scHeroTitle1">Title - Line 1</label>
+                      <label for="scHeroTitle1" data-i18n="sc_label_title1">Title - Line 1</label>
                       <input
                         type="text"
                         id="scHeroTitle1"
@@ -682,7 +698,7 @@
                       />
                     </div>
                     <div class="form-group">
-                      <label for="scHeroTitle2"
+                      <label for="scHeroTitle2" data-i18n="sc_label_title2"
                         >Title - Line 2 (accent color)</label
                       >
                       <input
@@ -694,7 +710,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label for="scHeroTagline">Tagline</label>
+                    <label for="scHeroTagline" data-i18n="sc_label_tagline">Tagline</label>
                     <input
                       type="text"
                       id="scHeroTagline"
@@ -703,7 +719,7 @@
                     />
                   </div>
                   <div class="form-group">
-                    <label for="scHeroDesc">Description</label>
+                    <label for="scHeroDesc" data-i18n="sc_label_desc">Description</label>
                     <input
                       type="text"
                       id="scHeroDesc"
@@ -712,17 +728,18 @@
                     />
                   </div>
 
-                  <h4 class="content-form-heading">Contact Details</h4>
+                  <h4 class="content-form-heading" data-i18n="sc_heading_contact">Contact Details</h4>
                   <p
                     class="field-hint"
                     style="margin-top: -8px; margin-bottom: 14px"
+                    data-i18n="sc_hint_contact"
                   >
                     These update everywhere on the site at once - navbar,
                     contact section, footer, and every WhatsApp/call button.
                   </p>
                   <div class="form-row">
                     <div class="form-group">
-                      <label for="scPhone">Phone / WhatsApp Number</label>
+                      <label for="scPhone" data-i18n="sc_label_phone">Phone / WhatsApp Number</label>
                       <input
                         type="text"
                         id="scPhone"
@@ -731,7 +748,7 @@
                       />
                     </div>
                     <div class="form-group">
-                      <label for="scEmail">Email</label>
+                      <label for="scEmail" data-i18n="sc_label_email">Email</label>
                       <input
                         type="email"
                         id="scEmail"
@@ -741,7 +758,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <label for="scAddress">Address (Contact section)</label>
+                    <label for="scAddress" data-i18n="sc_label_address">Address (Contact section)</label>
                     <input
                       type="text"
                       id="scAddress"
@@ -750,7 +767,7 @@
                     />
                   </div>
                   <div class="form-group">
-                    <label for="scHours"
+                    <label for="scHours" data-i18n="sc_label_hours"
                       >Operating Hours (Contact section)</label
                     >
                     <input
@@ -761,9 +778,9 @@
                     />
                   </div>
 
-                  <h4 class="content-form-heading">Footer</h4>
+                  <h4 class="content-form-heading" data-i18n="sc_heading_footer">Footer</h4>
                   <div class="form-group">
-                    <label for="scFooterBlurb"
+                    <label for="scFooterBlurb" data-i18n="sc_label_footer_blurb"
                       >Footer Tagline (under the logo)</label
                     >
                     <input
@@ -774,7 +791,7 @@
                     />
                   </div>
 
-                  <button type="submit" class="btn-primary">
+                  <button type="submit" class="btn-primary" data-i18n="sc_save_btn">
                     Save Website Text
                   </button>
                   <div
@@ -792,31 +809,32 @@
             <div class="settings-grid">
               <!-- Password Management -->
               <div class="settings-card glass-panel">
-                <h3>
+                <h3 data-i18n="settings_pw_h3">
                   <i class="fa-solid fa-key text-primary"></i> Change Master
                   Password
                 </h3>
-                <p>
+                <p data-i18n="settings_pw_p">
                   Updates your real Supabase Auth account password
                   (server-verified, not stored in this browser).
                 </p>
                 <form id="changePasswordForm" class="settings-form">
                   <div class="form-group">
-                    <label for="currentPassword">Current Password</label>
+                    <label for="currentPassword" data-i18n="settings_pw_current_label">Current Password</label>
                     <input type="password" id="currentPassword" required />
                   </div>
                   <div class="form-group">
-                    <label for="newPassword">New Secure Password</label>
+                    <label for="newPassword" data-i18n="settings_pw_new_label">New Secure Password</label>
                     <input
                       type="password"
                       id="newPassword"
+                      data-i18n-placeholder="settings_pw_new_ph"
                       placeholder="Minimum 8 characters with numbers & symbols"
                       required
                       minlength="8"
                     />
                   </div>
                   <div class="form-group">
-                    <label for="confirmNewPassword">Confirm New Password</label>
+                    <label for="confirmNewPassword" data-i18n="settings_pw_confirm_label">Confirm New Password</label>
                     <input
                       type="password"
                       id="confirmNewPassword"
@@ -824,7 +842,7 @@
                       minlength="8"
                     />
                   </div>
-                  <button type="submit" class="btn-primary">
+                  <button type="submit" class="btn-primary" data-i18n="settings_pw_submit">
                     Update Master Password
                   </button>
                   <div
@@ -837,11 +855,11 @@
 
               <!-- Data Backup -->
               <div class="settings-card glass-panel">
-                <h3>
+                <h3 data-i18n="settings_backup_h3">
                   <i class="fa-solid fa-download text-primary"></i> Data Backup
                   & Recovery
                 </h3>
-                <p>
+                <p data-i18n="settings_backup_p">
                   Export all repairs, inquiries, and catalogue data (live from
                   the database) into an offline JSON backup.
                 </p>
@@ -858,7 +876,7 @@
                     class="btn-secondary"
                     id="exportBackupBtn"
                   >
-                    <i class="fa-solid fa-file-export"></i> Export JSON Backup
+                    <i class="fa-solid fa-file-export"></i> <span data-i18n="settings_backup_btn">Export JSON Backup</span>
                   </button>
                 </div>
               </div>
@@ -887,7 +905,7 @@
         <form id="repairJobForm" class="cms-modal-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="jobTicketId">Ticket ID *</label>
+              <label for="jobTicketId" data-i18n="rm_label_ticketid">Ticket ID *</label>
               <input
                 type="text"
                 id="jobTicketId"
@@ -896,10 +914,11 @@
               />
             </div>
             <div class="form-group">
-              <label for="jobCustomerName">Customer Name *</label>
+              <label for="jobCustomerName" data-i18n="rm_label_customer">Customer Name *</label>
               <input
                 type="text"
                 id="jobCustomerName"
+                data-i18n-placeholder="rm_ph_customer"
                 placeholder="Full name"
                 required
               />
@@ -907,7 +926,7 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="jobPhone">Phone / WhatsApp Number *</label>
+              <label for="jobPhone" data-i18n="rm_label_phone">Phone / WhatsApp Number *</label>
               <input
                 type="tel"
                 id="jobPhone"
@@ -916,7 +935,7 @@
               />
             </div>
             <div class="form-group">
-              <label for="jobDevice">Device & Model *</label>
+              <label for="jobDevice" data-i18n="rm_label_device">Device & Model *</label>
               <input
                 type="text"
                 id="jobDevice"
@@ -926,60 +945,62 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="jobIssue">Reported Issue *</label>
+            <label for="jobIssue" data-i18n="rm_label_issue">Reported Issue *</label>
             <textarea
               id="jobIssue"
               rows="2"
+              data-i18n-placeholder="rm_ph_issue"
               placeholder="Describe hardware or software fault..."
               required
             ></textarea>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="jobStage">Lifecycle Stage (1 to 8) *</label>
+              <label for="jobStage" data-i18n="rm_label_stage">Lifecycle Stage (1 to 8) *</label>
               <select id="jobStage" required>
-                <option value="1">
+                <option value="1" data-i18n="rm_opt_stage1">
                   1. Received (Device logged into center)
                 </option>
-                <option value="2">
+                <option value="2" data-i18n="rm_opt_stage2">
                   2. Diagnosis (Inspecting circuits & diagnostic test)
                 </option>
-                <option value="3">3. Quotation (Cost estimate drafted)</option>
-                <option value="4">
+                <option value="3" data-i18n="rm_opt_stage3">3. Quotation (Cost estimate drafted)</option>
+                <option value="4" data-i18n="rm_opt_stage4">
                   4. Approval (Customer confirmed & approved)
                 </option>
-                <option value="5" selected>
+                <option value="5" selected data-i18n="rm_opt_stage5">
                   5. Repairing (Active hardware / IC repair)
                 </option>
-                <option value="6">
+                <option value="6" data-i18n="rm_opt_stage6">
                   6. Testing (Stress test & QA verification)
                 </option>
-                <option value="7">7. Ready (Ready for customer pickup)</option>
-                <option value="8">
+                <option value="7" data-i18n="rm_opt_stage7">7. Ready (Ready for customer pickup)</option>
+                <option value="8" data-i18n="rm_opt_stage8">
                   8. Delivered (Collected / Delivered with warranty)
                 </option>
               </select>
             </div>
             <div class="form-group">
-              <label for="jobCost">Estimated Cost Quote</label>
+              <label for="jobCost" data-i18n="rm_label_cost">Estimated Cost Quote</label>
               <input type="text" id="jobCost" placeholder="e.g. NPR 3,500" />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="jobReceivedDate">Date Received</label>
+              <label for="jobReceivedDate" data-i18n="rm_label_received_date">Date Received</label>
               <input type="date" id="jobReceivedDate" />
             </div>
             <div class="form-group">
-              <label for="jobDeliveryDate">Estimated Completion Date</label>
+              <label for="jobDeliveryDate" data-i18n="rm_label_delivery_date">Estimated Completion Date</label>
               <input type="date" id="jobDeliveryDate" />
             </div>
           </div>
           <div class="form-group">
-            <label for="jobNotes">Technician Diagnostic Remarks</label>
+            <label for="jobNotes" data-i18n="rm_label_notes">Technician Diagnostic Remarks</label>
             <textarea
               id="jobNotes"
               rows="2"
+              data-i18n-placeholder="rm_ph_notes"
               placeholder="Technical diagnostic notes, parts replaced, thermal paste..."
             ></textarea>
           </div>
@@ -988,10 +1009,11 @@
               type="button"
               class="btn-secondary"
               id="cancelRepairModalBtn"
+              data-i18n="btn_cancel"
             >
               Cancel
             </button>
-            <button type="submit" class="btn-primary" id="saveRepairBtn">
+            <button type="submit" class="btn-primary" id="saveRepairBtn" data-i18n="rm_save_btn">
               Save Repair Ticket
             </button>
           </div>
@@ -1018,7 +1040,7 @@
         <form id="productForm" class="cms-modal-form">
           <div class="form-row">
             <div class="form-group">
-              <label for="prodTitle">Product Name *</label>
+              <label for="prodTitle" data-i18n="pm_label_name">Product Name *</label>
               <input
                 type="text"
                 id="prodTitle"
@@ -1027,23 +1049,24 @@
               />
             </div>
             <div class="form-group">
-              <label for="prodCategory">Category *</label>
+              <label for="prodCategory" data-i18n="label_category">Category *</label>
               <select id="prodCategory" required>
-                <option value="Storage">Storage (SSD / HDD)</option>
-                <option value="Memory">Memory (RAM)</option>
-                <option value="Peripherals">
+                <option value="Storage" data-i18n="pm_opt_storage">Storage (SSD / HDD)</option>
+                <option value="Memory" data-i18n="pm_opt_memory">Memory (RAM)</option>
+                <option value="Peripherals" data-i18n="pm_opt_peripherals">
                   Peripherals (Keyboards/Mice)
                 </option>
-                <option value="Laptop Hardware">
+                <option value="Laptop Hardware" data-i18n="pm_opt_laptophw">
                   Laptop Hardware (Screens/Batteries)
                 </option>
-                <option value="Printing">Printing & Toners</option>
-                <option value="Power & Cases">Power & Cases</option>
-                <option value="__new__">+ Add New Category&hellip;</option>
+                <option value="Printing" data-i18n="pm_opt_printing">Printing & Toners</option>
+                <option value="Power & Cases" data-i18n="cat_power_cases">Power & Cases</option>
+                <option value="__new__" data-i18n="pm_opt_addnew">+ Add New Category&hellip;</option>
               </select>
               <input
                 type="text"
                 id="prodNewCategory"
+                data-i18n-placeholder="opt_type_new_category"
                 placeholder="Type the new category name"
                 hidden
                 style="margin-top: 8px"
@@ -1051,21 +1074,22 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="prodSpec">Specifications / Description *</label>
+            <label for="prodSpec" data-i18n="pm_label_spec">Specifications / Description *</label>
             <input
               type="text"
               id="prodSpec"
+              data-i18n-placeholder="pm_ph_spec"
               placeholder="Key technical specifications, speed, warranty..."
               required
             />
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="prodMrp">MRP (NPR)</label>
+              <label for="prodMrp" data-i18n="pm_label_mrp">MRP (NPR)</label>
               <input type="text" id="prodMrp" placeholder="e.g. NPR 12,000" />
             </div>
             <div class="form-group">
-              <label for="prodPrice">Selling Price (NPR) *</label>
+              <label for="prodPrice" data-i18n="pm_label_price">Selling Price (NPR) *</label>
               <input
                 type="text"
                 id="prodPrice"
@@ -1076,14 +1100,14 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="prodStock">Stock Availability</label>
+              <label for="prodStock" data-i18n="pm_label_stock">Stock Availability</label>
               <select id="prodStock" required>
-                <option value="in-stock" selected>In Stock</option>
-                <option value="pre-order">Available on Order</option>
+                <option value="in-stock" selected data-i18n="stockf_instock_opt">In Stock</option>
+                <option value="pre-order" data-i18n="stockf_onorder_opt">Available on Order</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="prodStockQty">Stock Quantity</label>
+              <label for="prodStockQty" data-i18n="pm_label_qty">Stock Quantity</label>
               <input
                 type="number"
                 id="prodStockQty"
@@ -1092,13 +1116,13 @@
                 placeholder="e.g. 12"
                 value="0"
               />
-              <p class="field-hint">
+              <p class="field-hint" data-i18n="pm_hint_qty">
                 For your own tracking - not shown to website visitors.
               </p>
             </div>
           </div>
           <div class="form-group">
-            <label for="prodImageUrl">Product Photo URL (optional)</label>
+            <label for="prodImageUrl" data-i18n="pm_label_photo">Product Photo URL (optional)</label>
             <div class="image-field-row">
               <div class="image-preview-box" id="prodImagePreviewBox">
                 <i class="fa-solid fa-image"></i>
@@ -1107,16 +1131,17 @@
                 <input
                   type="url"
                   id="prodImageUrl"
+                  data-i18n-placeholder="img_url_ph"
                   placeholder="Paste an image URL, or a Google Drive share link"
                 />
-                <p class="field-hint">
+                <p class="field-hint" data-i18n="pm_hint_gdrive">
                   Google Drive links are converted automatically &mdash; just
                   set the file to "Anyone with the link can view" and paste the
                   normal share link here. Leave blank to show the category icon
                   instead.
                 </p>
                 <div class="upload-row">
-                  <label for="prodImageFile" class="btn-upload">
+                  <label for="prodImageFile" class="btn-upload" data-i18n="upload_photo_label">
                     <i class="fa-solid fa-upload"></i> Or upload a photo
                   </label>
                   <input
@@ -1125,7 +1150,7 @@
                     accept="image/png,image/jpeg,image/webp,image/gif"
                     hidden
                   />
-                  <span class="field-hint"
+                  <span class="field-hint" data-i18n="img_filetypes_hint"
                     >JPG, PNG, WebP or GIF, up to 5MB.</span
                   >
                 </div>
@@ -1138,10 +1163,11 @@
               type="button"
               class="btn-secondary"
               id="cancelProductModalBtn"
+              data-i18n="btn_cancel"
             >
               Cancel
             </button>
-            <button type="submit" class="btn-primary">Save Product</button>
+            <button type="submit" class="btn-primary" data-i18n="pm_save_btn">Save Product</button>
           </div>
         </form>
       </div>
@@ -1161,7 +1187,7 @@
         </div>
         <form id="videoForm" class="cms-modal-form">
           <div class="form-group">
-            <label for="vidTitle">Video Title / Caption *</label>
+            <label for="vidTitle" data-i18n="vm_label_title">Video Title / Caption *</label>
             <input
               type="text"
               id="vidTitle"
@@ -1171,7 +1197,7 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="vidTopic">Topic Tag *</label>
+              <label for="vidTopic" data-i18n="vm_label_topic">Topic Tag *</label>
               <input
                 type="text"
                 id="vidTopic"
@@ -1180,12 +1206,12 @@
               />
             </div>
             <div class="form-group">
-              <label for="vidViews">Views Count</label>
+              <label for="vidViews" data-i18n="vm_label_views">Views Count</label>
               <input type="text" id="vidViews" placeholder="e.g. 18.5K views" />
             </div>
           </div>
           <div class="form-group">
-            <label for="vidUrl">TikTok Video URL *</label>
+            <label for="vidUrl" data-i18n="vm_label_url">TikTok Video URL *</label>
             <input
               type="url"
               id="vidUrl"
@@ -1195,14 +1221,14 @@
             <p class="field-status" id="vidUrlStatus"></p>
           </div>
           <div class="video-live-preview" id="videoLivePreview" hidden>
-            <span class="field-hint">Live preview:</span>
+            <span class="field-hint" data-i18n="vm_live_preview_label">Live preview:</span>
             <div
               class="video-live-preview-frame"
               id="videoLivePreviewFrame"
             ></div>
           </div>
           <div class="form-group">
-            <label for="vidThumbUrl"
+            <label for="vidThumbUrl" data-i18n="vm_label_cover"
               >Cover Photo URL (optional, for this admin table only)</label
             >
             <div class="image-field-row">
@@ -1213,15 +1239,16 @@
                 <input
                   type="url"
                   id="vidThumbUrl"
+                  data-i18n-placeholder="img_url_ph"
                   placeholder="Paste an image URL, or a Google Drive share link"
                 />
-                <p class="field-hint">
+                <p class="field-hint" data-i18n="vm_hint_gdrive">
                   Google Drive links are converted automatically. This is only a
                   quick-reference thumbnail here in the CMS &mdash; visitors
                   always see the live TikTok embed.
                 </p>
                 <div class="upload-row">
-                  <label for="vidImageFile" class="btn-upload">
+                  <label for="vidImageFile" class="btn-upload" data-i18n="upload_photo_label">
                     <i class="fa-solid fa-upload"></i> Or upload a photo
                   </label>
                   <input
@@ -1230,7 +1257,7 @@
                     accept="image/png,image/jpeg,image/webp,image/gif"
                     hidden
                   />
-                  <span class="field-hint"
+                  <span class="field-hint" data-i18n="img_filetypes_hint"
                     >JPG, PNG, WebP or GIF, up to 5MB.</span
                   >
                 </div>
@@ -1243,10 +1270,11 @@
               type="button"
               class="btn-secondary"
               id="cancelVideoModalBtn"
+              data-i18n="btn_cancel"
             >
               Cancel
             </button>
-            <button type="submit" class="btn-primary">Add Video</button>
+            <button type="submit" class="btn-primary" data-i18n="vm_save_btn">Add Video</button>
           </div>
         </form>
       </div>
@@ -1270,18 +1298,19 @@
         </div>
         <form id="chatbotForm" class="cms-modal-form">
           <div class="form-group">
-            <label for="cbCategory">Category *</label>
+            <label for="cbCategory" data-i18n="label_category">Category *</label>
             <select id="cbCategory" required></select>
             <input
               type="text"
               id="cbNewCategory"
+              data-i18n-placeholder="opt_type_new_category"
               placeholder="Type the new category name"
               hidden
               style="margin-top: 8px"
             />
           </div>
           <div class="form-group">
-            <label for="cbItem">Service Name *</label>
+            <label for="cbItem" data-i18n="cm_label_service">Service Name *</label>
             <input
               type="text"
               id="cbItem"
@@ -1291,7 +1320,7 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="cbPrice">Price (NPR) *</label>
+              <label for="cbPrice" data-i18n="cm_label_price">Price (NPR) *</label>
               <input
                 type="number"
                 id="cbPrice"
@@ -1306,6 +1335,7 @@
               style="display: flex; align-items: center; padding-top: 26px"
             >
               <label
+                data-i18n="cm_label_pricefrom"
                 style="
                   display: flex;
                   align-items: center;
@@ -1319,13 +1349,13 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="cbKeywords">Extra Search Keywords (optional)</label>
+            <label for="cbKeywords" data-i18n="cm_label_keywords">Extra Search Keywords (optional)</label>
             <input
               type="text"
               id="cbKeywords"
               placeholder="e.g. broken cracked monitor display"
             />
-            <p class="field-hint">
+            <p class="field-hint" data-i18n="cm_hint_keywords">
               Helps the chatbot match related words customers might type. Not
               shown to visitors.
             </p>
@@ -1335,10 +1365,11 @@
               type="button"
               class="btn-secondary"
               id="cancelChatbotModalBtn"
+              data-i18n="btn_cancel"
             >
               Cancel
             </button>
-            <button type="submit" class="btn-primary">Save Service</button>
+            <button type="submit" class="btn-primary" data-i18n="cm_save_btn">Save Service</button>
           </div>
         </form>
       </div>

@@ -49,6 +49,292 @@ document.addEventListener('DOMContentLoaded', () => {
     })();
 
     // =========================================================================
+    // Admin panel language (English / Nepali) - static UI chrome only.
+    // Real business data (product names, customer names, ticket details, and
+    // anything typed into the Site Content tab) is left exactly as typed,
+    // regardless of language. t() and applyLanguage() are used later on by
+    // switchTab() and the modal-open functions, so they're declared here at
+    // the top level rather than inside an IIFE.
+    // =========================================================================
+    const LANG_STORAGE_KEY = 'NEWAGE_LANG';
+    const I18N = {
+        login_h2: { en: 'CMS Administration', np: 'सीएमएस प्रशासन' },
+        login_p: { en: 'Enter your authorized credentials to manage repairs, inquiries, and store catalogue.', np: 'मर्मत, सोधपुछ, र स्टोर क्याटलग व्यवस्थापन गर्न आफ्नो अधिकृत प्रमाणहरू प्रविष्ट गर्नुहोस्।' },
+        login_email_label: { en: 'Admin Email', np: 'एडमिन इमेल' },
+        login_password_label: { en: 'Master Password', np: 'मास्टर पासवर्ड' },
+        login_password_placeholder: { en: 'Enter secure password', np: 'सुरक्षित पासवर्ड प्रविष्ट गर्नुहोस्' },
+        login_submit_btn: { en: 'Authenticate & Enter CMS', np: 'प्रमाणित गर्नुहोस् र सीएमएस प्रवेश गर्नुहोस्' },
+        login_back_link: { en: 'Return to Live Website', np: 'लाइभ वेबसाइटमा फर्कनुहोस्' },
+        login_security_tag: { en: 'Supabase Auth Secured', np: 'सुपाबेस अथ सुरक्षित' },
+
+        sidebar_brand_sub: { en: 'CMS Portal', np: 'सीएमएस पोर्टल' },
+        nav_overview: { en: 'Overview', np: 'सिंहावलोकन' },
+        nav_repairs: { en: 'Repair Jobs', np: 'मर्मत कामहरू' },
+        nav_inquiries: { en: 'Inquiries', np: 'सोधपुछहरू' },
+        nav_products: { en: 'Products', np: 'प्रोडक्टहरू' },
+        nav_videos: { en: 'TikTok Videos', np: 'टिकटक भिडियोहरू' },
+        nav_chatbot: { en: 'Price Assistant', np: 'मूल्य सहायक' },
+        nav_sitecontent: { en: 'Site Content', np: 'साइट सामग्री' },
+        nav_settings: { en: 'Security & Settings', np: 'सुरक्षा र सेटिङ' },
+        sidebar_role: { en: 'Super Administrator', np: 'सुपर एडमिनिस्ट्रेटर' },
+
+        topnav_view_live: { en: 'View Live Site', np: 'लाइभ साइट हेर्नुहोस्' },
+        topnav_system_operational: { en: 'System Operational', np: 'प्रणाली सञ्चालनमा' },
+
+        ov_stat_repairs_label: { en: 'Active Repair Jobs', np: 'सक्रिय मर्मत कामहरू' },
+        ov_stat_inquiries_label: { en: 'Total Inquiries', np: 'कुल सोधपुछहरू' },
+        ov_stat_products_label: { en: 'Product Catalogue', np: 'प्रोडक्ट क्याटलग' },
+        ov_stat_products_sub: { en: 'Active in store', np: 'पसलमा सक्रिय' },
+        ov_stat_lowstock_label: { en: 'Low Stock Alerts', np: 'न्यून स्टक चेतावनी' },
+        ov_stat_security_label: { en: 'Security Posture', np: 'सुरक्षा स्थिति' },
+        ov_stat_security_value: { en: 'Active', np: 'सक्रिय' },
+        ov_stat_security_sub: { en: 'Session timeout: 2 hrs', np: 'सेसन समय सीमा: २ घण्टा' },
+        ov_quick_actions_h3: { en: 'Quick Actions', np: 'द्रुत कार्यहरू' },
+        ov_qa_newjob: { en: 'New Repair Job', np: 'नयाँ मर्मत काम' },
+        ov_qa_reviewinq: { en: 'Review Inquiries', np: 'सोधपुछ समीक्षा गर्नुहोस्' },
+        ov_qa_addproduct: { en: 'Add Product', np: 'प्रोडक्ट थप्नुहोस्' },
+        ov_summary_h3: { en: 'System Summary', np: 'प्रणाली सारांश' },
+        ov_sum_bizname: { en: 'Business Name:', np: 'व्यवसायको नाम:' },
+        ov_sum_established: { en: 'Established:', np: 'स्थापना:' },
+        ov_sum_proprietor: { en: 'Proprietor:', np: 'मालिक:' },
+        ov_sum_lifecycle: { en: 'Repair Lifecycle:', np: 'मर्मत जीवनचक्र:' },
+
+        repairs_search_ph: { en: 'Filter by Ticket ID, Customer, or Phone...', np: 'टिकट आईडी, ग्राहक, वा फोनद्वारा फिल्टर गर्नुहोस्...' },
+        repairs_opt_all: { en: 'All 8 Stages', np: 'सबै ८ चरण' },
+        repairs_opt_s1: { en: '1. Received', np: '१. प्राप्त भयो' },
+        repairs_opt_s2: { en: '2. Diagnosis', np: '२. निदान' },
+        repairs_opt_s3: { en: '3. Quotation', np: '३. कोटेसन' },
+        repairs_opt_s4: { en: '4. Approval', np: '४. स्वीकृति' },
+        repairs_opt_s5: { en: '5. Repairing', np: '५. मर्मत हुँदैछ' },
+        repairs_opt_s6: { en: '6. Testing', np: '६. परीक्षण' },
+        repairs_opt_s7: { en: '7. Ready for Pickup', np: '७. लिन तयार' },
+        repairs_opt_s8: { en: '8. Delivered', np: '८. डेलिभर भयो' },
+        btn_export_excel: { en: 'Export to Excel', np: 'एक्सेलमा निर्यात गर्नुहोस्' },
+        repairs_new_job_btn: { en: 'New Repair Job', np: 'नयाँ मर्मत काम' },
+        th_ticket_id: { en: 'Ticket ID', np: 'टिकट आईडी' },
+        th_customer: { en: 'Customer', np: 'ग्राहक' },
+        th_device: { en: 'Device', np: 'डिभाइस' },
+        th_reported_issue: { en: 'Reported Issue', np: 'रिपोर्ट गरिएको समस्या' },
+        th_stage_1_8: { en: 'Current Stage (1-8)', np: 'हालको चरण (१-८)' },
+        th_est_cost: { en: 'Est. Cost', np: 'अनुमानित लागत' },
+        th_actions: { en: 'Actions', np: 'कार्यहरू' },
+
+        inq_search_ph: { en: 'Search inquiries by name, phone, message...', np: 'नाम, फोन, सन्देशद्वारा सोधपुछ खोज्नुहोस्...' },
+        inq_clear_btn: { en: 'Clear Closed', np: 'बन्द गरिएका हटाउनुहोस्' },
+        th_date: { en: 'Date', np: 'मिति' },
+        th_ticket_ref: { en: 'Ticket Ref', np: 'टिकट सन्दर्भ' },
+        th_service: { en: 'Service', np: 'सेवा' },
+        th_message: { en: 'Message', np: 'सन्देश' },
+        th_status: { en: 'Status', np: 'स्थिति' },
+
+        prod_search_ph: { en: 'Search by product name, spec, or category...', np: 'प्रोडक्टको नाम, स्पेक, वा श्रेणीद्वारा खोज्नुहोस्...' },
+        opt_all_categories: { en: 'All Categories', np: 'सबै श्रेणी' },
+        cat_storage: { en: 'Storage', np: 'स्टोरेज' },
+        cat_memory: { en: 'Memory', np: 'मेमोरी' },
+        cat_peripherals: { en: 'Peripherals', np: 'पेरिफेरल्स' },
+        cat_laptop_hw: { en: 'Laptop Hardware', np: 'ल्यापटप हार्डवेयर' },
+        cat_printing: { en: 'Printing', np: 'प्रिन्टिङ' },
+        cat_power_cases: { en: 'Power & Cases', np: 'पावर र केस' },
+        stockf_all: { en: 'In Stock & On Order', np: 'स्टकमा र अर्डरमा' },
+        stockf_instock: { en: 'In Stock Only', np: 'स्टकमा मात्र' },
+        stockf_onorder: { en: 'Available on Order Only', np: 'अर्डरमा मात्र उपलब्ध' },
+        products_add_btn: { en: 'Add Product', np: 'प्रोडक्ट थप्नुहोस्' },
+        bulk_delete_btn: { en: 'Delete Selected', np: 'छानिएका मेटाउनुहोस्' },
+        bulk_clear_btn: { en: 'Clear selection', np: 'छनोट हटाउनुहोस्' },
+        th_image: { en: 'Image', np: 'तस्बिर' },
+        th_category: { en: 'Category', np: 'श्रेणी' },
+        th_product_name: { en: 'Product Name', np: 'प्रोडक्टको नाम' },
+        th_specifications: { en: 'Specifications', np: 'स्पेसिफिकेसन' },
+        th_mrp: { en: 'MRP', np: 'एमआरपी' },
+        th_selling_price: { en: 'Selling Price', np: 'बिक्री मूल्य' },
+        th_qty: { en: 'Qty', np: 'परिमाण' },
+
+        vid_h3: { en: 'Featured TikTok Tech Repair Reels (@newageit2069)', np: 'प्रमुख टिकटक टेक मर्मत रिलहरू (@newageit2069)' },
+        vid_add_btn: { en: 'Add TikTok Reel', np: 'टिकटक रिल थप्नुहोस्' },
+        th_thumbnail: { en: 'Thumbnail', np: 'थम्बनेल' },
+        th_title: { en: 'Title', np: 'शीर्षक' },
+        th_topic_category: { en: 'Topic / Category', np: 'विषय / श्रेणी' },
+        th_tiktok_url: { en: 'TikTok Video URL', np: 'टिकटक भिडियो URL' },
+        th_views_badge: { en: 'Views Badge', np: 'भ्युज ब्याज' },
+
+        cb_search_ph: { en: 'Search by service name or category...', np: 'सेवाको नाम वा श्रेणीद्वारा खोज्नुहोस्...' },
+        cb_add_btn: { en: 'Add Service', np: 'सेवा थप्नुहोस्' },
+        cb_hint_p: { en: 'These are the services the website\'s "Price Assistant" chatbot answers questions from. Add a service, its price, and it\'s live on the site immediately - no code changes needed.', np: 'यी वेबसाइटको "मूल्य सहायक" च्याटबोटले जवाफ दिने सेवाहरू हुन्। सेवा र यसको मूल्य थप्नुहोस्, यो तुरुन्तै साइटमा लाइभ हुन्छ - कोड परिवर्तन आवश्यक पर्दैन।' },
+        th_service_name: { en: 'Service Name', np: 'सेवाको नाम' },
+        th_price: { en: 'Price', np: 'मूल्य' },
+
+        sc_h3: { en: 'Edit Website Text', np: 'वेबसाइट टेक्स्ट सम्पादन गर्नुहोस्' },
+        sc_p: { en: 'Leave a field blank and save to revert it to the site\'s normal default text. Product/video photos are already editable from their own tabs.', np: 'कुनै फिल्ड खाली छोडेर सेभ गर्दा यो साइटको सामान्य डिफल्ट टेक्स्टमा फर्किन्छ। प्रोडक्ट/भिडियो तस्बिरहरू पहिले नै आ-आफ्नो ट्याबबाट सम्पादन योग्य छन्।' },
+        sc_heading_hero: { en: 'Homepage Hero', np: 'होमपेज हिरो' },
+        sc_label_title1: { en: 'Title - Line 1', np: 'शीर्षक - लाइन १' },
+        sc_label_title2: { en: 'Title - Line 2 (accent color)', np: 'शीर्षक - लाइन २ (एक्सेन्ट रङ)' },
+        sc_label_tagline: { en: 'Tagline', np: 'ट्यागलाइन' },
+        sc_label_desc: { en: 'Description', np: 'विवरण' },
+        sc_heading_contact: { en: 'Contact Details', np: 'सम्पर्क विवरण' },
+        sc_hint_contact: { en: 'These update everywhere on the site at once - navbar, contact section, footer, and every WhatsApp/call button.', np: 'यी एकैचोटि साइटभर अपडेट हुन्छन् - नेभबार, सम्पर्क सेक्सन, फुटर, र हरेक ह्वाट्सएप/कल बटन।' },
+        sc_label_phone: { en: 'Phone / WhatsApp Number', np: 'फोन / ह्वाट्सएप नम्बर' },
+        sc_label_email: { en: 'Email', np: 'इमेल' },
+        sc_label_address: { en: 'Address (Contact section)', np: 'ठेगाना (सम्पर्क सेक्सन)' },
+        sc_label_hours: { en: 'Operating Hours (Contact section)', np: 'सञ्चालन समय (सम्पर्क सेक्सन)' },
+        sc_heading_footer: { en: 'Footer', np: 'फुटर' },
+        sc_label_footer_blurb: { en: 'Footer Tagline (under the logo)', np: 'फुटर ट्यागलाइन (लोगो मुनि)' },
+        sc_save_btn: { en: 'Save Website Text', np: 'वेबसाइट टेक्स्ट सेभ गर्नुहोस्' },
+
+        settings_pw_h3: { en: 'Change Master Password', np: 'मास्टर पासवर्ड परिवर्तन गर्नुहोस्' },
+        settings_pw_p: { en: 'Updates your real Supabase Auth account password (server-verified, not stored in this browser).', np: 'तपाईंको वास्तविक सुपाबेस अथ खाता पासवर्ड अपडेट गर्छ (सर्भर-प्रमाणित, यो ब्राउजरमा भण्डारण हुँदैन)।' },
+        settings_pw_current_label: { en: 'Current Password', np: 'हालको पासवर्ड' },
+        settings_pw_new_label: { en: 'New Secure Password', np: 'नयाँ सुरक्षित पासवर्ड' },
+        settings_pw_new_ph: { en: 'Minimum 8 characters with numbers & symbols', np: 'कम्तिमा ८ अक्षर, अंक र संकेतहरू सहित' },
+        settings_pw_confirm_label: { en: 'Confirm New Password', np: 'नयाँ पासवर्ड पुष्टि गर्नुहोस्' },
+        settings_pw_submit: { en: 'Update Master Password', np: 'मास्टर पासवर्ड अपडेट गर्नुहोस्' },
+        settings_backup_h3: { en: 'Data Backup & Recovery', np: 'डाटा ब्याकअप र रिकभरी' },
+        settings_backup_p: { en: 'Export all repairs, inquiries, and catalogue data (live from the database) into an offline JSON backup.', np: 'सबै मर्मत, सोधपुछ, र क्याटलग डाटा (डाटाबेसबाट लाइभ) अफलाइन JSON ब्याकअपमा निर्यात गर्नुहोस्।' },
+        settings_backup_btn: { en: 'Export JSON Backup', np: 'JSON ब्याकअप निर्यात गर्नुहोस्' },
+
+        rm_label_ticketid: { en: 'Ticket ID *', np: 'टिकट आईडी *' },
+        rm_label_customer: { en: 'Customer Name *', np: 'ग्राहकको नाम *' },
+        rm_ph_customer: { en: 'Full name', np: 'पूरा नाम' },
+        rm_label_phone: { en: 'Phone / WhatsApp Number *', np: 'फोन / ह्वाट्सएप नम्बर *' },
+        rm_label_device: { en: 'Device & Model *', np: 'डिभाइस र मोडेल *' },
+        rm_label_issue: { en: 'Reported Issue *', np: 'रिपोर्ट गरिएको समस्या *' },
+        rm_ph_issue: { en: 'Describe hardware or software fault...', np: 'हार्डवेयर वा सफ्टवेयर समस्या वर्णन गर्नुहोस्...' },
+        rm_label_stage: { en: 'Lifecycle Stage (1 to 8) *', np: 'जीवनचक्र चरण (१ देखि ८) *' },
+        rm_opt_stage1: { en: '1. Received (Device logged into center)', np: '१. प्राप्त भयो (डिभाइस सेन्टरमा लग गरियो)' },
+        rm_opt_stage2: { en: '2. Diagnosis (Inspecting circuits & diagnostic test)', np: '२. निदान (सर्किट जाँच र डायग्नोस्टिक परीक्षण)' },
+        rm_opt_stage3: { en: '3. Quotation (Cost estimate drafted)', np: '३. कोटेसन (लागत अनुमान तयार)' },
+        rm_opt_stage4: { en: '4. Approval (Customer confirmed & approved)', np: '४. स्वीकृति (ग्राहकले पुष्टि र स्वीकृत गर्यो)' },
+        rm_opt_stage5: { en: '5. Repairing (Active hardware / IC repair)', np: '५. मर्मत हुँदैछ (सक्रिय हार्डवेयर / IC मर्मत)' },
+        rm_opt_stage6: { en: '6. Testing (Stress test & QA verification)', np: '६. परीक्षण (स्ट्रेस टेस्ट र QA प्रमाणीकरण)' },
+        rm_opt_stage7: { en: '7. Ready (Ready for customer pickup)', np: '७. तयार (ग्राहक लिन तयार)' },
+        rm_opt_stage8: { en: '8. Delivered (Collected / Delivered with warranty)', np: '८. डेलिभर भयो (वारेन्टीसहित संकलन / डेलिभर)' },
+        rm_label_cost: { en: 'Estimated Cost Quote', np: 'अनुमानित लागत कोटेसन' },
+        rm_label_received_date: { en: 'Date Received', np: 'प्राप्त मिति' },
+        rm_label_delivery_date: { en: 'Estimated Completion Date', np: 'अनुमानित सम्पन्न मिति' },
+        rm_label_notes: { en: 'Technician Diagnostic Remarks', np: 'प्राविधिक निदान टिप्पणी' },
+        rm_ph_notes: { en: 'Technical diagnostic notes, parts replaced, thermal paste...', np: 'प्राविधिक निदान नोट, बदलिएका पार्ट्स, थर्मल पेस्ट...' },
+        btn_cancel: { en: 'Cancel', np: 'रद्द गर्नुहोस्' },
+        rm_save_btn: { en: 'Save Repair Ticket', np: 'मर्मत टिकट सेभ गर्नुहोस्' },
+        rm_title_add: { en: 'Add Repair Job', np: 'मर्मत काम थप्नुहोस्' },
+        rm_title_edit_prefix: { en: 'Edit Ticket', np: 'टिकट सम्पादन गर्नुहोस्' },
+
+        label_category: { en: 'Category *', np: 'श्रेणी *' },
+        pm_label_name: { en: 'Product Name *', np: 'प्रोडक्टको नाम *' },
+        pm_opt_storage: { en: 'Storage (SSD / HDD)', np: 'स्टोरेज (SSD / HDD)' },
+        pm_opt_memory: { en: 'Memory (RAM)', np: 'मेमोरी (RAM)' },
+        pm_opt_peripherals: { en: 'Peripherals (Keyboards/Mice)', np: 'पेरिफेरल्स (किबोर्ड/माउस)' },
+        pm_opt_laptophw: { en: 'Laptop Hardware (Screens/Batteries)', np: 'ल्यापटप हार्डवेयर (स्क्रिन/ब्याट्री)' },
+        pm_opt_printing: { en: 'Printing & Toners', np: 'प्रिन्टिङ र टोनर' },
+        pm_opt_addnew: { en: '+ Add New Category…', np: '+ नयाँ श्रेणी थप्नुहोस्…' },
+        opt_type_new_category: { en: 'Type the new category name', np: 'नयाँ श्रेणीको नाम टाइप गर्नुहोस्' },
+        pm_label_spec: { en: 'Specifications / Description *', np: 'स्पेसिफिकेसन / विवरण *' },
+        pm_ph_spec: { en: 'Key technical specifications, speed, warranty...', np: 'मुख्य प्राविधिक स्पेसिफिकेसन, स्पिड, वारेन्टी...' },
+        pm_label_mrp: { en: 'MRP (NPR)', np: 'एमआरपी (रु)' },
+        pm_label_price: { en: 'Selling Price (NPR) *', np: 'बिक्री मूल्य (रु) *' },
+        pm_label_stock: { en: 'Stock Availability', np: 'स्टक उपलब्धता' },
+        stockf_instock_opt: { en: 'In Stock', np: 'स्टकमा छ' },
+        stockf_onorder_opt: { en: 'Available on Order', np: 'अर्डरमा उपलब्ध' },
+        pm_label_qty: { en: 'Stock Quantity', np: 'स्टक परिमाण' },
+        pm_hint_qty: { en: 'For your own tracking - not shown to website visitors.', np: 'तपाईंको आफ्नै ट्र्याकिङका लागि - वेबसाइट भ्रमणकर्तालाई देखाइँदैन।' },
+        pm_label_photo: { en: 'Product Photo URL (optional)', np: 'प्रोडक्ट फोटो URL (वैकल्पिक)' },
+        img_url_ph: { en: 'Paste an image URL, or a Google Drive share link', np: 'तस्बिर URL पेस्ट गर्नुहोस्, वा गुगल ड्राइभ सेयर लिंक' },
+        pm_hint_gdrive: { en: 'Google Drive links are converted automatically — just set the file to "Anyone with the link can view" and paste the normal share link here. Leave blank to show the category icon instead.', np: 'गुगल ड्राइभ लिंकहरू स्वचालित रूपमा रूपान्तरण हुन्छन् — फाइललाई "लिंक भएका जो कोहीले हेर्न सक्छन्" मा सेट गरेर सामान्य सेयर लिंक यहाँ पेस्ट गर्नुहोस्। श्रेणी आइकन देखाउन खाली छोड्नुहोस्।' },
+        upload_photo_label: { en: 'Or upload a photo', np: 'वा फोटो अपलोड गर्नुहोस्' },
+        img_filetypes_hint: { en: 'JPG, PNG, WebP or GIF, up to 5MB.', np: 'JPG, PNG, WebP वा GIF, ५MB सम्म।' },
+        pm_save_btn: { en: 'Save Product', np: 'प्रोडक्ट सेभ गर्नुहोस्' },
+        pm_title_add: { en: 'Add Catalogue Product', np: 'क्याटलग प्रोडक्ट थप्नुहोस्' },
+        pm_title_edit: { en: 'Edit Product', np: 'प्रोडक्ट सम्पादन गर्नुहोस्' },
+
+        vm_label_title: { en: 'Video Title / Caption *', np: 'भिडियो शीर्षक / क्याप्सन *' },
+        vm_label_topic: { en: 'Topic Tag *', np: 'विषय ट्याग *' },
+        vm_label_views: { en: 'Views Count', np: 'भ्युज गणना' },
+        vm_label_url: { en: 'TikTok Video URL *', np: 'टिकटक भिडियो URL *' },
+        vm_live_preview_label: { en: 'Live preview:', np: 'लाइभ पूर्वावलोकन:' },
+        vm_label_cover: { en: 'Cover Photo URL (optional, for this admin table only)', np: 'कभर फोटो URL (वैकल्पिक, यो एडमिन तालिकाका लागि मात्र)' },
+        vm_hint_gdrive: { en: 'Google Drive links are converted automatically. This is only a quick-reference thumbnail here in the CMS — visitors always see the live TikTok embed.', np: 'गुगल ड्राइभ लिंकहरू स्वचालित रूपमा रूपान्तरण हुन्छन्। यो सीएमएसमा छिटो-सन्दर्भ थम्बनेल मात्र हो — भ्रमणकर्ताहरूले सधैं लाइभ टिकटक इम्बेड देख्छन्।' },
+        vm_save_btn: { en: 'Add Video', np: 'भिडियो थप्नुहोस्' },
+        vm_title_add: { en: 'Add TikTok Tech Video', np: 'टिकटक टेक भिडियो थप्नुहोस्' },
+        vm_title_edit: { en: 'Edit TikTok Video', np: 'टिकटक भिडियो सम्पादन गर्नुहोस्' },
+
+        cm_label_service: { en: 'Service Name *', np: 'सेवाको नाम *' },
+        cm_label_price: { en: 'Price (NPR) *', np: 'मूल्य (रु) *' },
+        cm_label_pricefrom: { en: '"Starting from" price (may vary after diagnosis)', np: '"यहाँदेखि सुरु" मूल्य (निदान पछि फरक हुन सक्छ)' },
+        cm_label_keywords: { en: 'Extra Search Keywords (optional)', np: 'अतिरिक्त खोज किवर्ड (वैकल्पिक)' },
+        cm_hint_keywords: { en: 'Helps the chatbot match related words customers might type. Not shown to visitors.', np: 'ग्राहकले टाइप गर्न सक्ने सम्बन्धित शब्दहरू मिलाउन च्याटबोटलाई मद्दत गर्छ। भ्रमणकर्तालाई देखाइँदैन।' },
+        cm_save_btn: { en: 'Save Service', np: 'सेवा सेभ गर्नुहोस्' },
+        cm_title_add: { en: 'Add Chatbot Service', np: 'च्याटबोट सेवा थप्नुहोस्' },
+        cm_title_edit: { en: 'Edit Chatbot Service', np: 'च्याटबोट सेवा सम्पादन गर्नुहोस्' },
+
+        tab_overviewTab: { en: 'System Overview', np: 'प्रणाली सिंहावलोकन' },
+        tab_repairsTab: { en: 'Repair Jobs Management', np: 'मर्मत काम व्यवस्थापन' },
+        tab_inquiriesTab: { en: 'Customer Inquiries & Messages', np: 'ग्राहक सोधपुछ र सन्देश' },
+        tab_productsTab: { en: 'In-Store Product Catalogue', np: 'पसल प्रोडक्ट क्याटलग' },
+        tab_videosTab: { en: 'Featured TikTok Tech Videos', np: 'प्रमुख टिकटक टेक भिडियोहरू' },
+        tab_chatbotTab: { en: 'Price Assistant Chatbot Catalogue', np: 'मूल्य सहायक च्याटबोट क्याटलग' },
+        tab_siteContentTab: { en: 'Website Text & Content', np: 'वेबसाइट टेक्स्ट र सामग्री' },
+        tab_settingsTab: { en: 'System Security & Database Settings', np: 'प्रणाली सुरक्षा र डाटाबेस सेटिङ' }
+    };
+
+    let currentLang = 'en';
+    try {
+        const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+        if (savedLang === 'en' || savedLang === 'np') currentLang = savedLang;
+    } catch (e) { /* localStorage unavailable */ }
+
+    function t(key) {
+        const entry = I18N[key];
+        if (!entry) return '';
+        return entry[currentLang] || entry.en || '';
+    }
+
+    // Preserves any sibling elements (icons, checkboxes) inside el - only the
+    // element's own text node is swapped, never el.innerHTML wholesale.
+    function applyI18nText(el, value) {
+        if (el.children.length > 0) {
+            const textNode = Array.from(el.childNodes).find(
+                (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim()
+            );
+            if (textNode) textNode.textContent = ' ' + value;
+            else el.appendChild(document.createTextNode(' ' + value));
+        } else {
+            el.textContent = value;
+        }
+    }
+
+    const langToggleBtn = document.getElementById('langToggleBtn');
+    const pageTitleEl = document.getElementById('pageTitle');
+
+    function refreshPageTitle() {
+        const activePane = document.querySelector('.tab-pane.active');
+        if (pageTitleEl && activePane && I18N['tab_' + activePane.id]) {
+            pageTitleEl.textContent = t('tab_' + activePane.id);
+        }
+    }
+
+    function applyLanguage(lang) {
+        currentLang = lang;
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+            const value = t(el.getAttribute('data-i18n'));
+            if (value) applyI18nText(el, value);
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+            const value = t(el.getAttribute('data-i18n-placeholder'));
+            if (value) el.setAttribute('placeholder', value);
+        });
+        langToggleBtn?.querySelectorAll('.lang-toggle-opt').forEach((opt) => {
+            opt.classList.toggle('is-active', opt.getAttribute('data-lang-option') === lang);
+        });
+        refreshPageTitle();
+        try { localStorage.setItem(LANG_STORAGE_KEY, lang); } catch (e) { /* localStorage unavailable */ }
+    }
+    applyLanguage(currentLang);
+
+    langToggleBtn?.addEventListener('click', (e) => {
+        const opt = e.target.closest('[data-lang-option]');
+        const next = opt ? opt.getAttribute('data-lang-option') : (currentLang === 'en' ? 'np' : 'en');
+        applyLanguage(next);
+    });
+
+    // =========================================================================
     // Image URL resolution (supports plain image URLs + Google Drive share links)
     // =========================================================================
     const PRODUCT_ICONS = {
@@ -291,21 +577,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileCloseSidebarBtn = document.getElementById('mobileCloseSidebarBtn');
     const dashboardSidebar = document.querySelector('.dashboard-sidebar');
 
-    const TAB_TITLES = {
-        overviewTab: 'System Overview',
-        repairsTab: 'Repair Jobs Management',
-        inquiriesTab: 'Customer Inquiries & Messages',
-        productsTab: 'In-Store Product Catalogue',
-        videosTab: 'Featured TikTok Tech Videos',
-        chatbotTab: 'Price Assistant Chatbot Catalogue',
-        siteContentTab: 'Website Text & Content',
-        settingsTab: 'System Security & Database Settings'
-    };
-
     function switchTab(tabId) {
         menuItems.forEach(item => item.classList.toggle('active', item.getAttribute('data-tab') === tabId));
         tabPanes.forEach(pane => pane.classList.toggle('active', pane.id === tabId));
-        if (pageTitle && TAB_TITLES[tabId]) pageTitle.textContent = TAB_TITLES[tabId];
+        if (pageTitle && I18N['tab_' + tabId]) pageTitle.textContent = t('tab_' + tabId);
         if (dashboardSidebar) dashboardSidebar.classList.remove('active');
 
         if (tabId === 'overviewTab') renderOverviewStats();
@@ -562,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const idInput = document.getElementById('jobTicketId');
 
         if (ticketData) {
-            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Ticket ${escapeHtml(ticketData.ticket_id)}`;
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-pen-to-square text-primary"></i> ${t('rm_title_edit_prefix')} ${escapeHtml(ticketData.ticket_id)}`;
             if (idInput) { idInput.value = ticketData.ticket_id; idInput.readOnly = true; }
             document.getElementById('jobCustomerName').value = ticketData.customer_name || '';
             document.getElementById('jobPhone').value = ticketData.phone || '';
@@ -574,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('jobDeliveryDate').value = ticketData.estimated_delivery || '';
             document.getElementById('jobNotes').value = ticketData.technician_notes || '';
         } else {
-            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-screwdriver-wrench text-primary"></i> Add Repair Job`;
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-screwdriver-wrench text-primary"></i> ${t('rm_title_add')}`;
             if (idInput) {
                 const existingIds = new Set(repairsCache.map(r => r.ticket_id));
                 let suggested;
@@ -946,8 +1221,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (productModalTitleEl) {
             productModalTitleEl.innerHTML = productData
-                ? '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Product'
-                : '<i class="fa-solid fa-box-open text-primary"></i> Add Catalogue Product';
+                ? `<i class="fa-solid fa-pen-to-square text-primary"></i> ${t('pm_title_edit')}`
+                : `<i class="fa-solid fa-box-open text-primary"></i> ${t('pm_title_add')}`;
         }
 
         if (productData) {
@@ -1101,8 +1376,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (videoModalTitleEl) {
             videoModalTitleEl.innerHTML = videoData
-                ? '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit TikTok Video'
-                : '<i class="fa-brands fa-tiktok text-primary"></i> Add TikTok Tech Video';
+                ? `<i class="fa-solid fa-pen-to-square text-primary"></i> ${t('vm_title_edit')}`
+                : `<i class="fa-brands fa-tiktok text-primary"></i> ${t('vm_title_add')}`;
         }
 
         if (videoData) {
@@ -1283,8 +1558,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (chatbotModalTitleEl) {
             chatbotModalTitleEl.innerHTML = item
-                ? '<i class="fa-solid fa-pen-to-square text-primary"></i> Edit Chatbot Service'
-                : '<i class="fa-solid fa-comment-dollar text-primary"></i> Add Chatbot Service';
+                ? `<i class="fa-solid fa-pen-to-square text-primary"></i> ${t('cm_title_edit')}`
+                : `<i class="fa-solid fa-comment-dollar text-primary"></i> ${t('cm_title_add')}`;
         }
 
         if (item) {
@@ -1484,3 +1759,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial check
     checkAuthUI();
 });
+
+
