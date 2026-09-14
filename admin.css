@@ -630,11 +630,22 @@ h1, h2, h3, h4 {
 
 /* Single accent for all stat icons (kept the old class names for markup
    compatibility - no more rainbow-per-card decoration). */
-.icon-cyan, .icon-purple, .icon-green, .icon-blue {
+.icon-cyan, .icon-purple, .icon-green, .icon-blue, .icon-warning {
     background: var(--card-bg-2);
     color: var(--primary);
     border: 1px solid var(--glass-border);
 }
+
+/* Low-stock card only turns amber once something actually needs attention -
+   otherwise it sits neutral like every other stat card. */
+.icon-warning.is-active {
+    background: rgba(250, 204, 21, 0.12);
+    color: #facc15;
+    border-color: rgba(250, 204, 21, 0.35);
+}
+
+.stat-card-clickable { cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease; }
+.stat-card-clickable:hover { transform: translateY(-2px); }
 
 .stat-label {
     font-size: 0.82rem;

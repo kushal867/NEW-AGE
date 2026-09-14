@@ -378,17 +378,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // caches - no fetch. Split out from renderOverviewStats() so callers who
     // just fetched fresh data (e.g. initDashboard on login) don't pay for a
     // second, redundant round-trip before the dashboard shows real numbers.
+    const LOW_STOCK_THRESHOLD = 5;
+
     function paintOverviewStats() {
         const totalRepairs = repairsCache.length;
         const pendingRepairs = repairsCache.filter(r => Number(r.stage) < 8).length;
         const totalInquiries = inquiriesCache.length;
         const newInquiries = inquiriesCache.filter(i => i.status === 'New').length;
+        const lowStockItems = productsCache.filter(p => p.stock === 'in-stock' && Number(p.stock_qty) <= LOW_STOCK_THRESHOLD);
 
         document.getElementById('statTotalRepairs').textContent = totalRepairs;
         document.getElementById('statPendingRepairs').textContent = `${pendingRepairs} actively in progress`;
         document.getElementById('statTotalInquiries').textContent = totalInquiries;
         document.getElementById('statNewInquiries').textContent = `${newInquiries} pending review`;
         document.getElementById('statTotalProducts').textContent = productsCache.length;
+
+        document.getElementById('statLowStock').textContent = lowStockItems.length;
+        document.getElementById('statLowStockSub').textContent = lowStockItems.length
+            ? lowStockItems.slice(0, 3).map(p => p.title).join(', ') + (lowStockItems.length > 3 ? ` +${lowStockItems.length - 3} more` : '')
+            : 'All items well stocked';
+        document.getElementById('statLowStockIcon')?.classList.toggle('is-active', lowStockItems.length > 0);
 
         document.getElementById('repairsCountBadge').textContent = pendingRepairs;
         document.getElementById('inquiriesCountBadge').textContent = newInquiries;
@@ -398,6 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
         await Promise.all([fetchRepairs(), fetchInquiries(), fetchProducts()]);
         paintOverviewStats();
     }
+
+    document.getElementById('statLowStockCard')?.addEventListener('click', () => switchTab('productsTab'));
 
     // =========================================================================
     // 5. Repair Jobs Management Tab (8 Stages)
