@@ -527,6 +527,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const label = document.getElementById('sessionUserLabel');
             if (label) label.textContent = session.user?.email || 'Admin';
             initDashboard();
+            const initialTab = getTabFromHash();
+            history.replaceState({ tab: initialTab }, '', '#' + initialTab);
+            switchTab(initialTab);
         } else {
             if (loginView) loginView.style.display = 'flex';
             if (dashboardView) dashboardView.style.display = 'none';
@@ -565,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
             await sb?.auth.signOut();
+            history.replaceState(null, '', location.pathname + location.search);
             checkAuthUI();
         });
     }
@@ -594,20 +598,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tabId === 'siteContentTab') loadSiteContentForm();
     }
 
+    // Tabs are switched purely in JS with no URL change, so by default the
+    // browser Back button has nothing to "go back" to within the admin panel
+    // - it jumps straight out to whatever page was open before (usually the
+    // public site). Pushing a history entry per tab, and switching tabs on
+    // popstate instead of leaving the app, fixes that.
+    const VALID_TAB_IDS = Array.from(tabPanes).map(pane => pane.id);
+
+    function getTabFromHash() {
+        const id = (location.hash || '').slice(1);
+        return VALID_TAB_IDS.includes(id) ? id : 'overviewTab';
+    }
+
+    function navigateToTab(tabId) {
+        if (location.hash !== '#' + tabId) history.pushState({ tab: tabId }, '', '#' + tabId);
+        switchTab(tabId);
+    }
+
+    window.addEventListener('popstate', () => {
+        if (dashboardView && dashboardView.style.display !== 'none') switchTab(getTabFromHash());
+    });
+
     menuItems.forEach(item => {
         item.addEventListener('click', () => {
             const tabId = item.getAttribute('data-tab');
-            if (tabId) switchTab(tabId);
+            if (tabId) navigateToTab(tabId);
         });
     });
 
     mobileSidebarToggle?.addEventListener('click', () => dashboardSidebar?.classList.add('active'));
     mobileCloseSidebarBtn?.addEventListener('click', () => dashboardSidebar?.classList.remove('active'));
 
-    document.getElementById('quickNewJobBtn')?.addEventListener('click', () => { switchTab('repairsTab'); openRepairModal(); });
-    document.getElementById('quickViewInqBtn')?.addEventListener('click', () => switchTab('inquiriesTab'));
-    document.getElementById('quickAddProductBtn')?.addEventListener('click', () => { switchTab('productsTab'); openProductModal(); });
-    document.getElementById('quickSyncSheetBtn')?.addEventListener('click', () => switchTab('settingsTab'));
+    document.getElementById('quickNewJobBtn')?.addEventListener('click', () => { navigateToTab('repairsTab'); openRepairModal(); });
+    document.getElementById('quickViewInqBtn')?.addEventListener('click', () => navigateToTab('inquiriesTab'));
+    document.getElementById('quickAddProductBtn')?.addEventListener('click', () => { navigateToTab('productsTab'); openProductModal(); });
+    document.getElementById('quickSyncSheetBtn')?.addEventListener('click', () => navigateToTab('settingsTab'));
 
     // =========================================================================
     // 3. In-memory caches, refreshed from Supabase after every mutation so the
@@ -685,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paintOverviewStats();
     }
 
-    document.getElementById('statLowStockCard')?.addEventListener('click', () => switchTab('productsTab'));
+    document.getElementById('statLowStockCard')?.addEventListener('click', () => navigateToTab('productsTab'));
 
     // =========================================================================
     // 5. Repair Jobs Management Tab (8 Stages)
