@@ -1414,6 +1414,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Loads a lightweight click-to-play facade instead of a live TikTok iframe
+  // for every card - a real embed starts TikTok's own tracking SDK polling
+  // in the background immediately, for videos the visitor may never watch.
+  // The real iframe (and that SDK traffic) is only created once someone
+  // actually clicks to play.
+  function playTikTokFacade(facade) {
+    const id = facade.getAttribute("data-tiktok-id");
+    const wrap = facade.closest(".video-player-wrap");
+    if (!wrap || !id) return;
+    const iframe = document.createElement("iframe");
+    iframe.src = `https://www.tiktok.com/player/v1/${id}?autoplay=1`;
+    iframe.className = "tiktok-iframe-player";
+    iframe.allow = "autoplay; encrypted-media";
+    iframe.allowFullscreen = true;
+    iframe.title = facade.getAttribute("data-video-title") || "TikTok video";
+    wrap.innerHTML = "";
+    wrap.appendChild(iframe);
+  }
+
   async function loadDynamicVideos() {
     const grid = document.getElementById("videosGrid");
     if (!grid || !sb) return;
@@ -1431,10 +1450,18 @@ document.addEventListener("DOMContentLoaded", () => {
             (v.url || "").match(/video\/(\d+)/) ||
             (v.url || "").match(/player\/v1\/(\d+)/);
           if (!tiktokMatch) return "";
+          const title = escapeHtml(v.title || "TikTok video");
+          const resolvedThumb = resolveImageUrl(v.thumbnail);
+          const thumbHtml = resolvedThumb
+            ? `<img src="${escapeHtml(resolvedThumb)}" alt="${title}" loading="lazy" onerror="this.remove()">`
+            : `<div class="video-facade-fallback"><i class="fa-brands fa-tiktok"></i></div>`;
           return `
                     <div class="video-card" data-card-id="${escapeHtml(v.id || "")}">
                         <div class="video-player-wrap">
-                            <iframe src="https://www.tiktok.com/player/v1/${tiktokMatch[1]}?autoplay=0" class="tiktok-iframe-player" allow="autoplay; encrypted-media" allowfullscreen title="${escapeHtml(v.title || "TikTok video")}"></iframe>
+                            <div class="video-facade" role="button" tabindex="0" data-tiktok-id="${tiktokMatch[1]}" data-video-title="${title}" aria-label="Play video: ${title}">
+                                ${thumbHtml}
+                                <span class="video-facade-play"><i class="fa-solid fa-play"></i></span>
+                            </div>
                         </div>
                         <div class="video-card-body">
                             <span class="video-topic-badge"><i class="fa-brands fa-tiktok"></i> ${escapeHtml(v.topic || "Tech Tip")}</span>
@@ -1448,6 +1475,19 @@ document.addEventListener("DOMContentLoaded", () => {
       console.warn("Videos load error:", e);
     }
   }
+
+  document.getElementById("videosGrid")?.addEventListener("click", (e) => {
+    const facade = e.target.closest(".video-facade");
+    if (facade) playTikTokFacade(facade);
+  });
+  document.getElementById("videosGrid")?.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const facade = e.target.closest(".video-facade");
+    if (facade) {
+      e.preventDefault();
+      playTikTokFacade(facade);
+    }
+  });
 
   loadDynamicProducts();
   loadDynamicVideos();
