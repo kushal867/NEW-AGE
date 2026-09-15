@@ -1435,6 +1435,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const cat = card.dataset.category;
       if (cat && !categories.includes(cat)) categories.push(cat);
     });
+    cards.forEach((card) => {
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute(
+        "aria-label",
+        "View details for " + (card.querySelector("h3")?.textContent || "product"),
+      );
+    });
+
     if (categories.length < 2) {
       filterBar.innerHTML = "";
       cards.forEach((card) => (card.hidden = false));
@@ -1539,6 +1548,84 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       playTikTokFacade(facade);
     }
+  });
+
+  // Product detail modal - opened by clicking anywhere on a card except the
+  // Order button (which should keep navigating straight to WhatsApp). Reads
+  // straight from the clicked card's DOM instead of a separate data store,
+  // so it works for both the static fallback cards and the ones rendered
+  // from Supabase.
+  function openProductModal(card) {
+    const modal = document.getElementById("productModal");
+    if (!modal) return;
+
+    const mediaImg = card.querySelector(".product-icon-wrap img");
+    const mediaIcon = card.querySelector(".product-icon-wrap i");
+    const media = document.getElementById("pmMedia");
+    media.innerHTML = mediaImg
+      ? `<img src="${mediaImg.src}" alt="${escapeHtml(mediaImg.alt || "")}">`
+      : mediaIcon
+        ? `<i class="${mediaIcon.className}"></i>`
+        : "";
+
+    document.getElementById("pmCat").textContent =
+      card.querySelector(".product-cat")?.textContent || "";
+
+    const badgeEl = card.querySelector(".product-badge");
+    const pmBadge = document.getElementById("pmBadge");
+    if (badgeEl) {
+      pmBadge.className = badgeEl.className;
+      pmBadge.innerHTML = badgeEl.innerHTML;
+      pmBadge.hidden = false;
+    } else {
+      pmBadge.hidden = true;
+    }
+
+    document.getElementById("pmTitle").textContent =
+      card.querySelector("h3")?.textContent || "";
+    document.getElementById("pmSpec").textContent =
+      card.querySelector(".product-spec")?.textContent || "";
+    document.getElementById("pmPriceBox").innerHTML =
+      card.querySelector(".price-box")?.innerHTML || "";
+
+    const orderLink = card.querySelector(".btn-buy-wa");
+    const pmOrder = document.getElementById("pmOrder");
+    if (orderLink) {
+      pmOrder.href = orderLink.href;
+      pmOrder.hidden = false;
+    } else {
+      pmOrder.hidden = true;
+    }
+
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeProductModal() {
+    const modal = document.getElementById("productModal");
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  document.querySelectorAll("[data-close-product-modal]").forEach((el) =>
+    el.addEventListener("click", closeProductModal),
+  );
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeProductModal();
+  });
+  document.querySelector(".products-grid")?.addEventListener("click", (e) => {
+    if (e.target.closest(".btn-buy-wa")) return;
+    const card = e.target.closest(".product-card");
+    if (card) openProductModal(card);
+  });
+  document.querySelector(".products-grid")?.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    if (e.target.closest(".btn-buy-wa")) return;
+    const card = e.target.closest(".product-card");
+    if (!card) return;
+    e.preventDefault();
+    openProductModal(card);
   });
 
   initProductsFilter();
