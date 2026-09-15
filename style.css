@@ -1015,7 +1015,25 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
    ========================================================================== */
 .products-section { max-width: var(--container); margin: 0 auto; padding: 100px 24px; }
 
+.products-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+
+.filter-chip {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.filter-chip:hover { border-color: rgba(var(--accent-rgb), 0.4); color: var(--heading); }
+.filter-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
+
 .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 14px; }
+.product-card[hidden] { display: none; }
 
 .photo-credits {
     margin-top: 24px;
@@ -1622,6 +1640,10 @@ footer { background: var(--surface); padding-top: 2px; position: relative; }
     .track-form button { order: 2; width: 100%; margin-top: 8px; }
 
     .floating-whatsapp { width: 50px; height: 50px; font-size: 1.5rem; bottom: 18px; right: 18px; }
+
+    .products-filter { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; -ms-overflow-style: none; scrollbar-width: none; }
+    .products-filter::-webkit-scrollbar { display: none; }
+    .filter-chip { flex-shrink: 0; }
 
     .products-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .product-card { padding: 8px 6px; }

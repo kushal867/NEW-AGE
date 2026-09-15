@@ -1398,7 +1398,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `<img src="${escapeHtml(resolvedImg)}" alt="${escapeHtml(p.title)}" loading="lazy" onerror="this.parentElement.innerHTML='<i class=\\'fa-solid ${icon}\\'></i>'">`
             : `<i class="fa-solid ${icon}"></i>`;
           return `
-                    <div class="product-card">
+                    <div class="product-card" data-category="${escapeHtml(p.category)}">
                         <div class="product-badge ${badgeClass}"><i class="fa-solid ${badgeIcon}"></i> ${badgeLabel}</div>
                         <div class="product-icon-wrap${resolvedImg ? " has-photo" : ""}">${mediaHtml}</div>
                         <div class="product-info">
@@ -1414,8 +1414,55 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
         })
         .join("");
+      initProductsFilter();
     } catch (e) {
       console.warn("Products load error:", e);
+    }
+  }
+
+  // Builds "All" + one tab per distinct product category (in first-seen
+  // order) from whatever cards are currently in the grid, and filters the
+  // grid by data-category on click. Safe to call again after the grid is
+  // re-rendered - it rebuilds the tabs from scratch each time.
+  function initProductsFilter() {
+    const filterBar = document.getElementById("productsFilter");
+    const grid = document.querySelector(".products-grid");
+    if (!filterBar || !grid) return;
+
+    const cards = Array.from(grid.querySelectorAll(".product-card"));
+    const categories = [];
+    cards.forEach((card) => {
+      const cat = card.dataset.category;
+      if (cat && !categories.includes(cat)) categories.push(cat);
+    });
+    if (categories.length < 2) {
+      filterBar.innerHTML = "";
+      cards.forEach((card) => (card.hidden = false));
+      return;
+    }
+
+    filterBar.innerHTML =
+      `<button type="button" class="filter-chip active" data-filter="all">All</button>` +
+      categories
+        .map(
+          (cat) =>
+            `<button type="button" class="filter-chip" data-filter="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`,
+        )
+        .join("");
+
+    if (!filterBar.dataset.wired) {
+      filterBar.dataset.wired = "1";
+      filterBar.addEventListener("click", (e) => {
+        const btn = e.target.closest(".filter-chip");
+        if (!btn) return;
+        filterBar
+          .querySelectorAll(".filter-chip")
+          .forEach((chip) => chip.classList.toggle("active", chip === btn));
+        const filter = btn.dataset.filter;
+        document.querySelectorAll(".products-grid .product-card").forEach((card) => {
+          card.hidden = filter !== "all" && card.dataset.category !== filter;
+        });
+      });
     }
   }
 
@@ -1494,6 +1541,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  initProductsFilter();
   loadDynamicProducts();
   loadDynamicVideos();
 

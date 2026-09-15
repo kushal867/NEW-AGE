@@ -1272,15 +1272,29 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('prodTitle').value = productData.title || '';
             document.getElementById('prodCategory').value = productData.category || 'Storage';
             document.getElementById('prodSpec').value = productData.spec || '';
-            document.getElementById('prodMrp').value = productData.mrp || '';
-            document.getElementById('prodPrice').value = productData.price || '';
+            document.getElementById('prodMrp').value = productData.mrp ? formatPrice(productData.mrp) : '';
+            document.getElementById('prodPrice').value = productData.price ? formatPrice(productData.price) : '';
             document.getElementById('prodStock').value = productData.stock || 'in-stock';
             document.getElementById('prodStockQty').value = productData.stock_qty ?? 0;
             if (prodImageUrlInput) prodImageUrlInput.value = productData.image || '';
+        } else {
+            // Pre-fill the currency prefix for a new product so the admin
+            // only has to type the number, not "NPR" itself.
+            document.getElementById('prodMrp').value = 'NPR ';
+            document.getElementById('prodPrice').value = 'NPR ';
         }
         prodImageUrlInput?._previewUpdate?.();
         productModal.style.display = 'flex';
     }
+
+    // If the admin clears the field and types/pastes a bare number, restore
+    // the NPR/Rs prefix as soon as they leave the field instead of saving a
+    // bare number.
+    [document.getElementById('prodMrp'), document.getElementById('prodPrice')].forEach((input) => {
+        input?.addEventListener('blur', () => {
+            if (input.value.trim()) input.value = formatPrice(input.value);
+        });
+    });
 
     openAddProductModalBtn?.addEventListener('click', () => openProductModal());
     closeProductModalBtn?.addEventListener('click', () => { if (productModal) productModal.style.display = 'none'; });
@@ -1297,12 +1311,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!category) { alert('Type a name for the new category, or pick an existing one.'); return; }
             }
 
+            const prodMrpRaw = document.getElementById('prodMrp')?.value?.trim() || '';
+            const prodPriceRaw = document.getElementById('prodPrice')?.value?.trim() || '';
+            // The MRP/Price fields are pre-filled with "NPR " for convenience;
+            // if the admin left it untouched (no digits typed), treat it as
+            // not entered instead of saving the bare prefix.
+            const mrp = /\d/.test(prodMrpRaw) ? prodMrpRaw : '';
+            const price = /\d/.test(prodPriceRaw) ? prodPriceRaw : '';
+            if (!price) { alert('Enter a selling price.'); return; }
+
             const prodData = {
                 title: document.getElementById('prodTitle')?.value?.trim() || '',
                 category,
                 spec: document.getElementById('prodSpec')?.value?.trim() || '',
-                mrp: document.getElementById('prodMrp')?.value?.trim() || '',
-                price: document.getElementById('prodPrice')?.value?.trim() || '',
+                mrp,
+                price,
                 stock: document.getElementById('prodStock')?.value || 'in-stock',
                 stock_qty: Math.max(0, parseInt(document.getElementById('prodStockQty')?.value, 10) || 0),
                 image: prodImageUrlInput?.value?.trim() || ''
