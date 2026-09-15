@@ -487,6 +487,16 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 
+    // Mirrors script.js's formatPrice so the admin table shows the same
+    // auto-prefixed "NPR 300" the public site renders, instead of the bare
+    // number the admin typed.
+    function formatPrice(raw) {
+        const val = (raw || '').trim();
+        if (!val) return val;
+        if (/^(npr|rs\.?|₹)/i.test(val)) return val;
+        return `NPR ${val}`;
+    }
+
     // =========================================================================
     // 1. Auth (real Supabase Auth session - server-verified, not a client-side
     //    hash comparison). Rate limiting on failed logins is handled by
@@ -1128,8 +1138,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><span class="badge" style="background: rgba(0, 210, 255, 0.1); color: var(--primary);">${escapeHtml(item.category)}</span></td>
                     <td><strong>${escapeHtml(item.title)}</strong></td>
                     <td><small style="color: var(--text-muted);">${escapeHtml(item.spec)}</small></td>
-                    <td><span style="text-decoration: line-through; color: #64748b;">${escapeHtml(item.mrp || '')}</span></td>
-                    <td><strong style="color: var(--primary);">${escapeHtml(item.price)}</strong></td>
+                    <td><span style="text-decoration: line-through; color: #64748b;">${item.mrp ? escapeHtml(formatPrice(item.mrp)) : ''}</span></td>
+                    <td><strong style="color: var(--primary);">${escapeHtml(formatPrice(item.price))}</strong></td>
                     <td><span class="status-pill ${productStockMeta(item.stock).cls}">${productStockMeta(item.stock).label}</span></td>
                     <td>${Number(item.stock_qty) || 0}</td>
                     <td>

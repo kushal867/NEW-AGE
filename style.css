@@ -1622,4 +1622,17 @@ footer { background: var(--surface); padding-top: 2px; position: relative; }
     .track-form button { order: 2; width: 100%; margin-top: 8px; }
 
     .floating-whatsapp { width: 50px; height: 50px; font-size: 1.5rem; bottom: 18px; right: 18px; }
+
+    .products-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .product-card { padding: 8px 6px; }
+    .product-badge { font-size: 0.5rem; padding: 2px 4px; top: 4px; right: 4px; }
+    .product-icon-wrap { width: 32px; height: 32px; margin-bottom: 6px; }
+    .product-icon-wrap.has-photo { width: calc(100% + 12px); height: 70px; margin: -8px -6px 6px; }
+    .product-cat { font-size: 0.52rem; }
+    .product-card h3 { font-size: 0.72rem; margin: 3px 0 4px; }
+    .product-spec { display: none; }
+    .product-price-row { flex-direction: column; align-items: flex-start; gap: 6px; padding-top: 6px; }
+    .price { font-size: 0.74rem; }
+    .mrp { font-size: 0.56rem; }
+    .btn-buy-wa { width: 100%; justify-content: center; font-size: 0.62rem; padding: 5px 6px; }
 }
