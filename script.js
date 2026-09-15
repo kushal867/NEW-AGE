@@ -1121,12 +1121,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="repair-detail-box"><div class="detail-label">Device</div><div class="detail-val">${escapeHtml(item.device || "N/A")}</div></div>
                     <div class="repair-detail-box"><div class="detail-label">Reported Issue</div><div class="detail-val">${escapeHtml(item.issue || "Diagnostic required")}</div></div>
                     <div class="repair-detail-box"><div class="detail-label">Est. Completion</div><div class="detail-val">${escapeHtml(item.estimated_delivery || "In Progress")}</div></div>
-                    <div class="repair-detail-box"><div class="detail-label">Cost Quote</div><div class="detail-val" style="color:var(--accent);">${escapeHtml(item.cost || "Quote upon diagnosis")}</div></div>
-                </div>
-
-                <div class="tech-note-box">
-                    <h4>Technician Notes</h4>
-                    <p>${escapeHtml(item.technician_notes || "Device is currently being processed by our technicians.")}</p>
                 </div>
 
                 <div class="repair-actions">
@@ -1344,6 +1338,17 @@ document.addEventListener("DOMContentLoaded", () => {
       : url;
   }
 
+  // Admins sometimes type a plain number ("300") instead of the full
+  // "NPR 300" - this fills in the currency prefix at display time without
+  // touching whatever they actually saved, and leaves it alone if they
+  // already included NPR/Rs/₹ themselves.
+  function formatPrice(raw) {
+    const val = (raw || "").trim();
+    if (!val) return val;
+    if (/^(npr|rs\.?|₹)/i.test(val)) return val;
+    return `NPR ${val}`;
+  }
+
   async function loadDynamicProducts() {
     const grid = document.querySelector(".products-grid");
     if (!grid || !sb) return;
@@ -1367,7 +1372,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .map((p) => {
           const icon = ICONS[p.category] || "fa-box";
           const waMsg = encodeURIComponent(
-            `Hello NewAge IT, I am interested in buying the ${p.title} (${p.price}).`,
+            `Hello NewAge IT, I am interested in buying the ${p.title} (${formatPrice(p.price)}).`,
           );
           const isStock = p.stock === "in-stock";
           const isOutOfStock =
@@ -1401,7 +1406,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <h3>${escapeHtml(p.title)}</h3>
                             <p class="product-spec">${escapeHtml(p.spec)}</p>
                             <div class="product-price-row">
-                                <div class="price-box">${p.mrp ? `<span class="mrp">${escapeHtml(p.mrp)}</span>` : ""}<span class="price">${escapeHtml(p.price)}</span></div>
+                                <div class="price-box">${p.mrp ? `<span class="mrp">${escapeHtml(formatPrice(p.mrp))}</span>` : ""}<span class="price">${escapeHtml(formatPrice(p.price))}</span></div>
                                 <a href="https://wa.me/${getContentPhoneDigits()}?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="btn-buy-wa"><i class="fa-brands fa-whatsapp"></i> Order</a>
                             </div>
                         </div>

@@ -1015,7 +1015,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
    ========================================================================== */
 .products-section { max-width: var(--container); margin: 0 auto; padding: 100px 24px; }
 
-.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 20px; }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 14px; }
 
 .photo-credits {
     margin-top: 24px;
@@ -1031,7 +1031,7 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .product-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    padding: 26px 22px;
+    padding: 14px 12px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1042,10 +1042,10 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .product-card:hover { border-color: rgba(var(--accent-rgb), 0.3); transform: translateY(-4px); }
 
 .product-badge {
-    position: absolute; top: 16px; right: 16px;
-    font-size: 0.7rem; font-weight: 700;
-    padding: 4px 10px; border-radius: 3px;
-    display: inline-flex; align-items: center; gap: 5px;
+    position: absolute; top: 8px; right: 8px;
+    font-size: 0.62rem; font-weight: 700;
+    padding: 3px 7px; border-radius: 3px;
+    display: inline-flex; align-items: center; gap: 4px;
 }
 
 .product-badge.in-stock { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
@@ -1053,22 +1053,22 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .product-badge.out-of-stock { background: rgba(248, 113, 113, 0.12); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.3); }
 
 .product-icon-wrap {
-    width: 56px; height: 56px;
+    width: 40px; height: 40px;
     display: flex; align-items: center; justify-content: center;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    font-size: 1.7rem;
+    font-size: 1.3rem;
     color: var(--accent);
-    margin-bottom: 18px;
+    margin-bottom: 10px;
     overflow: hidden;
 }
 
 /* When a real product photo is available, bleed it to the card edges as a
    proper header image instead of the small icon tile. */
 .product-icon-wrap.has-photo {
-    width: calc(100% + 44px);
-    height: 170px;
-    margin: -26px -22px 18px;
+    width: calc(100% + 24px);
+    height: 110px;
+    margin: -14px -12px 10px;
     border-width: 0 0 1px 0;
     background: var(--surface-2);
 }
@@ -1080,19 +1080,23 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     display: block;
 }
 
-.product-cat { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.8px; }
-.product-card h3 { font-size: 1.1rem; margin: 6px 0 8px; }
-.product-spec { font-size: 0.87rem; color: var(--muted); margin-bottom: 22px; }
+.product-cat { font-family: var(--font-mono); font-size: 0.62rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.6px; }
+.product-card h3 { font-size: 0.9rem; margin: 4px 0 6px; line-height: 1.3; }
+.product-spec {
+    font-size: 0.76rem; color: var(--muted); margin-bottom: 12px;
+    display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
 
-.product-price-row { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); }
-.price-box { display: flex; flex-direction: column; }
-.mrp { font-size: 0.78rem; color: var(--muted); text-decoration: line-through; }
-.price { font-size: 1.15rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); }
+.product-price-row { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border); gap: 6px; }
+.price-box { display: flex; flex-direction: column; min-width: 0; }
+.mrp { font-size: 0.68rem; color: var(--muted); text-decoration: line-through; }
+.price { font-size: 0.95rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); }
 
 .btn-buy-wa {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: #25D366; color: #fff; padding: 8px 14px;
-    border-radius: 3px; font-size: 0.82rem; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #25D366; color: #fff; padding: 6px 10px;
+    border-radius: 3px; font-size: 0.74rem; font-weight: 600;
+    flex-shrink: 0;
 }
 
 /* ==========================================================================
