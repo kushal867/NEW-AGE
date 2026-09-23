@@ -1739,13 +1739,15 @@ document.addEventListener('DOMContentLoaded', () => {
         (data || []).forEach(row => { siteContentCache[row.key] = row.value; });
 
         siteContentForm.querySelectorAll('[data-key]').forEach(input => {
-            input.value = siteContentCache[input.getAttribute('data-key')] || '';
+            const raw = siteContentCache[input.getAttribute('data-key')] || '';
+            if (input.type === 'checkbox') input.checked = raw === 'true';
+            else input.value = raw;
             input._previewUpdate?.();
         });
     }
 
-    // Workshop gallery photo fields - same upload/preview pattern as the
-    // product and video image fields above.
+    // Workshop gallery + announcement photo fields - same upload/preview
+    // pattern as the product and video image fields above.
     [
         ['wsImgRepairLab', 'workshop'],
         ['wsImgBoardDiag', 'workshop'],
@@ -1753,6 +1755,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ['wsImgElectronics', 'workshop'],
         ['wsImgQualityCheck', 'workshop'],
         ['wsImgFinishedSystems', 'workshop'],
+        ['annImage', 'announcements'],
     ].forEach(([idPrefix, folder]) => {
         const urlInput = document.getElementById(idPrefix);
         const previewBox = document.getElementById(idPrefix + 'Preview');
@@ -1779,7 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const toDelete = [];
             inputs.forEach(input => {
                 const key = input.getAttribute('data-key');
-                const value = input.value.trim();
+                const value = input.type === 'checkbox' ? (input.checked ? 'true' : '') : input.value.trim();
                 if (value) toUpsert.push({ key, value });
                 else toDelete.push(key);
             });

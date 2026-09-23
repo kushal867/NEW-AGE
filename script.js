@@ -120,6 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    showAnnouncementPopup();
+
     const email = getContentEmail();
     if (email !== SITE_CONTENT_DEFAULTS.contact_email) {
       document
@@ -136,6 +138,64 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
   }
+
+  // Admin-managed popup (e.g. a festival greeting or a sale notice). Shows
+  // once per visitor - the "seen" flag is the announcement's own content
+  // (title + message + image), not a fixed id, so editing it in admin makes
+  // it pop up again for everyone even if they'd already dismissed the old
+  // one, without the admin having to remember to reset anything.
+  function showAnnouncementPopup() {
+    if (siteContent.announcement_enabled !== "true") return;
+    const title = (siteContent.announcement_title || "").trim();
+    const message = (siteContent.announcement_message || "").trim();
+    if (!title && !message) return;
+
+    const imageUrl = resolveImageUrl(siteContent.announcement_image);
+    const signature = [title, message, imageUrl].join("|");
+    const storageKey = "newageit_announcement_seen";
+    try {
+      if (localStorage.getItem(storageKey) === signature) return;
+    } catch (e) {
+      /* private browsing / storage blocked - just show it every time */
+    }
+
+    const modal = document.getElementById("announceModal");
+    if (!modal) return;
+
+    document.getElementById("annTitle").textContent = title;
+    document.getElementById("annMessage").textContent = message;
+
+    const media = document.getElementById("annMedia");
+    if (imageUrl) {
+      media.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="">`;
+      media.hidden = false;
+    } else {
+      media.hidden = true;
+    }
+
+    const dismiss = () => {
+      modal.hidden = true;
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onKeydown);
+      try {
+        localStorage.setItem(storageKey, signature);
+      } catch (e) {}
+    };
+    const onKeydown = (e) => {
+      if (e.key === "Escape") dismiss();
+    };
+
+    modal
+      .querySelectorAll("[data-close-announce]")
+      .forEach((el) => el.addEventListener("click", dismiss, { once: true }));
+    document.addEventListener("keydown", onKeydown);
+
+    setTimeout(() => {
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+    }, 600);
+  }
+
   loadSiteContent();
 
   // =========================================================================

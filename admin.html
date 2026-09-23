@@ -898,6 +898,51 @@
                     </div>
                   </div>
 
+                  <h4 class="content-form-heading" data-i18n="sc_heading_announce">Announcement Popup</h4>
+                  <p
+                    class="field-hint"
+                    style="margin-top: -8px; margin-bottom: 14px"
+                    data-i18n="sc_hint_announce"
+                  >
+                    Shows once to each visitor when they open the site (e.g.
+                    a festival greeting or a sale). They can close it, and it
+                    won't bother them again until you change the text or
+                    image here.
+                  </p>
+
+                  <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
+                      <input type="checkbox" id="annEnabled" data-key="announcement_enabled" style="width: auto" />
+                      <span data-i18n="sc_label_ann_enabled">Show the announcement popup on the site</span>
+                    </label>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="annTitle" data-i18n="sc_label_ann_title">Title</label>
+                    <input type="text" id="annTitle" data-key="announcement_title" placeholder="e.g. Happy Dashain!" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="annMessage" data-i18n="sc_label_ann_message">Message</label>
+                    <textarea id="annMessage" data-key="announcement_message" rows="3" placeholder="e.g. NewAge I.T. wishes you and your family a joyous Dashain. We're open through the holidays for urgent repairs!"></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="annImage" data-i18n="sc_label_ann_image">Banner Image (optional)</label>
+                    <div class="image-field-row">
+                      <div class="image-preview-box" id="annImagePreview"><i class="fa-solid fa-image"></i></div>
+                      <div class="image-field-input">
+                        <input type="url" id="annImage" data-key="announcement_image" placeholder="Paste an image URL, or a Google Drive share link" />
+                        <div class="upload-row">
+                          <label for="annImageFile" class="btn-upload"><i class="fa-solid fa-upload"></i> Or upload a photo</label>
+                          <input type="file" id="annImageFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden />
+                          <span class="field-hint">JPG, PNG, WebP or GIF, up to 5MB.</span>
+                        </div>
+                        <p class="field-status" id="annImageStatus"></p>
+                      </div>
+                    </div>
+                  </div>
+
                   <button type="submit" class="btn-primary" data-i18n="sc_save_btn">
                     Save Website Text
                   </button>

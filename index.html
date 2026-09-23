@@ -874,6 +874,23 @@
         </div>
     </div>
 
+    <!-- ============================================================ -->
+    <!-- Announcement Popup (admin-managed, e.g. festival greetings)   -->
+    <!-- ============================================================ -->
+    <div class="announce-modal" id="announceModal" hidden>
+        <div class="announce-modal-backdrop" data-close-announce></div>
+        <div class="announce-modal-panel" role="dialog" aria-modal="true" aria-labelledby="annTitle">
+            <button type="button" class="announce-modal-close" data-close-announce aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="announce-modal-media" id="annMedia" hidden></div>
+            <div class="announce-modal-body">
+                <h3 id="annTitle"></h3>
+                <p id="annMessage"></p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script src="config.js"></script>
     <script src="script.js"></script>
