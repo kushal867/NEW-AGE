@@ -973,6 +973,8 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .workshop-slide:hover i { transform: scale(1.12); color: var(--accent); }
 .workshop-slide i { transition: transform 0.35s var(--ease), color 0.35s ease; }
 
+.workshop-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+
 .workshop-slide::after {
     content: attr(data-label);
     position: absolute;
@@ -982,12 +984,14 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
     letter-spacing: 1px;
     color: var(--muted);
     text-transform: uppercase;
+    z-index: 2;
 }
 
 .workshop-slide::before {
     content: '';
     position: absolute; inset: 0;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent 50%);
+    z-index: 1;
 }
 
 /* ==========================================================================
@@ -1034,17 +1038,6 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 
 .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 14px; }
 .product-card[hidden] { display: none; }
-
-.photo-credits {
-    margin-top: 24px;
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.7;
-}
-
-.photo-credits a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
-.photo-credits a:hover { color: var(--accent); }
 
 .product-card {
     background: var(--surface);

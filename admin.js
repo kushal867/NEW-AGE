@@ -1703,8 +1703,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         siteContentForm.querySelectorAll('[data-key]').forEach(input => {
             input.value = siteContentCache[input.getAttribute('data-key')] || '';
+            input._previewUpdate?.();
         });
     }
+
+    // Workshop gallery photo fields - same upload/preview pattern as the
+    // product and video image fields above.
+    [
+        ['wsImgRepairLab', 'workshop'],
+        ['wsImgBoardDiag', 'workshop'],
+        ['wsImgPcAssembly', 'workshop'],
+        ['wsImgElectronics', 'workshop'],
+        ['wsImgQualityCheck', 'workshop'],
+        ['wsImgFinishedSystems', 'workshop'],
+    ].forEach(([idPrefix, folder]) => {
+        const urlInput = document.getElementById(idPrefix);
+        const previewBox = document.getElementById(idPrefix + 'Preview');
+        const statusEl = document.getElementById(idPrefix + 'Status');
+        const fileInput = document.getElementById(idPrefix + 'File');
+        wireImagePreview(urlInput, previewBox, '<i class="fa-solid fa-image"></i>', statusEl);
+        wireFileUpload(fileInput, urlInput, statusEl, folder);
+    });
 
     function showSiteContentFeedback(msg, type) {
         if (!siteContentFeedback) return;

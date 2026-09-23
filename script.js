@@ -94,6 +94,21 @@ document.addEventListener("DOMContentLoaded", () => {
       if (value) applyContentValue(el, value);
     });
 
+    // Workshop gallery slides fall back to a plain icon tile until the
+    // admin uploads a photo for that slot (Site Content tab).
+    document.querySelectorAll("[data-img-key]").forEach((slide) => {
+      const url = resolveImageUrl(siteContent[slide.getAttribute("data-img-key")]);
+      if (!url) return;
+      const img = new Image();
+      img.onload = () => {
+        slide.querySelector("i")?.remove();
+        slide.appendChild(img);
+      };
+      img.onerror = () => {};
+      img.src = url;
+      img.alt = slide.getAttribute("data-label") || "";
+    });
+
     const defaultDigits = "9779841301930";
     const phoneDigits = getContentPhoneDigits();
     if (phoneDigits !== defaultDigits) {
@@ -354,10 +369,6 @@ document.addEventListener("DOMContentLoaded", () => {
     custompc_btn: { en: "Build Your PC", np: "आफ्नो पीसी बनाउनुहोस्" },
     workshop_eyebrow: { en: "05 — The Lab", np: "०५ — ल्याब" },
     workshop_h2: { en: "Inside The Repair Lab", np: "मर्मत ल्याब भित्र" },
-    workshop_p: {
-      en: "Real bench work, not a stock photo — drop your own shop photography into these slots any time.",
-      np: "वास्तविक कार्यस्थल, स्टक फोटो होइन — यहाँ आफ्नै पसलका तस्बिरहरू जुनसुकै बेला राख्न सकिन्छ।",
-    },
     slide_repair_lab: { en: "REPAIR LAB", np: "मर्मत ल्याब" },
     slide_board_diag: { en: "BOARD DIAGNOSTICS", np: "बोर्ड परीक्षण" },
     slide_pc_assembly: { en: "PC ASSEMBLY", np: "पीसी एसेम्बली" },
