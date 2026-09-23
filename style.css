@@ -944,21 +944,19 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .workshop { padding: 100px 0; }
 
 .workshop-gallery {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    overflow-x: auto;
     padding: 0 24px 12px;
-    scroll-snap-type: x proximity;
-    scrollbar-width: thin;
+    max-width: var(--container);
+    margin: 0 auto;
 }
 
 .workshop-slide {
     position: relative;
-    flex: 0 0 260px;
-    height: 340px;
+    height: 280px;
     background: var(--surface);
     border: 1px solid var(--border);
-    scroll-snap-align: start;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1669,6 +1667,9 @@ footer { background: var(--surface); padding-top: 2px; position: relative; }
     .contact { grid-template-columns: 1fr; }
 
     .footer-content { grid-template-columns: 1fr 1fr; }
+
+    .workshop-gallery { grid-template-columns: repeat(2, 1fr); }
+    .workshop-slide { height: 220px; }
 }
 
 @media (max-width: 560px) {
@@ -1679,6 +1680,10 @@ footer { background: var(--surface); padding-top: 2px; position: relative; }
     .timeline-track { flex-wrap: wrap; row-gap: 24px; }
     .timeline-node { width: 30%; }
     .timeline-track::before, .timeline-progress { display: none; }
+
+    .workshop-gallery { gap: 10px; padding: 0 16px 12px; }
+    .workshop-slide { height: 160px; font-size: 1.6rem; }
+    .workshop-slide::after { left: 10px; bottom: 10px; font-size: 0.6rem; }
 
     .footer-content { grid-template-columns: 1fr; }
     .track-form { flex-wrap: wrap; padding: 14px; }
