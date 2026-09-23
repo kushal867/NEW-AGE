@@ -1328,10 +1328,32 @@ document.addEventListener("DOMContentLoaded", () => {
   //     admin panel writes to, so edits show up for every visitor)
   // =========================================================================
 
+  // Photos uploaded straight from a phone camera routinely come in at
+  // 3000-4000px per side (several MB), which is what actually reads as
+  // "blurry" once the browser has to live-downscale one 8-10x into a small
+  // card - not a CSS/quality bug. Supabase Storage's image transformation
+  // endpoint lets us ask for an already-downsized version at read time (no
+  // re-upload needed for photos already in the bucket), so any of our own
+  // Storage URLs get rewritten to it; anything else (Google Drive, a pasted
+  // external link) is left exactly as-is since that endpoint only works for
+  // our own bucket.
+  function optimizeSupabaseImage(url, maxDim) {
+    const marker = "/storage/v1/object/public/";
+    const idx = url.indexOf(marker);
+    if (idx === -1) return url;
+    const rewritten =
+      url.slice(0, idx) +
+      "/storage/v1/render/image/public/" +
+      url.slice(idx + marker.length);
+    const sep = rewritten.includes("?") ? "&" : "?";
+    return `${rewritten}${sep}width=${maxDim}&height=${maxDim}&resize=contain&quality=75`;
+  }
+
   // Converts a Google Drive "share" link into a directly-hotlinkable image URL.
   // Any other URL (Google Photos direct links, Imgur, self-hosted, etc.) is
-  // returned unchanged. Mirrors the same helper in admin.js.
-  function resolveImageUrl(rawUrl) {
+  // returned unchanged. Mirrors the same helper in admin.js (minus the
+  // Supabase transform step, which only matters for public-facing display).
+  function resolveImageUrl(rawUrl, maxDim) {
     const url = (rawUrl || "").trim();
     if (!url) return "";
     let driveId = "";
@@ -1344,9 +1366,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (fileMatch) driveId = fileMatch[1];
     else if (url.includes("drive.google.com") && openMatch)
       driveId = openMatch[1];
-    return driveId
+    const resolved = driveId
       ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`
       : url;
+    return optimizeSupabaseImage(resolved, maxDim || 800);
   }
 
   // Admins sometimes type a plain number ("300") instead of the full
