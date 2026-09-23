@@ -424,6 +424,42 @@ document.addEventListener('DOMContentLoaded', () => {
         inputEl._previewUpdate = update;
     }
 
+    // Downscales an oversized photo on a <canvas> before it ever reaches
+    // Supabase Storage. Phone camera photos routinely come in at 3000-4000px
+    // per side; serving that straight into a ~280-400px card/tile forces the
+    // browser to do an 8-10x live downscale, which is what actually reads as
+    // "blurry" - a properly-sized source file fixes it, not a display tweak.
+    // Animated GIFs are left untouched (re-encoding would flatten them to a
+    // single frame).
+    const UPLOAD_MAX_DIMENSION = 1600;
+    function resizeImageFile(file, maxDim) {
+        return new Promise((resolve) => {
+            if (file.type === 'image/gif') { resolve(file); return; }
+
+            const img = new Image();
+            const objectUrl = URL.createObjectURL(file);
+            img.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                const { width, height } = img;
+                if (width <= maxDim && height <= maxDim) { resolve(file); return; }
+
+                const scale = maxDim / Math.max(width, height);
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.round(width * scale);
+                canvas.height = Math.round(height * scale);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                canvas.toBlob((blob) => {
+                    resolve(blob ? new File([blob], file.name, { type: outType }) : file);
+                }, outType, 0.85);
+            };
+            img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+            img.src = objectUrl;
+        });
+    }
+
     // Wires a hidden <input type="file"> to upload straight to Supabase
     // Storage (the "media" bucket) and drop the resulting public URL into the
     // paired URL input, reusing that field's existing preview wiring.
@@ -452,13 +488,14 @@ document.addEventListener('DOMContentLoaded', () => {
             label?.classList.add('is-uploading');
             setStatus('Uploading...', '');
 
+            const upload = await resizeImageFile(file, UPLOAD_MAX_DIMENSION);
             const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
             const path = `${folder}/${Date.now()}-${safeName}`;
 
-            const { error: uploadError } = await sb.storage.from('media').upload(path, file, {
+            const { error: uploadError } = await sb.storage.from('media').upload(path, upload, {
                 cacheControl: '3600',
                 upsert: false,
-                contentType: file.type
+                contentType: upload.type || file.type
             });
 
             label?.classList.remove('is-uploading');
