@@ -1544,24 +1544,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    filterBar.innerHTML =
-      `<button type="button" class="filter-chip active" data-filter="all">All</button>` +
-      categories
-        .map(
-          (cat) =>
-            `<button type="button" class="filter-chip" data-filter="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`,
-        )
-        .join("");
+    filterBar.innerHTML = `
+      <select class="filter-select" id="productsFilterSelect" aria-label="Filter products by category">
+        <option value="all">All</option>
+        ${categories.map((cat) => `<option value="${escapeHtml(cat)}">${escapeHtml(cat)}</option>`).join("")}
+      </select>
+    `;
 
     if (!filterBar.dataset.wired) {
       filterBar.dataset.wired = "1";
-      filterBar.addEventListener("click", (e) => {
-        const btn = e.target.closest(".filter-chip");
-        if (!btn) return;
-        filterBar
-          .querySelectorAll(".filter-chip")
-          .forEach((chip) => chip.classList.toggle("active", chip === btn));
-        const filter = btn.dataset.filter;
+      filterBar.addEventListener("change", (e) => {
+        const select = e.target.closest(".filter-select");
+        if (!select) return;
+        const filter = select.value;
         document.querySelectorAll(".products-grid .product-card").forEach((card) => {
           card.hidden = filter !== "all" && card.dataset.category !== filter;
         });
