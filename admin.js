@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ov_sum_lifecycle: { en: 'Repair Lifecycle:', np: 'मर्मत जीवनचक्र:' },
 
         repairs_search_ph: { en: 'Filter by Ticket ID, Customer, or Phone...', np: 'टिकट आईडी, ग्राहक, वा फोनद्वारा फिल्टर गर्नुहोस्...' },
-        repairs_opt_all: { en: 'All 8 Stages', np: 'सबै ८ चरण' },
+        repairs_opt_all: { en: 'All 9 Stages', np: 'सबै ९ चरण' },
         repairs_opt_s1: { en: '1. Received', np: '१. प्राप्त भयो' },
         repairs_opt_s2: { en: '2. Diagnosis', np: '२. निदान' },
         repairs_opt_s3: { en: '3. Quotation', np: '३. कोटेसन' },
@@ -109,13 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
         repairs_opt_s6: { en: '6. Testing', np: '६. परीक्षण' },
         repairs_opt_s7: { en: '7. Ready for Pickup', np: '७. लिन तयार' },
         repairs_opt_s8: { en: '8. Delivered', np: '८. डेलिभर भयो' },
+        repairs_opt_s9: { en: '9. Non-Repairable', np: '९. मर्मत हुन नसक्ने' },
         btn_export_excel: { en: 'Export to Excel', np: 'एक्सेलमा निर्यात गर्नुहोस्' },
         repairs_new_job_btn: { en: 'New Repair Job', np: 'नयाँ मर्मत काम' },
         th_ticket_id: { en: 'Ticket ID', np: 'टिकट आईडी' },
         th_customer: { en: 'Customer', np: 'ग्राहक' },
         th_device: { en: 'Device', np: 'डिभाइस' },
         th_reported_issue: { en: 'Reported Issue', np: 'रिपोर्ट गरिएको समस्या' },
-        th_stage_1_8: { en: 'Current Stage (1-8)', np: 'हालको चरण (१-८)' },
+        th_stage_1_8: { en: 'Current Stage (1-9)', np: 'हालको चरण (१-९)' },
         th_est_cost: { en: 'Est. Cost', np: 'अनुमानित लागत' },
         th_actions: { en: 'Actions', np: 'कार्यहरू' },
 
@@ -199,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rm_label_device: { en: 'Device & Model *', np: 'डिभाइस र मोडेल *' },
         rm_label_issue: { en: 'Reported Issue *', np: 'रिपोर्ट गरिएको समस्या *' },
         rm_ph_issue: { en: 'Describe hardware or software fault...', np: 'हार्डवेयर वा सफ्टवेयर समस्या वर्णन गर्नुहोस्...' },
-        rm_label_stage: { en: 'Lifecycle Stage (1 to 8) *', np: 'जीवनचक्र चरण (१ देखि ८) *' },
+        rm_label_stage: { en: 'Lifecycle Stage (1 to 9) *', np: 'जीवनचक्र चरण (१ देखि ९) *' },
         rm_opt_stage1: { en: '1. Received (Device logged into center)', np: '१. प्राप्त भयो (डिभाइस सेन्टरमा लग गरियो)' },
         rm_opt_stage2: { en: '2. Diagnosis (Inspecting circuits & diagnostic test)', np: '२. निदान (सर्किट जाँच र डायग्नोस्टिक परीक्षण)' },
         rm_opt_stage3: { en: '3. Quotation (Cost estimate drafted)', np: '३. कोटेसन (लागत अनुमान तयार)' },
@@ -208,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rm_opt_stage6: { en: '6. Testing (Stress test & QA verification)', np: '६. परीक्षण (स्ट्रेस टेस्ट र QA प्रमाणीकरण)' },
         rm_opt_stage7: { en: '7. Ready (Ready for customer pickup)', np: '७. तयार (ग्राहक लिन तयार)' },
         rm_opt_stage8: { en: '8. Delivered (Collected / Delivered with warranty)', np: '८. डेलिभर भयो (वारेन्टीसहित संकलन / डेलिभर)' },
+        rm_opt_stage9: { en: '9. Non-Repairable (Cannot be economically repaired)', np: '९. मर्मत हुन नसक्ने (आर्थिक रूपमा मर्मत सम्भव छैन)' },
         rm_label_cost: { en: 'Estimated Cost Quote', np: 'अनुमानित लागत कोटेसन' },
         rm_label_received_date: { en: 'Date Received', np: 'प्राप्त मिति' },
         rm_label_delivery_date: { en: 'Estimated Completion Date', np: 'अनुमानित सम्पन्न मिति' },
@@ -764,7 +766,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     const STAGE_NAMES = {
         1: '1. Received', 2: '2. Diagnosis', 3: '3. Quotation', 4: '4. Approval',
-        5: '5. Repairing', 6: '6. Testing', 7: '7. Ready for Pickup', 8: '8. Delivered'
+        5: '5. Repairing', 6: '6. Testing', 7: '7. Ready for Pickup', 8: '8. Delivered',
+        9: '9. Non-Repairable'
     };
 
     const repairSearchInput = document.getElementById('repairSearchInput');
@@ -805,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         repairsTableBody.innerHTML = list.map(item => {
             const stage = Number(item.stage) || 1;
-            const waMsg = encodeURIComponent(`Hello ${item.customer_name}, update on your repair ticket ${item.ticket_id} (${item.device}) at NewAge I.T. Solution Center: Current Status is Stage ${stage}/8 - ${STAGE_NAMES[stage]}. Estimated cost: ${item.cost}. Remarks: ${item.technician_notes}`);
+            const waMsg = encodeURIComponent(`Hello ${item.customer_name}, update on your repair ticket ${item.ticket_id} (${item.device}) at NewAge I.T. Solution Center: Current Status is ${STAGE_NAMES[stage]}. Estimated cost: ${item.cost}. Remarks: ${item.technician_notes}`);
             const waUrl = `https://wa.me/977${(item.phone || '').replace(/\D/g, '')}?text=${waMsg}`;
 
             return `

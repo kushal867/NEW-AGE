@@ -819,6 +819,18 @@ body.cursor-hover-btn .cursor-dot { width: 10px; height: 10px; }
 .status-badge.stage-3, .status-badge.stage-4 { color: #facc15; border-color: #a16207; background: rgba(250, 204, 21, 0.08); }
 .status-badge.stage-5, .status-badge.stage-6 { color: var(--accent); border-color: var(--accent); background: rgba(var(--accent-rgb), 0.1); }
 .status-badge.stage-7, .status-badge.stage-8 { color: #4ade80; border-color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+.status-badge.stage-9 { color: #f87171; border-color: #ef4444; background: rgba(248, 113, 113, 0.1); }
+
+.repair-non-repairable-note {
+    margin: 24px 0;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 1px solid #ef4444;
+    background: rgba(248, 113, 113, 0.08);
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
 
 .timeline-track { display: flex; justify-content: space-between; position: relative; margin: 40px 0 44px; }
 

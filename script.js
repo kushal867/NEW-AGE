@@ -533,6 +533,11 @@ document.addEventListener("DOMContentLoaded", () => {
     stage_repairing: { en: "Repairing", np: "मर्मत हुँदैछ" },
     stage_quality_check: { en: "Quality Check", np: "गुणस्तर जाँच" },
     stage_ready: { en: "Ready for Collection", np: "लिन तयार" },
+    stage_non_repairable: { en: "Non-Repairable", np: "मर्मत हुन नसक्ने" },
+    repair_non_repairable_note: {
+      en: "This device could not be repaired. Please contact us for details and next steps.",
+      np: "यो डिभाइस मर्मत हुन सकेन। विवरण र अर्को चरणको लागि कृपया हामीलाई सम्पर्क गर्नुहोस्।",
+    },
     timeline_received: { en: "Received", np: "प्राप्त भयो" },
     timeline_diagnosing: { en: "Diagnosing", np: "परीक्षण" },
     timeline_awaiting_approval: { en: "Awaiting Approval", np: "स्वीकृति पर्खाइ" },
@@ -1072,6 +1077,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { num: 6, key: "stage_quality_check" },
     { num: 7, key: "stage_ready" },
     { num: 8, key: "stage_ready" },
+    { num: 9, key: "stage_non_repairable" },
   ];
   // Collapsed 6-node display timeline (stage numbers 1-8 map onto 6 visual nodes)
   const TIMELINE_NODES = [
@@ -1145,33 +1151,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderRepairCard(item) {
     const stage = Number(item.stage) || 1;
+    const isNonRepairable = stage === 9;
     const statusLabel = t(STAGE_DEFINITIONS[stage - 1]?.key) || "In Progress";
     const waMessage = encodeURIComponent(
       `Hello NewAge I.T. Solution Center, I am inquiring about my repair ticket ${item.ticket_id} for my ${item.device}. Could you please update me?`,
     );
     const waLink = `https://wa.me/${getContentPhoneDigits()}?text=${waMessage}`;
 
-    const timelineHtml = TIMELINE_NODES.map((node, idx) => {
-      const isDone = node.stages[node.stages.length - 1] < stage;
-      const isCurrent = node.stages.includes(stage);
-      let cls = "";
-      if (isDone) cls = "done";
-      else if (isCurrent) cls = "current";
-      return `
+    // Stage 9 (Non-Repairable) is a terminal outcome, not a further step
+    // along the 1-8 repair flow, so it skips the linear progress timeline
+    // entirely instead of showing a nonsensical "9/8" progress bar.
+    let progressHtml = "";
+    if (!isNonRepairable) {
+      const timelineHtml = TIMELINE_NODES.map((node, idx) => {
+        const isDone = node.stages[node.stages.length - 1] < stage;
+        const isCurrent = node.stages.includes(stage);
+        let cls = "";
+        if (isDone) cls = "done";
+        else if (isCurrent) cls = "current";
+        return `
                 <div class="timeline-node ${cls}">
                     <div class="timeline-dot">${isDone ? '<i class="fa-solid fa-check"></i>' : idx + 1}</div>
                     <span class="node-label">${t(node.key)}</span>
                 </div>
             `;
-    }).join("");
+      }).join("");
 
-    const completedNodes = TIMELINE_NODES.filter(
-      (n) => n.stages[n.stages.length - 1] < stage,
-    ).length;
-    const progressPct = Math.min(
-      100,
-      (completedNodes / (TIMELINE_NODES.length - 1)) * 100,
-    );
+      const completedNodes = TIMELINE_NODES.filter(
+        (n) => n.stages[n.stages.length - 1] < stage,
+      ).length;
+      const progressPct = Math.min(
+        100,
+        (completedNodes / (TIMELINE_NODES.length - 1)) * 100,
+      );
+
+      progressHtml = `
+                <div class="timeline-track" style="--progress:${progressPct}%">
+                    <div class="timeline-progress" style="width:${progressPct}%"></div>
+                    ${timelineHtml}
+                </div>
+            `;
+    } else {
+      progressHtml = `<p class="repair-non-repairable-note">${escapeHtml(t("repair_non_repairable_note"))}</p>`;
+    }
 
     trackResult.innerHTML = `
             <div class="repair-card">
@@ -1180,13 +1202,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         <h3><i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent);"></i> ${escapeHtml(item.ticket_id)}</h3>
                         <p>${escapeHtml(item.customer_name || "Valued Customer")} &bull; Received ${escapeHtml(item.date_received || "recently")}</p>
                     </div>
-                    <span class="status-badge stage-${stage}">Stage ${stage}/8 &middot; ${escapeHtml(statusLabel)}</span>
+                    <span class="status-badge stage-${stage}">${isNonRepairable ? "" : `Stage ${stage}/8 &middot; `}${escapeHtml(statusLabel)}</span>
                 </div>
 
-                <div class="timeline-track" style="--progress:${progressPct}%">
-                    <div class="timeline-progress" style="width:${progressPct}%"></div>
-                    ${timelineHtml}
-                </div>
+                ${progressHtml}
 
                 <div class="repair-grid">
                     <div class="repair-detail-box"><div class="detail-label">Device</div><div class="detail-val">${escapeHtml(item.device || "N/A")}</div></div>

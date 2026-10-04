@@ -44,7 +44,7 @@ create table if not exists public.repairs (
     phone text,
     device text,
     issue text,
-    stage int not null default 1 check (stage between 1 and 8),
+    stage int not null default 1 check (stage between 1 and 9),
     date_received date,
     estimated_delivery text,
     cost text,

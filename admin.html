@@ -388,7 +388,7 @@
               </div>
               <div class="toolbar-actions">
                 <select id="repairStageFilter" class="filter-select">
-                  <option value="" data-i18n="repairs_opt_all">All 8 Stages</option>
+                  <option value="" data-i18n="repairs_opt_all">All 9 Stages</option>
                   <option value="1" data-i18n="repairs_opt_s1">1. Received</option>
                   <option value="2" data-i18n="repairs_opt_s2">2. Diagnosis</option>
                   <option value="3" data-i18n="repairs_opt_s3">3. Quotation</option>
@@ -397,6 +397,7 @@
                   <option value="6" data-i18n="repairs_opt_s6">6. Testing</option>
                   <option value="7" data-i18n="repairs_opt_s7">7. Ready for Pickup</option>
                   <option value="8" data-i18n="repairs_opt_s8">8. Delivered</option>
+                  <option value="9" data-i18n="repairs_opt_s9">9. Non-Repairable</option>
                 </select>
                 <button
                   type="button"
@@ -424,7 +425,7 @@
                     <th data-i18n="th_customer">Customer</th>
                     <th data-i18n="th_device">Device</th>
                     <th data-i18n="th_reported_issue">Reported Issue</th>
-                    <th data-i18n="th_stage_1_8">Current Stage (1-8)</th>
+                    <th data-i18n="th_stage_1_8">Current Stage (1-9)</th>
                     <th data-i18n="th_est_cost">Est. Cost</th>
                     <th data-i18n="th_actions">Actions</th>
                   </tr>
@@ -1108,7 +1109,7 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="jobStage" data-i18n="rm_label_stage">Lifecycle Stage (1 to 8) *</label>
+              <label for="jobStage" data-i18n="rm_label_stage">Lifecycle Stage (1 to 9) *</label>
               <select id="jobStage" required>
                 <option value="1" data-i18n="rm_opt_stage1">
                   1. Received (Device logged into center)
@@ -1129,6 +1130,9 @@
                 <option value="7" data-i18n="rm_opt_stage7">7. Ready (Ready for customer pickup)</option>
                 <option value="8" data-i18n="rm_opt_stage8">
                   8. Delivered (Collected / Delivered with warranty)
+                </option>
+                <option value="9" data-i18n="rm_opt_stage9">
+                  9. Non-Repairable (Cannot be economically repaired)
                 </option>
               </select>
             </div>
