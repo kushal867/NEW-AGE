@@ -533,6 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
     stage_repairing: { en: "Repairing", np: "मर्मत हुँदैछ" },
     stage_quality_check: { en: "Quality Check", np: "गुणस्तर जाँच" },
     stage_ready: { en: "Ready for Collection", np: "लिन तयार" },
+    stage_delivered: { en: "Delivered", np: "डेलिभर भयो" },
     stage_non_repairable: { en: "Non-Repairable", np: "मर्मत हुन नसक्ने" },
     repair_non_repairable_note: {
       en: "This device could not be repaired. Please contact us for details and next steps.",
@@ -544,6 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
     timeline_repairing: { en: "Repairing", np: "मर्मत" },
     timeline_quality_check: { en: "Quality Check", np: "गुणस्तर जाँच" },
     timeline_ready: { en: "Ready", np: "तयार" },
+    timeline_delivered: { en: "Delivered", np: "डेलिभर" },
   };
 
   let currentLang = "en";
@@ -1076,17 +1078,18 @@ document.addEventListener("DOMContentLoaded", () => {
     { num: 5, key: "stage_repairing" },
     { num: 6, key: "stage_quality_check" },
     { num: 7, key: "stage_ready" },
-    { num: 8, key: "stage_ready" },
+    { num: 8, key: "stage_delivered" },
     { num: 9, key: "stage_non_repairable" },
   ];
-  // Collapsed 6-node display timeline (stage numbers 1-8 map onto 6 visual nodes)
+  // Collapsed 7-node display timeline (stage numbers 1-8 map onto 7 visual nodes)
   const TIMELINE_NODES = [
     { key: "timeline_received", stages: [1] },
     { key: "timeline_diagnosing", stages: [2] },
     { key: "timeline_awaiting_approval", stages: [3, 4] },
     { key: "timeline_repairing", stages: [5] },
     { key: "timeline_quality_check", stages: [6] },
-    { key: "timeline_ready", stages: [7, 8] },
+    { key: "timeline_ready", stages: [7] },
+    { key: "timeline_delivered", stages: [8] },
   ];
 
   // =========================================================================
@@ -1164,7 +1167,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let progressHtml = "";
     if (!isNonRepairable) {
       const timelineHtml = TIMELINE_NODES.map((node, idx) => {
-        const isDone = node.stages[node.stages.length - 1] < stage;
+        const isDone = node.stages[node.stages.length - 1] < stage || stage === 8;
         const isCurrent = node.stages.includes(stage);
         let cls = "";
         if (isDone) cls = "done";
@@ -1178,7 +1181,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }).join("");
 
       const completedNodes = TIMELINE_NODES.filter(
-        (n) => n.stages[n.stages.length - 1] < stage,
+        (n) => n.stages[n.stages.length - 1] < stage || stage === 8,
       ).length;
       const progressPct = Math.min(
         100,
